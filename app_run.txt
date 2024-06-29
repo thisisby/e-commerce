@@ -1,0 +1,9 @@
+
+// migrations up
+docker exec -it eb ./bin/migrate -up
+
+// migrations down
+docker exec -it eb ./bin/migrate -down
+
+// seeder run
+docker exec -it eb ./bin/seeder

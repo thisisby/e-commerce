@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "ga_marketplace/docs"
 	"ga_marketplace/internal/config"
 	"ga_marketplace/internal/datasources/caches"
 	"ga_marketplace/internal/http/middlewares"
@@ -11,6 +12,7 @@ import (
 	"ga_marketplace/third_party/mobizon"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"log/slog"
 	"os"
 	"strconv"
@@ -28,6 +30,21 @@ func init() {
 		return
 	}
 }
+
+//	@title			GA Marketplace API
+//	@version		1.0
+//	@description	This is a sample server with null types overridden with primitive types.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		product_info.swagger.io
+//	@BasePath	/v2
 
 func main() {
 	conn, err := utils.SetupPostgreConnection()
@@ -50,6 +67,8 @@ func main() {
 	jwtService := jwt.NewJWTService()
 
 	e := echo.New()
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "time=${time}, host=${host}, method=${method}, uri=${uri}, status=${status}, latency=${latency_human}\n",
 	}))

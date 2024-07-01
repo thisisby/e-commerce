@@ -52,9 +52,9 @@ func (r *UsersRoute) Register() {
 	auth.POST("/verify-otp", r.usersHandler.VerifyOTP)
 	auth.POST("/register", r.usersHandler.Register)
 	auth.GET("/refresh-token", r.usersHandler.RefreshToken)
+	auth.POST("/resend-otp", r.usersHandler.ResendOTP)
 
 	auth.Use(r.authMiddleware.Handle)
-	auth.POST("/resend-otp", r.usersHandler.ResendOTP)
 	auth.GET("/me", r.usersHandler.GetMe)
 
 	//users

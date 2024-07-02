@@ -12,6 +12,7 @@ import (
 	"ga_marketplace/pkg/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
+	"log/slog"
 	"net/http"
 )
 
@@ -44,6 +45,7 @@ func (u *UsersHandler) SendOTP(ctx echo.Context) error {
 
 	u.redisCache.Set(otpKey, otpCode)
 
+	slog.Info("OTP: ", otpCode)
 	return NewSuccessResponse(ctx, statusCode, "OTP sent successfully", nil)
 }
 

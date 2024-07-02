@@ -35,7 +35,16 @@ func main() {
 	err = seeder.RolesSeeder(seeders.RolesData)
 	if err != nil {
 		slog.Error("[Seed]: failed to seed roles data", err)
-		return
+	}
+
+	err = seeder.ProductsSeeder(seeders.ProductsData)
+	if err != nil {
+		slog.Error("[Seed]: failed to seed products data", err)
+	}
+
+	err = seeder.UsersSeeder(seeders.UsersData)
+	if err != nil {
+		slog.Error("[Seed]: failed to seed users data", err)
 	}
 
 	slog.Info("[Seed]: seeding completed")

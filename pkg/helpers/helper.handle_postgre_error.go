@@ -16,8 +16,11 @@ func PostgresErrorTransform(err error) error {
 	var pgErr *pq.Error
 	ok := errors.As(err, &pgErr)
 	if ok {
-		if pgErr.Code == "23505" {
+		switch pgErr.Code {
+		case "23505":
 			return constants.ErrRowExists
+		case "23503":
+			return constants.ErrForeignKeyViolation
 		}
 	}
 

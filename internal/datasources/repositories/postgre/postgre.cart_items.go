@@ -106,3 +106,39 @@ func (p *postgreCartsRepository) FindAll() ([]domains.CartItemsDomain, error) {
 
 	return records.ToArrayOfDomain(cartRecord), nil
 }
+
+func (p *postgreCartsRepository) FindByUserIdAndProductId(userId int, productId int) (*domains.CartItemsDomain, error) {
+	query := `
+		SELECT c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at
+		FROM cart_items c
+		WHERE c.user_id = $1 AND c.product_id = $2
+		`
+
+	var cartRecord records.CartItems
+
+	err := p.conn.Get(&cartRecord, query, userId, productId)
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return cartRecord.ToDomain(), nil
+}
+
+func (p *postgreCartsRepository) Update(id int, userId int, cart *domains.CartItemsDomain) error {
+	query := `
+		UPDATE cart_items
+		SET quantity = :quantity
+		WHERE id = :id AND user_id = :user_id
+		`
+
+	cartRecord := records.FromCartsDomain(cart)
+	cartRecord.Id = id
+	cartRecord.UserId = userId
+
+	_, err := p.conn.NamedQuery(query, cartRecord)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}

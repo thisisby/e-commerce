@@ -14,10 +14,12 @@ type CartItemsDomain struct {
 
 type CartItemsRepository interface {
 	FindByUserId(id int) ([]CartItemsDomain, error)
+	FindByUserIdAndProductId(userId int, productId int) (*CartItemsDomain, error)
 	FindById(id int) (*CartItemsDomain, error)
 	Save(cart *CartItemsDomain) error
 	Delete(id int, userId int) error
 	FindAll() ([]CartItemsDomain, error)
+	Update(id int, userId int, cart *CartItemsDomain) error
 }
 
 type CartUsecase interface {
@@ -25,4 +27,5 @@ type CartUsecase interface {
 	Save(inDom *CartItemsDomain) (statusCode int, err error)
 	Delete(id int, userId int) (statusCode int, err error)
 	FindAll(userId int, isAdmin bool) (outDom []CartItemsDomain, statusCode int, err error)
+	Update(id int, userId int, cart *CartItemsDomain) (statusCode int, err error)
 }

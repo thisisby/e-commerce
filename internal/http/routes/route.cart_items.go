@@ -49,10 +49,11 @@ func (r *CartsRoute) Register() {
 
 	cartItems.Use(r.authMiddleware.Handle)
 	cartItems.GET("", r.cartHandler.FindAll)
-	cartItems.POST("", r.cartHandler.SaveCart)
-	cartItems.DELETE("/:id", r.cartHandler.DeleteCart)
+	cartItems.POST("", r.cartHandler.SaveCartItem)
+	cartItems.DELETE("/:id", r.cartHandler.DeleteCartItem)
+	cartItems.PUT("/:id", r.cartHandler.UpdateCartItem)
 
 	users.Use(r.adminMiddleware.Handle)
-	users.GET("/:id/carts", r.cartHandler.GetCartsByUserId)
+	users.GET("/:id/cart_items", r.cartHandler.GetCartItemsByUserId)
 
 }

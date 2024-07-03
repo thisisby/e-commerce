@@ -25,7 +25,7 @@ func NewCartsHandler(cartUsecase domains.CartUsecase, redisCache caches.RedisCac
 	}
 }
 
-func (c *CartsHandler) GetCartsByUserId(ctx echo.Context) error {
+func (c *CartsHandler) GetCartItemsByUserId(ctx echo.Context) error {
 	userId := ctx.Param("id")
 
 	userIdInt, err := strconv.Atoi(userId)
@@ -40,7 +40,7 @@ func (c *CartsHandler) GetCartsByUserId(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsResponse(carts))
 }
 
-func (c *CartsHandler) SaveCart(ctx echo.Context) error {
+func (c *CartsHandler) SaveCartItem(ctx echo.Context) error {
 	var cartCreateRequest requests.CartCreateRequest
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
@@ -59,7 +59,7 @@ func (c *CartsHandler) SaveCart(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Cart saved successfully", nil)
 }
 
-func (c *CartsHandler) DeleteCart(ctx echo.Context) error {
+func (c *CartsHandler) DeleteCartItem(ctx echo.Context) error {
 	cartId := ctx.Param("id")
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
@@ -85,4 +85,28 @@ func (c *CartsHandler) FindAll(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsResponse(carts))
+}
+
+func (c *CartsHandler) UpdateCartItem(ctx echo.Context) error {
+	var cartUpdateRequest requests.CartUpdateRequest
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+
+	err := helpers.BindAndValidate(ctx, &cartUpdateRequest)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	cartId := ctx.Param("id")
+	cartIdInt, err := strconv.Atoi(cartId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid cart id")
+	}
+
+	cartDomain := cartUpdateRequest.ToDomain()
+	statusCode, err := c.cartUsecase.Update(cartIdInt, jwtClaims.UserId, cartDomain)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Cart updated successfully", nil)
 }

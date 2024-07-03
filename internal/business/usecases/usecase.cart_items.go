@@ -42,22 +42,13 @@ func (c *cartItemsUsecase) FindByUserId(id int) (outDom []domains.CartItemsDomai
 
 func (c *cartItemsUsecase) Save(inDom *domains.CartItemsDomain) (statusCode int, err error) {
 
-	// Check if product_id exists
-	_, err = c.productRepo.FindById(inDom.ProductId)
+	// Check if cart_items exists
+	cartItemExists, err := c.cartRepo.FindByUserIdAndProductId(inDom.UserId, inDom.ProductId)
 	if err != nil {
-		if errors.Is(err, constants.ErrRowNotFound) {
-			return http.StatusNotFound, constants.ErrProductNotFound
-		}
 		return http.StatusInternalServerError, err
 	}
-
-	// Check if user_id exists
-	_, err = c.userRepo.FindById(inDom.UserId)
-	if err != nil {
-		if errors.Is(err, constants.ErrRowNotFound) {
-			return http.StatusNotFound, constants.ErrUserNotFound
-		}
-		return http.StatusInternalServerError, err
+	if cartItemExists != nil {
+		return http.StatusBadRequest, constants.ErrCartItemsExists
 	}
 
 	inDom.CreatedAt = helpers.GetCurrentTime()
@@ -115,4 +106,14 @@ func (c *cartItemsUsecase) FindAll(userId int, isAdmin bool) (outDom []domains.C
 	}
 
 	return carts, http.StatusOK, nil
+}
+
+func (c *cartItemsUsecase) Update(id int, userId int, cart *domains.CartItemsDomain) (statusCode int, err error) {
+	cart.UpdatedAt = helpers.GetCurrentTime()
+	err = c.cartRepo.Update(id, userId, cart)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }

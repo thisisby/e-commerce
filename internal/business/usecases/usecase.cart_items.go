@@ -43,12 +43,12 @@ func (c *cartItemsUsecase) FindByUserId(id int) (outDom []domains.CartItemsDomai
 func (c *cartItemsUsecase) Save(inDom *domains.CartItemsDomain) (statusCode int, err error) {
 
 	// Check if cart_items exists
-	cartItemExists, err := c.cartRepo.FindByUserIdAndProductId(inDom.UserId, inDom.ProductId)
+	_, err = c.cartRepo.FindByUserIdAndProductId(inDom.UserId, inDom.ProductId)
 	if err != nil {
+		if errors.Is(err, constants.ErrRowNotFound) {
+
+		}
 		return http.StatusInternalServerError, err
-	}
-	if cartItemExists != nil {
-		return http.StatusBadRequest, constants.ErrCartItemsExists
 	}
 
 	inDom.CreatedAt = helpers.GetCurrentTime()

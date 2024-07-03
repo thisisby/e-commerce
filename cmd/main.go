@@ -81,6 +81,7 @@ func main() {
 	routes.NewRolesRoute(conn, v1).Register()
 	routes.NewUsersRoute(conn, v1, redisCache, jwtService, clientAuthMiddleware, adminAuthMiddleware, mobizonClient).Register()
 	routes.NewCartsRoute(conn, v1, redisCache, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewWishRoute(conn, v1, clientAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(config.AppConfig.Port)))

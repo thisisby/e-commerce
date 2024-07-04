@@ -18,7 +18,7 @@ func NewPostgreCartsRepository(conn *sqlx.DB) domains.CartItemsRepository {
 	}
 }
 
-func (p *postgreCartsRepository) FindByUserId(id int) ([]domains.CartItemsDomain, error) {
+func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDomain, error) {
 	query := `
 		SELECT c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
 		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
@@ -32,16 +32,18 @@ func (p *postgreCartsRepository) FindByUserId(id int) ([]domains.CartItemsDomain
 
 	err := p.conn.Select(&cartRecord, query, id)
 	if err != nil {
+		slog.Error("PostgreCartsRepository.FindAllByUserId: ", err)
 		return nil, helpers.PostgresErrorTransform(err)
 	}
 
-	return records.ToArrayOfDomain(cartRecord), nil
+	return records.ToArrayOfCartItemsDomain(cartRecord), nil
 }
 
 func (p *postgreCartsRepository) Save(cart *domains.CartItemsDomain) error {
 	query := `
 		INSERT INTO cart_items (user_id, product_id, quantity, created_at)
-		VALUES (:user_id, :product_id, :quantity, :created_at)`
+		VALUES (:user_id, :product_id, :quantity, :created_at)
+		`
 
 	cartRecord := records.FromCartsDomain(cart)
 
@@ -54,7 +56,7 @@ func (p *postgreCartsRepository) Save(cart *domains.CartItemsDomain) error {
 	return nil
 }
 
-func (p *postgreCartsRepository) Delete(id int, userId int) error {
+func (p *postgreCartsRepository) DeleteByIdAndUserId(id int, userId int) error {
 	query := `
 		DELETE FROM cart_items
 		WHERE id = $1 AND user_id = $2
@@ -62,6 +64,7 @@ func (p *postgreCartsRepository) Delete(id int, userId int) error {
 
 	_, err := p.conn.Exec(query, id, userId)
 	if err != nil {
+		slog.Error("PostgreCartsRepository.DeleteByIdAndUserId: ", err)
 		return helpers.PostgresErrorTransform(err)
 	}
 
@@ -82,29 +85,11 @@ func (p *postgreCartsRepository) FindById(id int) (*domains.CartItemsDomain, err
 
 	err := p.conn.Get(&cartRecord, query, id)
 	if err != nil {
+		slog.Error("PostgreCartsRepository.FindById: ", err)
 		return nil, helpers.PostgresErrorTransform(err)
 	}
 
 	return cartRecord.ToDomain(), nil
-}
-
-func (p *postgreCartsRepository) FindAll() ([]domains.CartItemsDomain, error) {
-	query := `
-		SELECT c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
-		FROM cart_items c
-		JOIN users u ON c.user_id = u.id
-		JOIN products p ON c.product_id = p.id
-		`
-
-	var cartRecord []records.CartItems
-
-	err := p.conn.Select(&cartRecord, query)
-	if err != nil {
-		return nil, helpers.PostgresErrorTransform(err)
-	}
-
-	return records.ToArrayOfDomain(cartRecord), nil
 }
 
 func (p *postgreCartsRepository) FindByUserIdAndProductId(userId int, productId int) (*domains.CartItemsDomain, error) {
@@ -118,13 +103,14 @@ func (p *postgreCartsRepository) FindByUserIdAndProductId(userId int, productId 
 
 	err := p.conn.Get(&cartRecord, query, userId, productId)
 	if err != nil {
+		slog.Error("PostgreCartsRepository.FindByUserIdAndProductId: ", err)
 		return nil, helpers.PostgresErrorTransform(err)
 	}
 
 	return cartRecord.ToDomain(), nil
 }
 
-func (p *postgreCartsRepository) Update(id int, userId int, cart *domains.CartItemsDomain) error {
+func (p *postgreCartsRepository) UpdateByIdAndUserId(cart *domains.CartItemsDomain) error {
 	query := `
 		UPDATE cart_items
 		SET quantity = :quantity
@@ -132,11 +118,10 @@ func (p *postgreCartsRepository) Update(id int, userId int, cart *domains.CartIt
 		`
 
 	cartRecord := records.FromCartsDomain(cart)
-	cartRecord.Id = id
-	cartRecord.UserId = userId
 
 	_, err := p.conn.NamedQuery(query, cartRecord)
 	if err != nil {
+		slog.Error("PostgreCartsRepository.UpdateByIdAndUserId: ", err)
 		return helpers.PostgresErrorTransform(err)
 	}
 

@@ -23,7 +23,7 @@ func FromWishDomain(inDom *domains.WishDomain) Wish {
 	}
 }
 
-func ToArrayOfWishDomain(inRec []Wish) []domains.WishDomain {
+func ToArrayOfWishesDomain(inRec []Wish) []domains.WishDomain {
 	var wishes []domains.WishDomain
 	for _, rec := range inRec {
 		wishes = append(wishes, *rec.ToDomain())

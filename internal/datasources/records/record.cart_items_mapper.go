@@ -25,7 +25,7 @@ func FromCartsDomain(inDom *domains.CartItemsDomain) CartItems {
 	}
 }
 
-func ToArrayOfDomain(inRec []CartItems) []domains.CartItemsDomain {
+func ToArrayOfCartItemsDomain(inRec []CartItems) []domains.CartItemsDomain {
 	var carts []domains.CartItemsDomain
 	for _, rec := range inRec {
 		carts = append(carts, *rec.ToDomain())

@@ -65,7 +65,7 @@ func (p *postgreUsersRepository) Update(inDom *domains.UserDomain) error {
 
 	_, err := p.conn.NamedQuery(query, userRecord)
 	if err != nil {
-		slog.Error("PostgreUsersRepository.Update: ", err)
+		slog.Error("PostgreUsersRepository.UpdateByIdAndUserId: ", err)
 		return helpers.PostgresErrorTransform(err)
 	}
 

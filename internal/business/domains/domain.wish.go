@@ -16,11 +16,11 @@ type WishRepository interface {
 	FindByUserIdAndProductId(userId int, productId int) (*WishDomain, error)
 	FindById(id int) (*WishDomain, error)
 	Save(wish *WishDomain) error
-	Delete(id int, userId int) error
+	DeleteByIdAndUserId(id int, userId int) error
 }
 
 type WishUsecase interface {
 	FindByUserId(id int) (outDom []WishDomain, statusCode int, err error)
 	Save(inDom *WishDomain) (statusCode int, err error)
-	Delete(id int, userId int) (statusCode int, err error)
+	DeleteByIdAndUserId(id int, userId int) (statusCode int, err error)
 }

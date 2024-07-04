@@ -37,7 +37,7 @@ func (r *WishRoute) Register() {
 	wishes := r.router.Group("/wishes")
 
 	wishes.Use(r.authMiddleware.Handle)
-	wishes.GET("", r.wishHandler.FindAll)
-	wishes.POST("", r.wishHandler.SaveWish)
-	wishes.DELETE("/:id", r.wishHandler.DeleteWish)
+	wishes.GET("", r.wishHandler.GetMyWishes)
+	wishes.POST("", r.wishHandler.SaveToMyWishes)
+	wishes.DELETE("/:id", r.wishHandler.DeleteMyWish)
 }

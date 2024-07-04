@@ -22,7 +22,7 @@ func NewWishHandler(wishUsecase domains.WishUsecase) WishHandler {
 	}
 }
 
-func (w *WishHandler) FindAll(ctx echo.Context) error {
+func (w *WishHandler) GetMyWishes(ctx echo.Context) error {
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
 	wishes, statusCode, err := w.wishUsecase.FindByUserId(jwtClaims.UserId)
@@ -33,7 +33,7 @@ func (w *WishHandler) FindAll(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Wishes fetched successfully", responses.ToArrayOfWishResponse(wishes))
 }
 
-func (w *WishHandler) SaveWish(ctx echo.Context) error {
+func (w *WishHandler) SaveToMyWishes(ctx echo.Context) error {
 	var wishCreateRequest requests.WishCreateRequest
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
@@ -52,16 +52,16 @@ func (w *WishHandler) SaveWish(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Wish saved successfully", nil)
 }
 
-func (w *WishHandler) DeleteWish(ctx echo.Context) error {
+func (w *WishHandler) DeleteMyWish(ctx echo.Context) error {
 	id := ctx.Param("id")
 	userId := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims).UserId
 
-	idInt, err := strconv.Atoi(id)
+	wishIdInt, err := strconv.Atoi(id)
 	if err != nil {
 		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid wish id")
 	}
 
-	statusCode, err := w.wishUsecase.Delete(idInt, userId)
+	statusCode, err := w.wishUsecase.DeleteByIdAndUserId(wishIdInt, userId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}

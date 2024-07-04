@@ -11,12 +11,11 @@ import (
 )
 
 type CartsRoute struct {
-	cartHandler     handlers.CartsHandler
-	router          *echo.Group
-	db              *sqlx.DB
-	redisCache      caches.RedisCache
-	authMiddleware  middlewares.AuthMiddleware
-	adminMiddleware middlewares.AuthMiddleware
+	cartItemsHandler handlers.CartItemsHandler
+	router           *echo.Group
+	db               *sqlx.DB
+	redisCache       caches.RedisCache
+	authMiddleware   middlewares.AuthMiddleware
 }
 
 func NewCartsRoute(
@@ -24,36 +23,32 @@ func NewCartsRoute(
 	router *echo.Group,
 	redisCache caches.RedisCache,
 	authMiddleware middlewares.AuthMiddleware,
-	adminMiddleware middlewares.AuthMiddleware,
 ) *CartsRoute {
 	cartItemsRepo := postgre.NewPostgreCartsRepository(db)
 	productsRepo := postgre.NewPostgreProductsRepository(db)
 	usersRepo := postgre.NewPostgreUsersRepository(db)
 	cartItemsUsecase := usecases.NewCartsUsecase(cartItemsRepo, usersRepo, productsRepo)
 	cartItemsHandler := handlers.NewCartsHandler(cartItemsUsecase, redisCache)
-
 	return &CartsRoute{
-		cartHandler:     cartItemsHandler,
-		router:          router,
-		db:              db,
-		redisCache:      redisCache,
-		authMiddleware:  authMiddleware,
-		adminMiddleware: adminMiddleware,
+		cartItemsHandler: cartItemsHandler,
+		router:           router,
+		db:               db,
+		redisCache:       redisCache,
+		authMiddleware:   authMiddleware,
 	}
 }
 
 func (r *CartsRoute) Register() {
 	// carts
 	cartItems := r.router.Group("/cart_items")
-	users := r.router.Group("/users")
 
 	cartItems.Use(r.authMiddleware.Handle)
-	cartItems.GET("", r.cartHandler.FindAll)
-	cartItems.POST("", r.cartHandler.SaveCartItem)
-	cartItems.DELETE("/:id", r.cartHandler.DeleteCartItem)
-	cartItems.PUT("/:id", r.cartHandler.UpdateCartItem)
+	cartItems.GET("", r.cartItemsHandler.GetAllMyCartItems)
+	cartItems.POST("", r.cartItemsHandler.SaveToMyCartItems)
+	cartItems.DELETE("/:id", r.cartItemsHandler.DeleteMyCartItem)
+	cartItems.PATCH("/:id", r.cartItemsHandler.UpdateMyCartItem)
 
-	users.Use(r.adminMiddleware.Handle)
-	users.GET("/:id/cart_items", r.cartHandler.GetCartItemsByUserId)
+	//users.Use(r.adminMiddleware.Handle)
+	//users.GET("/:id/cart_items", r.cartItemsHandler.GetCartItemsByUserId)
 
 }

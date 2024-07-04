@@ -6,6 +6,7 @@ import (
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/constants"
 	"ga_marketplace/pkg/helpers"
+	"log/slog"
 	"net/http"
 )
 
@@ -27,9 +28,10 @@ func NewCartsUsecase(
 	}
 }
 
-func (c *cartItemsUsecase) FindByUserId(id int) (outDom []domains.CartItemsDomain, statusCode int, err error) {
-	carts, err := c.cartRepo.FindByUserId(id)
+func (c *cartItemsUsecase) FindAllByUserId(id int) (outDom []domains.CartItemsDomain, statusCode int, err error) {
+	carts, err := c.cartRepo.FindAllByUserId(id)
 	if err != nil {
+		slog.Error("cartItemsUsecase.FindAllByUserId", err)
 		return nil, http.StatusInternalServerError, err
 	}
 
@@ -43,75 +45,49 @@ func (c *cartItemsUsecase) FindByUserId(id int) (outDom []domains.CartItemsDomai
 func (c *cartItemsUsecase) Save(inDom *domains.CartItemsDomain) (statusCode int, err error) {
 
 	// Check if cart_items exists
-	_, err = c.cartRepo.FindByUserIdAndProductId(inDom.UserId, inDom.ProductId)
+	cartItemExists, err := c.cartRepo.FindByUserIdAndProductId(inDom.UserId, inDom.ProductId)
 	if err != nil {
-		if errors.Is(err, constants.ErrRowNotFound) {
-
+		if !errors.Is(err, constants.ErrRowNotFound) {
+			slog.Error("cartItemsUsecase.Save", err)
+			return http.StatusInternalServerError, err
 		}
-		return http.StatusInternalServerError, err
+	}
+
+	if cartItemExists != nil {
+		return http.StatusBadRequest, constants.ErrCartItemsExists
 	}
 
 	inDom.CreatedAt = helpers.GetCurrentTime()
 	err = c.cartRepo.Save(inDom)
 	if err != nil {
 		if errors.Is(err, constants.ErrForeignKeyViolation) {
-			return http.StatusBadRequest, err
+			return http.StatusBadRequest, fmt.Errorf("product id not found")
 		}
+		slog.Error("cartItemsUsecase.Save", err)
 		return http.StatusInternalServerError, err
 	}
 
 	return http.StatusOK, nil
 }
 
-func (c *cartItemsUsecase) Delete(id int, userId int) (statusCode int, err error) {
+func (c *cartItemsUsecase) DeleteByIdAndUserId(id int, userId int) (statusCode int, err error) {
 
-	// Check if cart_items exists
-	_, err = c.cartRepo.FindById(id)
+	err = c.cartRepo.DeleteByIdAndUserId(id, userId)
 	if err != nil {
-		if errors.Is(err, constants.ErrRowNotFound) {
-			return http.StatusNotFound, constants.ErrCartItemsNotFound
-		}
-		return http.StatusInternalServerError, err
-	}
-
-	err = c.cartRepo.Delete(id, userId)
-	if err != nil {
+		slog.Error("cartItemsUsecase.DeleteByIdAndUserId", err)
 		return http.StatusInternalServerError, err
 	}
 
 	return http.StatusOK, nil
 }
 
-func (c *cartItemsUsecase) FindAll(userId int, isAdmin bool) (outDom []domains.CartItemsDomain, statusCode int, err error) {
-	if isAdmin {
-		carts, err := c.cartRepo.FindAll()
-		if err != nil {
-			return nil, http.StatusInternalServerError, err
-		}
-
-		if len(carts) == 0 {
-			return nil, http.StatusNotFound, fmt.Errorf("cart_items is empty")
-		}
-
-		return carts, http.StatusOK, nil
-	}
-
-	carts, err := c.cartRepo.FindByUserId(userId)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	if len(carts) == 0 {
-		return nil, http.StatusNotFound, fmt.Errorf("cart_items is empty")
-	}
-
-	return carts, http.StatusOK, nil
-}
-
-func (c *cartItemsUsecase) Update(id int, userId int, cart *domains.CartItemsDomain) (statusCode int, err error) {
+func (c *cartItemsUsecase) UpdateByIdAndUserId(id int, userId int, cart *domains.CartItemsDomain) (statusCode int, err error) {
 	cart.UpdatedAt = helpers.GetCurrentTime()
-	err = c.cartRepo.Update(id, userId, cart)
+	cart.Id = id
+	cart.UserId = userId
+	err = c.cartRepo.UpdateByIdAndUserId(cart)
 	if err != nil {
+		slog.Error("cartItemsUsecase.UpdateByIdAndUserId", err)
 		return http.StatusInternalServerError, err
 	}
 

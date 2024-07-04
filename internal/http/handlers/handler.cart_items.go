@@ -13,26 +13,26 @@ import (
 	"strconv"
 )
 
-type CartsHandler struct {
+type CartItemsHandler struct {
 	cartUsecase domains.CartUsecase
 	redisCache  caches.RedisCache
 }
 
-func NewCartsHandler(cartUsecase domains.CartUsecase, redisCache caches.RedisCache) CartsHandler {
-	return CartsHandler{
+func NewCartsHandler(cartUsecase domains.CartUsecase, redisCache caches.RedisCache) CartItemsHandler {
+	return CartItemsHandler{
 		cartUsecase: cartUsecase,
 		redisCache:  redisCache,
 	}
 }
 
-func (c *CartsHandler) GetCartItemsByUserId(ctx echo.Context) error {
+func (c *CartItemsHandler) GetAllCartItemsByUserId(ctx echo.Context) error {
 	userId := ctx.Param("id")
 
 	userIdInt, err := strconv.Atoi(userId)
 	if err != nil {
 		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid user id")
 	}
-	carts, statusCode, err := c.cartUsecase.FindByUserId(userIdInt)
+	carts, statusCode, err := c.cartUsecase.FindAllByUserId(userIdInt)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
@@ -40,7 +40,7 @@ func (c *CartsHandler) GetCartItemsByUserId(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsResponse(carts))
 }
 
-func (c *CartsHandler) SaveCartItem(ctx echo.Context) error {
+func (c *CartItemsHandler) SaveToMyCartItems(ctx echo.Context) error {
 	var cartCreateRequest requests.CartCreateRequest
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
@@ -59,7 +59,7 @@ func (c *CartsHandler) SaveCartItem(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Cart saved successfully", nil)
 }
 
-func (c *CartsHandler) DeleteCartItem(ctx echo.Context) error {
+func (c *CartItemsHandler) DeleteMyCartItem(ctx echo.Context) error {
 	cartId := ctx.Param("id")
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
@@ -68,7 +68,7 @@ func (c *CartsHandler) DeleteCartItem(ctx echo.Context) error {
 		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid cart id")
 	}
 
-	statusCode, err := c.cartUsecase.Delete(cartIdInt, jwtClaims.UserId)
+	statusCode, err := c.cartUsecase.DeleteByIdAndUserId(cartIdInt, jwtClaims.UserId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
@@ -76,10 +76,10 @@ func (c *CartsHandler) DeleteCartItem(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Cart deleted successfully", nil)
 }
 
-func (c *CartsHandler) FindAll(ctx echo.Context) error {
+func (c *CartItemsHandler) GetAllMyCartItems(ctx echo.Context) error {
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
-	carts, statusCode, err := c.cartUsecase.FindAll(jwtClaims.UserId, jwtClaims.IsAdmin)
+	carts, statusCode, err := c.cartUsecase.FindAllByUserId(jwtClaims.UserId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
@@ -87,7 +87,7 @@ func (c *CartsHandler) FindAll(ctx echo.Context) error {
 	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsResponse(carts))
 }
 
-func (c *CartsHandler) UpdateCartItem(ctx echo.Context) error {
+func (c *CartItemsHandler) UpdateMyCartItem(ctx echo.Context) error {
 	var cartUpdateRequest requests.CartUpdateRequest
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
@@ -103,7 +103,7 @@ func (c *CartsHandler) UpdateCartItem(ctx echo.Context) error {
 	}
 
 	cartDomain := cartUpdateRequest.ToDomain()
-	statusCode, err := c.cartUsecase.Update(cartIdInt, jwtClaims.UserId, cartDomain)
+	statusCode, err := c.cartUsecase.UpdateByIdAndUserId(cartIdInt, jwtClaims.UserId, cartDomain)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}

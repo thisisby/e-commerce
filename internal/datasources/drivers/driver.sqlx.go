@@ -2,7 +2,6 @@ package drivers
 
 import (
 	"fmt"
-	"ga_marketplace/internal/config"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"time"
@@ -38,10 +37,6 @@ func (d *SQLXDriver) OpenConnection() (*sqlx.DB, error) {
 
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
-	}
-
-	if _, err := db.Exec("CREATE TABLE " + config.AppConfig.DBName); err != nil {
-		return nil, fmt.Errorf("failed to create database: %w", err)
 	}
 
 	return db, nil

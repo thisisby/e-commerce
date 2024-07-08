@@ -12,6 +12,11 @@ type CartItemsDomain struct {
 	UpdatedAt time.Time
 }
 
+type CartItemTotalAmount struct {
+	TotalAmount   float64 `json:"total_amount"`
+	TotalDiscount float64 `json:"total_discount"`
+}
+
 type CartItemsRepository interface {
 	FindAllByUserId(id int) ([]CartItemsDomain, error)
 	FindByUserIdAndProductId(userId int, productId int) (*CartItemsDomain, error)
@@ -19,6 +24,8 @@ type CartItemsRepository interface {
 	Save(cart *CartItemsDomain) error
 	DeleteByIdAndUserId(id int, userId int) error
 	UpdateByIdAndUserId(cart *CartItemsDomain) error
+
+	FindTotalAmountByUserId(userId int) (*CartItemTotalAmount, error)
 }
 
 type CartUsecase interface {
@@ -26,4 +33,6 @@ type CartUsecase interface {
 	Save(inDom *CartItemsDomain) (statusCode int, err error)
 	DeleteByIdAndUserId(id int, userId int) (statusCode int, err error)
 	UpdateByIdAndUserId(id int, userId int, cart *CartItemsDomain) (statusCode int, err error)
+
+	FindTotalAmountByUserId(userId int) (*CartItemTotalAmount, int, error)
 }

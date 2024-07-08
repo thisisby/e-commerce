@@ -32,3 +32,10 @@ func ToArrayOfCartItemsDomain(inRec []CartItems) []domains.CartItemsDomain {
 	}
 	return carts
 }
+
+func (c *CartItemTotalAmount) ToDomain() *domains.CartItemTotalAmount {
+	return &domains.CartItemTotalAmount{
+		TotalAmount:   c.TotalAmount,
+		TotalDiscount: c.TotalDiscount,
+	}
+}

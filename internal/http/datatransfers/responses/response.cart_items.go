@@ -15,6 +15,11 @@ type CartItemsResponse struct {
 	UpdatedAt time.Time       `json:"updated_at"`
 }
 
+type CartItemTotalAmountResponse struct {
+	TotalAmount   float64 `json:"total_amount"`
+	TotalDiscount float64 `json:"total_discount"`
+}
+
 func FromCartItemsDomain(inDom *domains.CartItemsDomain) CartItemsResponse {
 	return CartItemsResponse{
 		Id:        inDom.Id,

@@ -12,3 +12,8 @@ type CartItems struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
+
+type CartItemTotalAmount struct {
+	TotalAmount   float64 `db:"total_amount"`
+	TotalDiscount float64 `db:"total_discount"`
+}

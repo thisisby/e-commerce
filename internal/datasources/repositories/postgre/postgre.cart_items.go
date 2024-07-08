@@ -131,3 +131,24 @@ func (p *postgreCartsRepository) UpdateByIdAndUserId(cart *domains.CartItemsDoma
 
 	return nil
 }
+
+func (p *postgreCartsRepository) FindTotalAmountByUserId(userId int) (*domains.CartItemTotalAmount, error) {
+	query := `
+		SELECT COALESCE(SUM(CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END), 0) "total_amount",
+			   COALESCE(SUM(CASE WHEN d.discount IS NOT NULL THEN (p.price * d.discount / 100) * c.quantity ELSE 0 END), 0) "total_discount"
+		FROM cart_items c
+		JOIN products p ON c.product_id = p.id
+		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+		WHERE c.user_id = $1
+		`
+
+	var cartTotalAmount records.CartItemTotalAmount
+
+	err := p.conn.Get(&cartTotalAmount, query, userId)
+	if err != nil {
+		slog.Error("PostgreCartsRepository.FindTotalAmountByUserId: ", err)
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return cartTotalAmount.ToDomain(), nil
+}

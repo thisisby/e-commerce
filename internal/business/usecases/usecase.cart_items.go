@@ -93,3 +93,13 @@ func (c *cartItemsUsecase) UpdateByIdAndUserId(id int, userId int, cart *domains
 
 	return http.StatusOK, nil
 }
+
+func (c *cartItemsUsecase) FindTotalAmountByUserId(userId int) (*domains.CartItemTotalAmount, int, error) {
+	totalAmount, err := c.cartRepo.FindTotalAmountByUserId(userId)
+	if err != nil {
+		slog.Error("cartItemsUsecase.FindTotalAmountByUserId", err)
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return totalAmount, http.StatusOK, nil
+}

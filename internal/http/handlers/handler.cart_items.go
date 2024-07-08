@@ -84,7 +84,22 @@ func (c *CartItemsHandler) GetAllMyCartItems(ctx echo.Context) error {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsResponse(carts))
+	totalAmount, statusCode, err := c.cartUsecase.FindTotalAmountByUserId(jwtClaims.UserId)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	totalAmountResponse := responses.CartItemTotalAmountResponse{
+		TotalAmount:   totalAmount.TotalAmount,
+		TotalDiscount: totalAmount.TotalDiscount,
+	}
+
+	outResponse := map[string]interface{}{
+		"total_amount": totalAmountResponse,
+		"cart_items":   responses.ToArrayOfCartItemsResponse(carts),
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", outResponse)
 }
 
 func (c *CartItemsHandler) UpdateMyCartItem(ctx echo.Context) error {

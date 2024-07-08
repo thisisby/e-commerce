@@ -21,10 +21,14 @@ func NewPostgreCartsRepository(conn *sqlx.DB) domains.CartItemsRepository {
 func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDomain, error) {
 	query := `
 		SELECT c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
+		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at",
+			   COALESCE(d.id, 0) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
+			   CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
+		       CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price"
 		FROM cart_items c
 		JOIN users u ON c.user_id = u.id
 		JOIN products p ON c.product_id = p.id
+		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		WHERE c.user_id = $1
 		`
 

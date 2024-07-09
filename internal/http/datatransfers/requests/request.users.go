@@ -21,6 +21,26 @@ type UserRegisterRequest struct {
 	DateOfBirth time.Time `json:"date_of_birth" validate:"required"`
 }
 
+type UserUpdateRequest struct {
+	CountryId   *int       `json:"country_id"`
+	Name        *string    `json:"name"`
+	DateOfBirth *time.Time `json:"date_of_birth"`
+	Street      *string    `json:"street"`
+	Region      *string    `json:"region"`
+	Apartment   *string    `json:"apartment"`
+}
+
+func (u *UserUpdateRequest) ToDomain() *domains.UserDomain {
+	return &domains.UserDomain{
+		CountryId: *u.CountryId,
+		Name:      *u.Name,
+		Street:    u.Street,
+		Region:    u.Region,
+		Apartment: u.Apartment,
+	}
+
+}
+
 func (u *UserRegisterRequest) ToDomain() *domains.UserDomain {
 	return &domains.UserDomain{
 		Phone:       u.Phone,

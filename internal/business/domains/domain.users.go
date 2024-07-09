@@ -5,10 +5,18 @@ import (
 )
 
 type UserDomain struct {
-	Id           int
-	Name         string
-	Phone        string
-	Role         string
+	Id    int
+	Name  string
+	Phone string
+	Role  string
+
+	CountryId int
+	Country   CountryDomain
+
+	Street    *string
+	Region    *string
+	Apartment *string
+
 	AccessToken  string
 	RefreshToken string
 	DateOfBirth  time.Time
@@ -31,4 +39,5 @@ type UserUsecase interface {
 	Login(inDom *UserDomain) (outDom *UserDomain, statusCode int, err error)
 	RefreshToken(refreshToken string) (outDom *UserDomain, statusCode int, err error)
 	FindByID(id int) (outDom *UserDomain, statusCode int, err error)
+	Update(inDom *UserDomain) (statusCode int, err error)
 }

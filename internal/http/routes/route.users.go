@@ -58,5 +58,8 @@ func (r *UsersRoute) Register() {
 	auth.GET("/me", r.usersHandler.GetMe)
 
 	//users
-	_ = r.router.Group("/users")
+	users := r.router.Group("/users")
+	users.Use(r.authMiddleware.Handle)
+	users.PATCH("", r.usersHandler.UpdateMe)
+
 }

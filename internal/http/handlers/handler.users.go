@@ -201,3 +201,49 @@ func (u *UsersHandler) GetMe(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, http.StatusOK, "User found", responses.FromUserDomain(user))
 }
+
+func (u *UsersHandler) UpdateMe(ctx echo.Context) error {
+	var userUpdateRequest requests.UserUpdateRequest
+
+	err := helpers.BindAndValidate(ctx, &userUpdateRequest)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+
+	if &jwtClaims == nil {
+		return NewErrorResponse(ctx, http.StatusUnauthorized, "User not found")
+	}
+
+	user, statusCode, err := u.userUsecase.FindByID(jwtClaims.UserId)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	if userUpdateRequest.Name != nil {
+		user.Name = *userUpdateRequest.Name
+	}
+	if userUpdateRequest.DateOfBirth != nil {
+		user.DateOfBirth = *userUpdateRequest.DateOfBirth
+	}
+	if userUpdateRequest.Street != nil {
+		user.Street = userUpdateRequest.Street
+	}
+	if userUpdateRequest.Region != nil {
+		user.Region = userUpdateRequest.Region
+	}
+	if userUpdateRequest.Apartment != nil {
+		user.Apartment = userUpdateRequest.Apartment
+	}
+	if userUpdateRequest.CountryId != nil {
+		user.CountryId = *userUpdateRequest.CountryId
+	}
+
+	statusCode, err = u.userUsecase.Update(user)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "User updated successfully", responses.FromUserDomain(user))
+}

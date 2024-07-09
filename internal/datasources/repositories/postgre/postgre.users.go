@@ -20,7 +20,10 @@ func NewPostgreUsersRepository(conn *sqlx.DB) domains.UserRepository {
 
 func (p *postgreUsersRepository) FindByPhone(phone string) (*domains.UserDomain, error) {
 	query := `
-		SELECT u.id, u.name, u.phone, r.name "role.name", u.date_of_birth, u.created_at, u.updated_at 
+		SELECT
+		    u.id, u.name, u.phone, r.name "role.name",
+			u.country_id, u.street, u.region, u.apartment,
+			u.date_of_birth, u.created_at, u.updated_at
 		FROM users u 
 		INNER JOIN roles r ON u.role_id = r.id 
 		WHERE phone = $1
@@ -57,7 +60,17 @@ func (p *postgreUsersRepository) Save(inDom *domains.UserDomain) error {
 func (p *postgreUsersRepository) Update(inDom *domains.UserDomain) error {
 	query := `
 		UPDATE users 
-		SET name = :name, phone = :phone, role_id = :role_id, date_of_birth = :date_of_birth, refresh_token = :refresh_token, updated_at = :updated_at
+		SET 
+		    name = :name, 
+		    phone = :phone, 
+		    role_id = :role_id, 
+		    country_id = :country_id,
+		    street = :street,
+		    region = :region,
+		    apartment = :apartment,
+		    date_of_birth = :date_of_birth,
+		    refresh_token = :refresh_token,
+		    updated_at = :updated_at
 		WHERE id = :id
 		`
 
@@ -74,7 +87,10 @@ func (p *postgreUsersRepository) Update(inDom *domains.UserDomain) error {
 
 func (p *postgreUsersRepository) FindById(id int) (*domains.UserDomain, error) {
 	query := `
-		SELECT u.id, u.name, u.phone, r.name "role.name", u.refresh_token, u.date_of_birth, u.created_at, u.updated_at
+		SELECT 
+			u.id, u.name, u.phone, r.name "role.name",
+			u.country_id, u.street, u.region, u.apartment,
+			u.refresh_token, u.date_of_birth, u.created_at, u.updated_at
 		FROM users u
 		INNER JOIN roles r ON u.role_id = r.id
 		WHERE u.id = $1

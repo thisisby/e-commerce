@@ -13,9 +13,9 @@ func init() {
 		{
 			Id:           1,
 			Name:         "admin",
-			Phone:        "08123456789",
+			Phone:        "1",
 			RoleId:       constants.MapperRoleToId[constants.Admin],
-			RefreshToken: "refresh_token",
+			RefreshToken: "nil",
 			DateOfBirth:  helpers.GetCurrentTime(),
 			CreatedAt:    helpers.GetCurrentTime(),
 			UpdatedAt:    helpers.GetCurrentTime(),
@@ -23,9 +23,9 @@ func init() {
 		{
 			Id:           2,
 			Name:         "client",
-			Phone:        "123123412412",
+			Phone:        "2",
 			RoleId:       constants.MapperRoleToId[constants.Client],
-			RefreshToken: "refresh_token",
+			RefreshToken: "nil",
 			DateOfBirth:  helpers.GetCurrentTime(),
 			CreatedAt:    helpers.GetCurrentTime(),
 			UpdatedAt:    helpers.GetCurrentTime(),

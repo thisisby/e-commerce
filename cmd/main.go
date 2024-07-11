@@ -67,6 +67,10 @@ func main() {
 	jwtService := jwt.NewJWTService()
 
 	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -83,6 +87,7 @@ func main() {
 	routes.NewCartsRoute(conn, v1, redisCache, clientAuthMiddleware).Register()
 	routes.NewWishRoute(conn, v1, clientAuthMiddleware).Register()
 	routes.NewDiscountRoute(conn, v1, adminAuthMiddleware).Register()
+	routes.NewProfileSectionsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(config.AppConfig.Port)))

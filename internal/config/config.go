@@ -25,6 +25,11 @@ type Config struct {
 
 	MobizonBaseUrl string `mapstructure:"MOBIZON_BASE_URL"`
 	MobizonApiKey  string `mapstructure:"MOBIZON_API_KEY"`
+
+	AwsAccessKeyID     string `mapstructure:"AWS_ACCESS_KEY_ID"`
+	AwsAccessKeySecret string `mapstructure:"AWS_ACCESS_KEY_SECRET"`
+	AwsBucketName      string `mapstructure:"AWS_BUCKET_NAME"`
+	AwsBucketRegion    string `mapstructure:"AWS_BUCKET_REGION"`
 }
 
 func InitializeAppConfig() error {

@@ -43,7 +43,7 @@ func (u *UsersHandler) SendOTP(ctx echo.Context) error {
 
 	otpKey := fmt.Sprintf("otp:%s", userSendOTP.Phone)
 
-	go u.redisCache.Set(otpKey, otpCode)
+	u.redisCache.Set(otpKey, otpCode)
 
 	slog.Info("OTP: ", otpCode)
 	return NewSuccessResponse(ctx, statusCode, "OTP sent successfully", nil)
@@ -69,14 +69,14 @@ func (u *UsersHandler) ResendOTP(ctx echo.Context) error {
 		return NewErrorResponse(ctx, http.StatusTooManyRequests, "Maximum OTP attempts reached")
 	}
 
-	go u.redisCache.Incr(attemptKey)
+	u.redisCache.Incr(attemptKey)
 
 	otpCode, statusCode, err := u.userUsecase.SendOTP(userSendOTP.Phone)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	go u.redisCache.Set(otpKey, otpCode)
+	u.redisCache.Set(otpKey, otpCode)
 
 	return NewSuccessResponse(ctx, statusCode, "OTP resent successfully", nil)
 }
@@ -91,7 +91,7 @@ func (u *UsersHandler) ResetAttempts(ctx echo.Context) error {
 
 	var attemptKey = fmt.Sprintf("attempt:%s", userSendOTP.Phone)
 
-	go u.redisCache.Delete(attemptKey)
+	u.redisCache.Delete(attemptKey)
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Attempt reset successfully", nil)
 }
@@ -115,13 +115,13 @@ func (u *UsersHandler) VerifyOTP(ctx echo.Context) error {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	go u.redisCache.Delete(otpKey)
+	u.redisCache.Delete(otpKey)
 
 	userExists, statusCode, err := u.userUsecase.FindByPhone(userVerifyOTP.Phone)
 	if err != nil {
 		if errors.Is(err, constants.ErrUserNotFound) {
 			verifiedKey := fmt.Sprintf("verified:%s", userVerifyOTP.Phone)
-			go u.redisCache.Set(verifiedKey, true)
+			u.redisCache.Set(verifiedKey, true)
 
 			return NewSuccessResponse(ctx, statusCode, "OTP verified successfully", nil)
 
@@ -160,7 +160,7 @@ func (u *UsersHandler) Register(ctx echo.Context) error {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	go u.redisCache.Delete(verifiedKey)
+	u.redisCache.Delete(verifiedKey)
 
 	outDom, statusCode, err := u.userUsecase.Login(outDomain)
 	if err != nil {

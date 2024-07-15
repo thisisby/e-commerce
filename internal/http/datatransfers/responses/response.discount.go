@@ -13,8 +13,11 @@ type DiscountResponse struct {
 	EndDate   time.Time `json:"end_date"`
 }
 
-func FromDiscountDomain(inDom *domains.DiscountsDomain) DiscountResponse {
-	return DiscountResponse{
+func FromDiscountDomain(inDom *domains.DiscountsDomain) *DiscountResponse {
+	if inDom == nil {
+		return nil
+	}
+	return &DiscountResponse{
 		Id:        inDom.Id,
 		ProductId: inDom.ProductId,
 		Discount:  inDom.Discount,

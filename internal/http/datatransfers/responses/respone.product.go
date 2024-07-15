@@ -6,15 +6,19 @@ import (
 )
 
 type ProductResponse struct {
-	Id              int              `json:"id"`
-	Name            string           `json:"name"`
-	Description     string           `json:"description"`
-	Price           float64          `json:"price"`
-	DiscountedPrice float64          `json:"discounted_price"`
-	TotalPrice      float64          `json:"total_price"`
-	Discount        DiscountResponse `json:"discount"`
-	CreatedAt       time.Time        `json:"created_at"`
-	UpdatedAt       time.Time        `json:"updated_at"`
+	Id              int               `json:"id"`
+	Name            string            `json:"name"`
+	Description     string            `json:"description"`
+	Price           float64           `json:"price"`
+	DiscountedPrice float64           `json:"discounted_price"`
+	TotalPrice      *float64          `json:"total_price"`
+	IsInCart        bool              `json:"is_in_cart"`
+	IsInWishlist    bool              `json:"is_in_wishlist"`
+	Discount        *DiscountResponse `json:"discount"`
+	Image           string            `json:"image"`
+	Images          []string          `json:"images"`
+	CreatedAt       time.Time         `json:"created_at"`
+	UpdatedAt       time.Time         `json:"updated_at"`
 }
 
 func FromProductDomain(inDom *domains.ProductDomain) ProductResponse {
@@ -25,8 +29,22 @@ func FromProductDomain(inDom *domains.ProductDomain) ProductResponse {
 		Price:           inDom.Price,
 		DiscountedPrice: inDom.DiscountedPrice,
 		TotalPrice:      inDom.TotalPrice,
-		Discount:        FromDiscountDomain(&inDom.Discount),
+		Discount:        FromDiscountDomain(inDom.Discount),
+		IsInCart:        inDom.IsInCart,
+		IsInWishlist:    inDom.IsInWishlist,
+		Image:           inDom.Image,
+		Images:          inDom.Images,
 		CreatedAt:       inDom.CreatedAt,
 		UpdatedAt:       inDom.UpdatedAt,
 	}
+}
+
+func ToArrayOfProductResponse(inDom []domains.ProductDomain) []ProductResponse {
+	var outDom []ProductResponse
+
+	for _, dom := range inDom {
+		outDom = append(outDom, FromProductDomain(&dom))
+	}
+
+	return outDom
 }

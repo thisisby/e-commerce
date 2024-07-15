@@ -8,12 +8,23 @@ type ProductDomain struct {
 	Description     string
 	Price           float64
 	DiscountedPrice float64
-	TotalPrice      float64
-	Discount        DiscountsDomain
+	TotalPrice      *float64
+	Discount        *DiscountsDomain
+	Image           string
+	Images          []string
+	IsInCart        bool
+	IsInWishlist    bool
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
 
-type ProductRepository interface {
+type ProductsRepository interface {
 	FindById(id int) (*ProductDomain, error)
+	Save(product *ProductDomain) error
+	FindAllForMe(id int) ([]ProductDomain, error)
+}
+
+type ProductsUsecase interface {
+	Save(product *ProductDomain) (int, error)
+	FindAllForMe(id int) ([]ProductDomain, int, error)
 }

@@ -9,6 +9,7 @@ import (
 	"ga_marketplace/internal/http/routes"
 	"ga_marketplace/internal/utils"
 	"ga_marketplace/pkg/jwt"
+	"ga_marketplace/third_party/aws"
 	"ga_marketplace/third_party/mobizon"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -63,6 +64,11 @@ func main() {
 	// mobizon integration
 	mobizonClient := mobizon.NewClient(config.AppConfig.MobizonBaseUrl, config.AppConfig.MobizonApiKey)
 
+	// s3 integration
+	s3Client := aws.NewS3Client()
+	buckets := s3Client.ListBuckets()
+	fmt.Printf("buckets: %v\n", buckets)
+
 	// jwt
 	jwtService := jwt.NewJWTService()
 
@@ -88,8 +94,13 @@ func main() {
 	routes.NewWishRoute(conn, v1, clientAuthMiddleware).Register()
 	routes.NewDiscountRoute(conn, v1, adminAuthMiddleware).Register()
 	routes.NewProfileSectionsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewProductRoute(conn, v1, s3Client, clientAuthMiddleware).Register()
+	routes.NewHealthCheckRoute(v1).Register()
 
 	slog.Info("success to listen and serve on :8080")
+
+	slog.Info("buckets: ", buckets)
+
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(config.AppConfig.Port)))
 
 }

@@ -13,13 +13,13 @@ import (
 type cartItemsUsecase struct {
 	cartRepo    domains.CartItemsRepository
 	userRepo    domains.UserRepository
-	productRepo domains.ProductRepository
+	productRepo domains.ProductsRepository
 }
 
 func NewCartsUsecase(
 	cartRepo domains.CartItemsRepository,
 	userRepo domains.UserRepository,
-	productRepo domains.ProductRepository,
+	productRepo domains.ProductsRepository,
 ) domains.CartUsecase {
 	return &cartItemsUsecase{
 		cartRepo:    cartRepo,

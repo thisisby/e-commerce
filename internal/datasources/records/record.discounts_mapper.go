@@ -3,6 +3,9 @@ package records
 import "ga_marketplace/internal/business/domains"
 
 func (d *Discounts) ToDiscountsDomain() *domains.DiscountsDomain {
+	if d == nil || d.Id == -1 {
+		return nil
+	}
 	return &domains.DiscountsDomain{
 		Id:        d.Id,
 		ProductId: d.ProductId,

@@ -22,13 +22,16 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 	query := `
 		SELECT c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
 		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at",
-			   COALESCE(d.id, 0) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
+			   COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 			   CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
-		       CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price"
+		       CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
+		       CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_cart",
+			   CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_wishlist"
 		FROM cart_items c
 		JOIN users u ON c.user_id = u.id
 		JOIN products p ON c.product_id = p.id
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = u.id
 		WHERE c.user_id = $1
 		`
 

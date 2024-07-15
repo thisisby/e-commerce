@@ -30,11 +30,6 @@ func (d *SQLXDriver) OpenConnection() (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	db.SetMaxOpenConns(d.MaxOpenConns)
-	db.SetMaxIdleConns(d.MaxIdleConns)
-	db.SetConnMaxLifetime(d.ConnMaxLifetime)
-
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}

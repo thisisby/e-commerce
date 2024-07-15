@@ -29,6 +29,7 @@ type UserRepository interface {
 	Save(inDom *UserDomain) error
 	Update(inDom *UserDomain) error
 	FindById(id int) (*UserDomain, error)
+	FindAll() ([]UserDomain, error)
 }
 
 type UserUsecase interface {
@@ -40,4 +41,5 @@ type UserUsecase interface {
 	RefreshToken(refreshToken string) (outDom *UserDomain, statusCode int, err error)
 	FindByID(id int) (outDom *UserDomain, statusCode int, err error)
 	Update(inDom *UserDomain) (statusCode int, err error)
+	FindAll() (outDom []UserDomain, statusCode int, err error)
 }

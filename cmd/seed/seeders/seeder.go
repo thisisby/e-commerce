@@ -42,8 +42,8 @@ func (s *seeder) RolesSeeder(rolesData []records.Roles) (err error) {
 
 func (s *seeder) ProductsSeeder(productsData []records.Products) (err error) {
 	query := `
-        INSERT INTO products (name, description, price, created_at, updated_at)
-        VALUES (:name, :description, :price, :created_at, :updated_at)
+        INSERT INTO products (name, description, price, image, created_at, updated_at)
+        VALUES (:name, :description, :price, :image, :created_at, :updated_at)
     `
 	if len(productsData) == 0 {
 		return errors.New("products data is empty")

@@ -90,7 +90,7 @@ func main() {
 	v1 := e.Group("/api/v1")
 	routes.NewRolesRoute(conn, v1).Register()
 	routes.NewUsersRoute(conn, v1, redisCache, jwtService, clientAuthMiddleware, adminAuthMiddleware, mobizonClient).Register()
-	routes.NewCartsRoute(conn, v1, redisCache, clientAuthMiddleware).Register()
+	routes.NewCartsRoute(conn, v1, redisCache, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewWishRoute(conn, v1, clientAuthMiddleware).Register()
 	routes.NewDiscountRoute(conn, v1, adminAuthMiddleware).Register()
 	routes.NewProfileSectionsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()

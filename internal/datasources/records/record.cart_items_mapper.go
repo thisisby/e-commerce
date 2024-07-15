@@ -6,6 +6,7 @@ func (c *CartItems) ToDomain() *domains.CartItemsDomain {
 	return &domains.CartItemsDomain{
 		Id:        c.Id,
 		UserId:    c.UserId,
+		User:      *c.User.ToDomain(),
 		ProductId: c.ProductId,
 		Product:   *c.Product.ToDomain(),
 		Quantity:  c.Quantity,

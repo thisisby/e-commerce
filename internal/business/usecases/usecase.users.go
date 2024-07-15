@@ -172,3 +172,12 @@ func (u *usersUsecase) Update(inDom *domains.UserDomain) (statusCode int, err er
 
 	return http.StatusOK, nil
 }
+
+func (u *usersUsecase) FindAll() (outDom []domains.UserDomain, statusCode int, err error) {
+	outDom, err = u.userRepo.FindAll()
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return outDom, http.StatusOK, nil
+}

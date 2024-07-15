@@ -15,9 +15,38 @@ type CartItemsResponse struct {
 	UpdatedAt time.Time       `json:"updated_at"`
 }
 
+type CartItemsAdminResponse struct {
+	CartItemsResponse
+	User UserResponse `json:"user"`
+}
+
 type CartItemTotalAmountResponse struct {
 	TotalAmount   float64 `json:"total_amount"`
 	TotalDiscount float64 `json:"total_discount"`
+}
+
+func FromCartItemsAdminDomain(inDom *domains.CartItemsDomain) CartItemsAdminResponse {
+	return CartItemsAdminResponse{
+		CartItemsResponse: CartItemsResponse{
+			Id:        inDom.Id,
+			UserId:    inDom.UserId,
+			ProductId: inDom.ProductId,
+			Product:   FromProductDomain(&inDom.Product),
+			Quantity:  inDom.Quantity,
+			CreatedAt: inDom.CreatedAt,
+			UpdatedAt: inDom.UpdatedAt,
+		},
+		User: FromUserDomain(&inDom.User),
+	}
+}
+
+func ToArrayOfCartItemsAdminResponse(inDom []domains.CartItemsDomain) []CartItemsAdminResponse {
+	var carts []CartItemsAdminResponse
+	for _, dom := range inDom {
+		carts = append(carts, FromCartItemsAdminDomain(&dom))
+	}
+	return carts
+
 }
 
 func FromCartItemsDomain(inDom *domains.CartItemsDomain) CartItemsResponse {

@@ -106,3 +106,24 @@ func (p *postgreUsersRepository) FindById(id int) (*domains.UserDomain, error) {
 
 	return userRecord.ToDomain(), nil
 }
+
+func (p *postgreUsersRepository) FindAll() ([]domains.UserDomain, error) {
+	query := `
+		SELECT 
+			u.id, u.name, u.phone, r.name "role.name",
+			u.country_id, u.street, u.region, u.apartment,
+			u.date_of_birth, u.created_at, u.updated_at
+		FROM users u
+		INNER JOIN roles r ON u.role_id = r.id
+		`
+
+	var usersRecord []records.Users
+
+	err := p.conn.Select(&usersRecord, query)
+	if err != nil {
+		slog.Error("PostgreUsersRepository.FindAll: ", err)
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return records.ToArrayOfUsersDomain(usersRecord), nil
+}

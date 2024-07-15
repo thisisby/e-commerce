@@ -47,3 +47,50 @@ func (p *postgreProfileSectionsRepository) Save(profileSection domains.ProfileSe
 
 	return nil
 }
+
+func (p *postgreProfileSectionsRepository) FindById(id int) (domains.ProfileSectionsDomain, error) {
+	query := `
+		SELECT id, name, content, parent_id
+		FROM profile_sections
+		WHERE id = $1
+		`
+
+	var profileSectionRecord records.ProfileSections
+
+	err := p.conn.Get(&profileSectionRecord, query, id)
+	if err != nil {
+		return domains.ProfileSectionsDomain{}, helpers.PostgresErrorTransform(err)
+	}
+
+	return *profileSectionRecord.ToDomain(), nil
+}
+
+func (p *postgreProfileSectionsRepository) UpdateById(profileSection domains.ProfileSectionsDomain) error {
+	query := `
+		UPDATE profile_sections
+		SET name = :name, content = :content, parent_id = :parent_id
+		WHERE id = :id
+`
+	profileSectionRecord := records.FromProfileSectionDomain(profileSection)
+
+	_, err := p.conn.NamedQuery(query, profileSectionRecord)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}
+
+func (p *postgreProfileSectionsRepository) DeleteById(id int) error {
+	query := `
+		DELETE FROM profile_sections
+		WHERE id = $1
+		`
+
+	_, err := p.conn.Exec(query, id)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}

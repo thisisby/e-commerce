@@ -247,3 +247,12 @@ func (u *UsersHandler) UpdateMe(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, http.StatusOK, "User updated successfully", responses.FromUserDomain(user))
 }
+
+func (u *UsersHandler) GetAllUsers(ctx echo.Context) error {
+	users, statusCode, err := u.userUsecase.FindAll()
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Users found", responses.FromUsersDomain(users))
+}

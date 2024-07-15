@@ -59,7 +59,12 @@ func (r *UsersRoute) Register() {
 
 	//users
 	users := r.router.Group("/users")
+	admin := r.router.Group("/admin/users")
+
 	users.Use(r.authMiddleware.Handle)
 	users.PATCH("", r.usersHandler.UpdateMe)
+
+	admin.Use(r.adminMid.Handle)
+	admin.GET("", r.usersHandler.GetAllUsers)
 
 }

@@ -41,7 +41,10 @@ func (r *ProfileSectionsRoute) Register() {
 	profileSections.Use(r.authMiddleware.Handle)
 	profileSections.GET("", r.profileSectionsHandler.FindAll)
 
-	profileSections.Use(r.adminAuthMiddleware.Handle)
-	profileSections.POST("", r.profileSectionsHandler.Save)
+	admin := r.router.Group("/admin/profile-sections")
 
+	admin.Use(r.adminAuthMiddleware.Handle)
+	admin.POST("", r.profileSectionsHandler.Save)
+	admin.PATCH("/:id", r.profileSectionsHandler.UpdateById)
+	admin.DELETE("/:id", r.profileSectionsHandler.DeleteById)
 }

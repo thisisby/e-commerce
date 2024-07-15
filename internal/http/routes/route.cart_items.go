@@ -16,6 +16,7 @@ type CartsRoute struct {
 	db               *sqlx.DB
 	redisCache       caches.RedisCache
 	authMiddleware   middlewares.AuthMiddleware
+	adminMiddleware  middlewares.AuthMiddleware
 }
 
 func NewCartsRoute(
@@ -23,6 +24,7 @@ func NewCartsRoute(
 	router *echo.Group,
 	redisCache caches.RedisCache,
 	authMiddleware middlewares.AuthMiddleware,
+	adminMiddleware middlewares.AuthMiddleware,
 ) *CartsRoute {
 	cartItemsRepo := postgre.NewPostgreCartsRepository(db)
 	productsRepo := postgre.NewPostgreProductsRepository(db)
@@ -35,20 +37,22 @@ func NewCartsRoute(
 		db:               db,
 		redisCache:       redisCache,
 		authMiddleware:   authMiddleware,
+		adminMiddleware:  adminMiddleware,
 	}
 }
 
 func (r *CartsRoute) Register() {
 	// carts
 	cartItems := r.router.Group("/cart_items")
+	cartItemsAdmin := r.router.Group("/admin/users")
 
 	cartItems.Use(r.authMiddleware.Handle)
 	cartItems.GET("", r.cartItemsHandler.GetAllMyCartItems)
 	cartItems.POST("", r.cartItemsHandler.SaveToMyCartItems)
+	cartItems.DELETE("", r.cartItemsHandler.DeleteAllMyCartItems)
 	cartItems.DELETE("/:id", r.cartItemsHandler.DeleteMyCartItem)
 	cartItems.PATCH("/:id", r.cartItemsHandler.UpdateMyCartItem)
 
-	//users.Use(r.adminMiddleware.Handle)
-	//users.GET("/:id/cart_items", r.cartItemsHandler.GetCartItemsByUserId)
-
+	cartItemsAdmin.Use(r.adminMiddleware.Handle)
+	cartItemsAdmin.GET("/:user-id/cart-items", r.cartItemsHandler.GetAllCartItemsForUser)
 }

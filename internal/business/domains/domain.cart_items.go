@@ -5,6 +5,7 @@ import "time"
 type CartItemsDomain struct {
 	Id        int
 	UserId    int
+	User      UserDomain
 	ProductId int
 	Product   ProductDomain
 	Quantity  int
@@ -24,7 +25,7 @@ type CartItemsRepository interface {
 	Save(cart *CartItemsDomain) error
 	DeleteByIdAndUserId(id int, userId int) error
 	UpdateByIdAndUserId(cart *CartItemsDomain) error
-
+	DeleteAllByUserId(userId int) error
 	FindTotalAmountByUserId(userId int) (*CartItemTotalAmount, error)
 }
 
@@ -33,6 +34,6 @@ type CartUsecase interface {
 	Save(inDom *CartItemsDomain) (statusCode int, err error)
 	DeleteByIdAndUserId(id int, userId int) (statusCode int, err error)
 	UpdateByIdAndUserId(id int, userId int, cart *CartItemsDomain) (statusCode int, err error)
-
+	DeleteAllByUserId(userId int) (statusCode int, err error)
 	FindTotalAmountByUserId(userId int) (*CartItemTotalAmount, int, error)
 }

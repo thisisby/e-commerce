@@ -36,3 +36,13 @@ func FromUserDomain(inDom *domains.UserDomain) UserResponse {
 		UpdatedAt:   inDom.UpdatedAt,
 	}
 }
+
+func FromUsersDomain(inDom []domains.UserDomain) []UserResponse {
+	var outDom []UserResponse
+
+	for _, rec := range inDom {
+		outDom = append(outDom, FromUserDomain(&rec))
+	}
+
+	return outDom
+}

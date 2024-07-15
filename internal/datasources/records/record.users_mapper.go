@@ -38,3 +38,13 @@ func FromUsersDomain(inDom *domains.UserDomain) Users {
 		UpdatedAt:    inDom.UpdatedAt,
 	}
 }
+
+func ToArrayOfUsersDomain(inRecs []Users) []domains.UserDomain {
+	var outDom []domains.UserDomain
+
+	for _, rec := range inRecs {
+		outDom = append(outDom, *rec.ToDomain())
+	}
+
+	return outDom
+}

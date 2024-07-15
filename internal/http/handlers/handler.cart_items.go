@@ -125,3 +125,29 @@ func (c *CartItemsHandler) UpdateMyCartItem(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, statusCode, "Cart updated successfully", nil)
 }
+
+func (c *CartItemsHandler) DeleteAllMyCartItems(ctx echo.Context) error {
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+
+	statusCode, err := c.cartUsecase.DeleteAllByUserId(jwtClaims.UserId)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Carts deleted successfully", nil)
+}
+
+func (c *CartItemsHandler) GetAllCartItemsForUser(ctx echo.Context) error {
+	userId := ctx.Param("user-id")
+
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid user id")
+	}
+	carts, statusCode, err := c.cartUsecase.FindAllByUserId(userIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsAdminResponse(carts))
+}

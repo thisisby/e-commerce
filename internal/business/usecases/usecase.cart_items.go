@@ -103,3 +103,13 @@ func (c *cartItemsUsecase) FindTotalAmountByUserId(userId int) (*domains.CartIte
 
 	return totalAmount, http.StatusOK, nil
 }
+
+func (c *cartItemsUsecase) DeleteAllByUserId(userId int) (statusCode int, err error) {
+	err = c.cartRepo.DeleteAllByUserId(userId)
+	if err != nil {
+		slog.Error("cartItemsUsecase.DeleteByUserId", err)
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}

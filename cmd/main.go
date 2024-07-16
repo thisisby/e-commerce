@@ -95,6 +95,7 @@ func main() {
 	routes.NewProfileSectionsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewProductRoute(conn, v1, s3Client, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewHealthCheckRoute(v1).Register()
+	routes.NewCountriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 

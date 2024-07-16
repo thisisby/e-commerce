@@ -15,6 +15,7 @@ type ProductResponse struct {
 	IsInCart        bool              `json:"is_in_cart"`
 	IsInWishlist    bool              `json:"is_in_wishlist"`
 	Discount        *DiscountResponse `json:"discount"`
+	Stock           int               `json:"stock"`
 	Image           string            `json:"image"`
 	Images          []string          `json:"images"`
 	CreatedAt       time.Time         `json:"created_at"`
@@ -32,6 +33,7 @@ func FromProductDomain(inDom *domains.ProductDomain) ProductResponse {
 		Discount:        FromDiscountDomain(inDom.Discount),
 		IsInCart:        inDom.IsInCart,
 		IsInWishlist:    inDom.IsInWishlist,
+		Stock:           inDom.Stock,
 		Image:           inDom.Image,
 		Images:          inDom.Images,
 		CreatedAt:       inDom.CreatedAt,

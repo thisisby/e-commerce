@@ -12,6 +12,7 @@ type ProductDomain struct {
 	Discount        *DiscountsDomain
 	Image           string
 	Images          []string
+	Stock           int
 	IsInCart        bool
 	IsInWishlist    bool
 	CreatedAt       time.Time
@@ -22,9 +23,12 @@ type ProductsRepository interface {
 	FindById(id int) (*ProductDomain, error)
 	Save(product *ProductDomain) error
 	FindAllForMe(id int) ([]ProductDomain, error)
+	UpdateById(inDom ProductDomain) error
 }
 
 type ProductsUsecase interface {
 	Save(product *ProductDomain) (int, error)
 	FindAllForMe(id int) ([]ProductDomain, int, error)
+	UpdateById(inDom ProductDomain) (int, error)
+	FindById(id int) (*ProductDomain, int, error)
 }

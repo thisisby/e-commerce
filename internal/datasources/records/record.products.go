@@ -15,6 +15,7 @@ type Products struct {
 	Discount        *Discounts     `db:"discount"`
 	Image           string         `db:"image"`
 	Images          pq.StringArray `db:"images"`
+	Stock           int            `db:"stock"`
 	IsInCart        bool           `db:"is_in_cart"`
 	IsInWishlist    bool           `db:"is_in_wishlist"`
 	CreatedAt       time.Time      `db:"created_at"`

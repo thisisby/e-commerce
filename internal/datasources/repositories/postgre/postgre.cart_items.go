@@ -20,8 +20,9 @@ func NewPostgreCartsRepository(conn *sqlx.DB) domains.CartItemsRepository {
 
 func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDomain, error) {
 	query := `
-		SELECT c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at",
+		SELECT DISTINCT ON (c.id)
+		       c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
+		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
 		       u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name", u.country_id "user.country_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment", u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at",
 			   COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 			   CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
@@ -30,7 +31,7 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 			   CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_wishlist"
 		FROM cart_items c
 		JOIN users u ON c.user_id = u.id
-		INNER JOIN roles r ON u.role_id = u.id 
+		JOIN roles r ON u.role_id = u.id 
 		JOIN products p ON c.product_id = p.id
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = u.id

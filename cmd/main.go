@@ -93,7 +93,7 @@ func main() {
 	routes.NewWishRoute(conn, v1, clientAuthMiddleware).Register()
 	routes.NewDiscountRoute(conn, v1, adminAuthMiddleware).Register()
 	routes.NewProfileSectionsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
-	routes.NewProductRoute(conn, v1, s3Client, clientAuthMiddleware).Register()
+	routes.NewProductRoute(conn, v1, s3Client, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewHealthCheckRoute(v1).Register()
 
 	slog.Info("success to listen and serve on :8080")

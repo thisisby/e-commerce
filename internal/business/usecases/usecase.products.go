@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"ga_marketplace/internal/business/domains"
+	"ga_marketplace/pkg/helpers"
 	"net/http"
 )
 
@@ -31,4 +32,23 @@ func (p *productsUsecase) FindAllForMe(id int) ([]domains.ProductDomain, int, er
 	}
 
 	return products, http.StatusOK, nil
+}
+
+func (p *productsUsecase) UpdateById(inDom domains.ProductDomain) (int, error) {
+	inDom.UpdatedAt = helpers.GetCurrentTime()
+	err := p.productsRepo.UpdateById(inDom)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func (p *productsUsecase) FindById(id int) (*domains.ProductDomain, int, error) {
+	product, err := p.productsRepo.FindById(id)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return product, http.StatusOK, nil
 }

@@ -19,9 +19,12 @@ func NewPostgreProductsRepository(conn *sqlx.DB) domains.ProductsRepository {
 
 func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, error) {
 	query := `
-		SELECT id, name, description, price, stock, image, images, created_at, updated_at 
-		FROM products 
-		WHERE id = $1
+		SELECT p.id, p.name, p.description, p.price, p.stock, p.image, p.images, p.created_at, p.updated_at,
+		       COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+		    	CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
+		FROM products p
+		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+		WHERE p.id = $1
 		`
 
 	var productRecord records.Products

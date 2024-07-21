@@ -10,3 +10,16 @@ func ToArrayOfOrdersDomain(data []Orders) []domains.OrdersDomain {
 
 	return result
 }
+
+func FromOrdersDomain(data domains.OrdersDomain) Orders {
+	return Orders{
+		Id:              data.Id,
+		UserId:          data.UserId,
+		TotalPrice:      data.TotalPrice,
+		DiscountedPrice: data.DiscountedPrice,
+		Status:          data.Status,
+		Street:          data.Street,
+		Region:          data.Region,
+		Apartment:       data.Apartment,
+	}
+}

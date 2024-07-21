@@ -10,16 +10,18 @@ import (
 )
 
 type OrdersRoute struct {
-	orderHandler   handlers.OrdersHandler
-	router         *echo.Group
-	db             *sqlx.DB
-	authMiddleware middlewares.AuthMiddleware
+	orderHandler    handlers.OrdersHandler
+	router          *echo.Group
+	db              *sqlx.DB
+	authMiddleware  middlewares.AuthMiddleware
+	adminMiddleware middlewares.AuthMiddleware
 }
 
 func NewOrdersRoute(
 	db *sqlx.DB,
 	router *echo.Group,
 	authMiddleware middlewares.AuthMiddleware,
+	adminMiddleware middlewares.AuthMiddleware,
 ) *OrdersRoute {
 
 	cartRepo := postgre.NewPostgreCartsRepository(db)
@@ -31,17 +33,23 @@ func NewOrdersRoute(
 	orderHandler := handlers.NewOrdersHandler(ordersUsecase, cartItemsUsecase)
 
 	return &OrdersRoute{
-		orderHandler:   orderHandler,
-		router:         router,
-		db:             db,
-		authMiddleware: authMiddleware,
+		orderHandler:    orderHandler,
+		router:          router,
+		db:              db,
+		authMiddleware:  authMiddleware,
+		adminMiddleware: adminMiddleware,
 	}
 }
 
 func (r *OrdersRoute) Register() {
 	orders := r.router.Group("/orders")
+	admin := r.router.Group("/admin/orders")
 
 	orders.Use(r.authMiddleware.Handle)
 	orders.POST("", r.orderHandler.Save)
 	orders.GET("", r.orderHandler.FindMyOrders)
+
+	admin.Use(r.adminMiddleware.Handle)
+	admin.PATCH("/:id", r.orderHandler.Update)
+
 }

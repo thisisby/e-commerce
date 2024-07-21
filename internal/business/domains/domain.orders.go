@@ -25,10 +25,14 @@ type OrderDetailsDomain struct {
 
 type OrdersRepository interface {
 	Save(orders OrdersDomain) error
-	FindByUserId(userId int) ([]OrdersDomain, error)
+	FindByUserId(userId int, statusParam string) ([]OrdersDomain, error)
+	Update(orders OrdersDomain) error
+	FindById(id int) (OrdersDomain, error)
 }
 
 type OrdersUsecase interface {
 	Save(orders OrdersDomain, cartItems []CartItemsDomain, totalAmount CartItemTotalAmount) (int, error)
-	FindByUserId(userId int) ([]OrdersDomain, int, error)
+	FindByUserId(userId int, statusParam string) ([]OrdersDomain, int, error)
+	Update(orders OrdersDomain) (int, error)
+	FindById(id int) (OrdersDomain, int, error)
 }

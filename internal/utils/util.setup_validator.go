@@ -1,14 +1,19 @@
 package utils
 
-import "github.com/go-playground/validator/v10"
+import (
+	"ga_marketplace/pkg/helpers"
+	"github.com/go-playground/validator/v10"
+)
 
 type Validator struct {
 	validator *validator.Validate
 }
 
 func NewValidator() *Validator {
+	newValidator := validator.New()
+	newValidator.RegisterValidation("orderstatus", helpers.OrderStatusValidator)
 	return &Validator{
-		validator: validator.New(),
+		validator: newValidator,
 	}
 }
 

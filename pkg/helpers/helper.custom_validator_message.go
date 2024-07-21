@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"ga_marketplace/internal/constants"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -35,6 +36,8 @@ func BindAndValidate(c echo.Context, req any) error {
 				e = fmt.Errorf("field '%s' must  be a valid Ethereum address", err.Field())
 			case "len":
 				e = fmt.Errorf("field '%s' must be exactly %v characters long", err.Field(), err.Param())
+			case "orderstatus":
+				e = fmt.Errorf("field '%s' must be one of [pending, shipping, delivered, cancelled]", err.Field())
 			default:
 				e = fmt.Errorf("field '%s': '%v' must satisfy '%s' '%v' criteria", err.Field(), err.Value(), err.Tag(), err.Param())
 			}
@@ -60,4 +63,13 @@ func (v validationErrors) Error() string {
 	}
 
 	return strings.TrimSpace(buff.String())
+}
+
+func OrderStatusValidator(fl validator.FieldLevel) bool {
+	status := fl.Field().String()
+	switch status {
+	case constants.Pending, constants.Shipping, constants.Delivered, constants.Cancelled:
+		return true
+	}
+	return false
 }

@@ -15,3 +15,19 @@ func (r *CreateOrderRequest) ToDomain() domains.OrdersDomain {
 		Apartment: r.Apartment,
 	}
 }
+
+type UpdateOrderRequest struct {
+	Status    *string `json:"status" validate:"orderstatus"`
+	Street    *string `json:"street"`
+	Region    *string `json:"region"`
+	Apartment *string `json:"apartment"`
+}
+
+func (r *UpdateOrderRequest) ToDomain() *domains.OrdersDomain {
+	return &domains.OrdersDomain{
+		Status:    *r.Status,
+		Street:    *r.Street,
+		Region:    *r.Region,
+		Apartment: *r.Apartment,
+	}
+}

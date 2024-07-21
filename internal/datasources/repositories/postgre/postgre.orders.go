@@ -57,7 +57,7 @@ func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) error {
 	return tx.Commit()
 }
 
-func (p *postgreOrdersRepository) FindByUserId(userId int) ([]domains.OrdersDomain, error) {
+func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) ([]domains.OrdersDomain, error) {
 	tx, err := p.conn.Beginx()
 	if err != nil {
 		return nil, helpers.PostgresErrorTransform(err)
@@ -78,9 +78,16 @@ func (p *postgreOrdersRepository) FindByUserId(userId int) ([]domains.OrdersDoma
 		LEFT JOIN roles r ON u.role_id = r.id
 		WHERE o.user_id = $1
 	`
+	args := []interface{}{userId}
+
+	if statusParam != "" {
+		query += " AND o.status = $2"
+		args = append(args, statusParam)
+	}
+
 	var ordersRecord []records.Orders
 
-	err = tx.Select(&ordersRecord, query, userId)
+	err = tx.Select(&ordersRecord, query, args...)
 	if err != nil {
 		tx.Rollback()
 		return nil, helpers.PostgresErrorTransform(err)
@@ -108,4 +115,37 @@ func (p *postgreOrdersRepository) FindByUserId(userId int) ([]domains.OrdersDoma
 	}
 
 	return records.ToArrayOfOrdersDomain(ordersRecord), nil
+}
+
+func (p *postgreOrdersRepository) Update(orders domains.OrdersDomain) error {
+	query := `
+		UPDATE orders
+		SET status = COALESCE(:status, status),
+		    region = COALESCE(:region, region),
+		    street = COALESCE(:street, street), 
+		    apartment = COALESCE(:apartment, apartment), 
+		    updated_at = NOW()
+		WHERE id = :id
+		`
+
+	var orderRecord records.Orders
+	orderRecord = records.FromOrdersDomain(orders)
+
+	_, err := p.conn.NamedExec(query, &orderRecord)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}
+
+func (p *postgreOrdersRepository) FindById(id int) (domains.OrdersDomain, error) {
+	query := `SELECT * FROM orders WHERE id = $1`
+	var orderRecord records.Orders
+	err := p.conn.Get(&orderRecord, query, id)
+	if err != nil {
+		return domains.OrdersDomain{}, helpers.PostgresErrorTransform(err)
+	}
+
+	return orderRecord.ToDomain(), nil
 }

@@ -40,11 +40,29 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 
 }
 
-func (o *ordersUsecase) FindByUserId(userId int) ([]domains.OrdersDomain, int, error) {
-	orders, err := o.ordersRepo.FindByUserId(userId)
+func (o *ordersUsecase) FindByUserId(userId int, statusParam string) ([]domains.OrdersDomain, int, error) {
+	orders, err := o.ordersRepo.FindByUserId(userId, statusParam)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 
 	return orders, http.StatusOK, nil
+}
+
+func (o *ordersUsecase) Update(orders domains.OrdersDomain) (int, error) {
+	err := o.ordersRepo.Update(orders)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func (o *ordersUsecase) FindById(id int) (domains.OrdersDomain, int, error) {
+	order, err := o.ordersRepo.FindById(id)
+	if err != nil {
+		return domains.OrdersDomain{}, http.StatusInternalServerError, err
+	}
+
+	return order, http.StatusOK, nil
 }

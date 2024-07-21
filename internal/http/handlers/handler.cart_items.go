@@ -151,3 +151,20 @@ func (c *CartItemsHandler) GetAllCartItemsForUser(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, statusCode, "Carts fetched successfully", responses.ToArrayOfCartItemsAdminResponse(carts))
 }
+
+func (c *CartItemsHandler) DeleteMyCartItemsByIds(ctx echo.Context) error {
+	var cartIdsRequest requests.CartDeleteRequest
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+
+	err := helpers.BindAndValidate(ctx, &cartIdsRequest)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	statusCode, err := c.cartUsecase.DeleteByIdsAndUserId(jwtClaims.UserId, cartIdsRequest.Ids)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Carts deleted successfully", nil)
+}

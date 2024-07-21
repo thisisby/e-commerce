@@ -52,6 +52,7 @@ func (r *CartsRoute) Register() {
 	cartItems.DELETE("", r.cartItemsHandler.DeleteAllMyCartItems)
 	cartItems.DELETE("/:id", r.cartItemsHandler.DeleteMyCartItem)
 	cartItems.PATCH("/:id", r.cartItemsHandler.UpdateMyCartItem)
+	cartItems.POST("/delete", r.cartItemsHandler.DeleteMyCartItemsByIds)
 
 	cartItemsAdmin.Use(r.adminMiddleware.Handle)
 	cartItemsAdmin.GET("/:user-id/cart-items", r.cartItemsHandler.GetAllCartItemsForUser)

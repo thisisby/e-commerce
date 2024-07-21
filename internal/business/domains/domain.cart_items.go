@@ -27,6 +27,7 @@ type CartItemsRepository interface {
 	UpdateByIdAndUserId(cart *CartItemsDomain) error
 	DeleteAllByUserId(userId int) error
 	FindTotalAmountByUserId(userId int) (*CartItemTotalAmount, error)
+	DeleteByIdsAndUserId(userId int, ids []int) error
 }
 
 type CartUsecase interface {
@@ -36,4 +37,5 @@ type CartUsecase interface {
 	UpdateByIdAndUserId(id int, userId int, cart *CartItemsDomain) (statusCode int, err error)
 	DeleteAllByUserId(userId int) (statusCode int, err error)
 	FindTotalAmountByUserId(userId int) (*CartItemTotalAmount, int, error)
+	DeleteByIdsAndUserId(userId int, ids []int) (statusCode int, err error)
 }

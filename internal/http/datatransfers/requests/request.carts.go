@@ -23,3 +23,7 @@ func (r *CartUpdateRequest) ToDomain() *domains.CartItemsDomain {
 		Quantity: r.Quantity,
 	}
 }
+
+type CartDeleteRequest struct {
+	Ids []int `json:"ids" validate:"required"`
+}

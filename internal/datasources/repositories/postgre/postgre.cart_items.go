@@ -5,6 +5,7 @@ import (
 	"ga_marketplace/internal/datasources/records"
 	"ga_marketplace/pkg/helpers"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"log/slog"
 )
 
@@ -168,6 +169,21 @@ func (p *postgreCartsRepository) DeleteAllByUserId(userId int) error {
 	_, err := p.conn.Exec(query, userId)
 	if err != nil {
 		slog.Error("PostgreCartsRepository.DeleteAllByUserId: ", err)
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}
+
+func (p *postgreCartsRepository) DeleteByIdsAndUserId(userId int, ids []int) error {
+	query := `
+		DELETE FROM cart_items
+		WHERE user_id = $1 AND id = ANY($2)
+		`
+
+	_, err := p.conn.Exec(query, userId, pq.Array(ids))
+	if err != nil {
+		slog.Error("PostgreCartsRepository.DeleteByIdsAndUserId: ", err)
 		return helpers.PostgresErrorTransform(err)
 	}
 

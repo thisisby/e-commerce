@@ -129,3 +129,13 @@ func (c *cartItemsUsecase) DeleteAllByUserId(userId int) (statusCode int, err er
 
 	return http.StatusOK, nil
 }
+
+func (c *cartItemsUsecase) DeleteByIdsAndUserId(userId int, ids []int) (int, error) {
+	err := c.cartRepo.DeleteByIdsAndUserId(userId, ids)
+	if err != nil {
+		slog.Error("cartItemsUsecase.DeleteByIdsAndUserId", err)
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}

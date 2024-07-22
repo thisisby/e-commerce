@@ -66,3 +66,12 @@ func (o *ordersUsecase) FindById(id int) (domains.OrdersDomain, int, error) {
 
 	return order, http.StatusOK, nil
 }
+
+func (o *ordersUsecase) FindAll(filter constants.OrderFilter) ([]domains.OrdersDomain, int, error) {
+	orders, err := o.ordersRepo.FindAll(filter)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return orders, http.StatusOK, nil
+}

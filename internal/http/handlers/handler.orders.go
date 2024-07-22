@@ -106,3 +106,29 @@ func (o *OrdersHandler) Update(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, statusCode, "Order updated successfully", nil)
 }
+
+func (o *OrdersHandler) FindAll(ctx echo.Context) error {
+
+	params := ctx.QueryParams()
+	status := params.Get("status")
+	limit, err := strconv.Atoi(params.Get("limit"))
+	if err != nil {
+		limit = 10
+	}
+	offset, err := strconv.Atoi(params.Get("offset"))
+	if err != nil {
+		offset = 0
+	}
+
+	filter := constants.OrderFilter{
+		Status: &status,
+		Limit:  &limit,
+		Offset: &offset,
+	}
+	orders, statusCode, err := o.ordersUsecase.FindAll(filter)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Orders found", responses.ToArrayOfOrdersResponse(orders))
+}

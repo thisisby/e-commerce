@@ -50,6 +50,7 @@ func (r *OrdersRoute) Register() {
 	orders.GET("", r.orderHandler.FindMyOrders)
 
 	admin.Use(r.adminMiddleware.Handle)
+	admin.GET("", r.orderHandler.FindAll)
 	admin.PATCH("/:id", r.orderHandler.Update)
 
 }

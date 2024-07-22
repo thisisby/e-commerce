@@ -6,3 +6,9 @@ const (
 	Delivered = "delivered"
 	Cancelled = "cancelled"
 )
+
+type OrderFilter struct {
+	Status *string
+	Limit  *int
+	Offset *int
+}

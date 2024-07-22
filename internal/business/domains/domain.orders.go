@@ -1,5 +1,7 @@
 package domains
 
+import "ga_marketplace/internal/constants"
+
 type OrdersDomain struct {
 	Id              int
 	UserId          int
@@ -30,6 +32,7 @@ type OrdersRepository interface {
 	FindByUserId(userId int, statusParam string) ([]OrdersDomain, error)
 	Update(orders OrdersDomain) error
 	FindById(id int) (OrdersDomain, error)
+	FindAll(filter constants.OrderFilter) ([]OrdersDomain, error)
 }
 
 type OrdersUsecase interface {
@@ -37,4 +40,5 @@ type OrdersUsecase interface {
 	FindByUserId(userId int, statusParam string) ([]OrdersDomain, int, error)
 	Update(orders OrdersDomain) (int, error)
 	FindById(id int) (OrdersDomain, int, error)
+	FindAll(filter constants.OrderFilter) ([]OrdersDomain, int, error)
 }

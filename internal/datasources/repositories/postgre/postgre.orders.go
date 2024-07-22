@@ -2,9 +2,11 @@ package postgre
 
 import (
 	"ga_marketplace/internal/business/domains"
+	"ga_marketplace/internal/constants"
 	"ga_marketplace/internal/datasources/records"
 	"ga_marketplace/pkg/helpers"
 	"github.com/jmoiron/sqlx"
+	"strconv"
 )
 
 type postgreOrdersRepository struct {
@@ -150,4 +152,78 @@ func (p *postgreOrdersRepository) FindById(id int) (domains.OrdersDomain, error)
 	}
 
 	return orderRecord.ToDomain(), nil
+}
+
+func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domains.OrdersDomain, error) {
+	tx, err := p.conn.Beginx()
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	query := `
+		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.created_at, o.updated_at,
+			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
+			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
+			u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at",
+			c.id "city.id", c.name "city.name"
+		FROM orders o
+		JOIN users u ON o.user_id = u.id
+		LEFT JOIN roles r ON u.role_id = r.id
+		LEFT JOIN cities c ON o.city_id = c.id
+		WHERE 1 = 1
+	`
+	var args []interface{}
+	argIndex := 1
+
+	if filter.Status != nil && *filter.Status != "" {
+		query += " AND o.status = $" + strconv.Itoa(argIndex)
+		args = append(args, *filter.Status)
+		argIndex++
+	}
+	if filter.Limit != nil {
+		query += " LIMIT $" + strconv.Itoa(argIndex)
+		args = append(args, *filter.Limit)
+		argIndex++
+	}
+	if filter.Offset != nil {
+		query += " OFFSET $" + strconv.Itoa(argIndex)
+		args = append(args, *filter.Offset)
+		argIndex++
+	}
+
+	var ordersRecord []records.Orders
+
+	err = tx.Select(&ordersRecord, query, args...)
+	if err != nil {
+		tx.Rollback()
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	queryOrderDetails := `
+			SELECT od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
+				p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
+				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
+			FROM order_details od
+			JOIN products p ON od.product_id = p.id
+			LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+			WHERE od.order_id = $1
+		`
+
+	for i, order := range ordersRecord {
+		var orderDetailsRecord []records.OrderDetails
+		err = tx.Select(&orderDetailsRecord, queryOrderDetails, order.Id)
+		if err != nil {
+			tx.Rollback()
+			return nil, helpers.PostgresErrorTransform(err)
+		}
+		ordersRecord[i].OrderDetails = orderDetailsRecord
+	}
+
+	return records.ToArrayOfOrdersDomain(ordersRecord), nil
 }

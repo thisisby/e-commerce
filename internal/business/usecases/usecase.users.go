@@ -55,7 +55,7 @@ func (u *usersUsecase) VerifyOTP(userOTP string, redisOTP string) (statusCode in
 
 func (u *usersUsecase) Save(inDom *domains.UserDomain) (outDom *domains.UserDomain, statusCode int, err error) {
 	inDom.CreatedAt = helpers.GetCurrentTime()
-	inDom.CountryId = 1
+	inDom.CityId = 1
 	err = u.userRepo.Save(inDom)
 	if err != nil {
 		if errors.Is(err, constants.ErrRowExists) {

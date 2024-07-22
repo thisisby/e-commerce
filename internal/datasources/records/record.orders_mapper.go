@@ -17,6 +17,8 @@ func FromOrdersDomain(data domains.OrdersDomain) Orders {
 		UserId:          data.UserId,
 		TotalPrice:      data.TotalPrice,
 		DiscountedPrice: data.DiscountedPrice,
+		CityId:          data.CityId,
+		City:            *FromCityDomain(&data.City),
 		Status:          data.Status,
 		Street:          data.Street,
 		Region:          data.Region,

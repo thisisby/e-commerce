@@ -7,6 +7,8 @@ type OrdersDomain struct {
 	OrderDetails    []OrderDetailsDomain
 	TotalPrice      float64
 	DiscountedPrice float64
+	CityId          int
+	City            CityDomain
 	Status          string
 	Street          string
 	Region          string

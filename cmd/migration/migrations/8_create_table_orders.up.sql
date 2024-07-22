@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS orders
     street           VARCHAR(255)   NOT NULL,
     region           VARCHAR(255)   NOT NULL,
     apartment        VARCHAR(255)   NOT NULL,
+    city_id          int            NOT NULL references cities (id) ON DELETE CASCADE,
     created_at       TIMESTAMP               DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP               DEFAULT CURRENT_TIMESTAMP
 );

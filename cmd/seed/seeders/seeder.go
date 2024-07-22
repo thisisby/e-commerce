@@ -11,7 +11,7 @@ type Seeder interface {
 	RolesSeeder(rolesData []records.Roles) (err error)
 	ProductsSeeder(productsData []records.Products) (err error)
 	UsersSeeder(usersData []records.Users) (err error)
-	CountriesSeeder(countriesData []records.Countries) (err error)
+	CitiesSeeder(citiesData []records.Cities) (err error)
 }
 
 type seeder struct {
@@ -82,20 +82,20 @@ func (s *seeder) UsersSeeder(usersData []records.Users) (err error) {
 	return nil
 }
 
-func (s *seeder) CountriesSeeder(countriesData []records.Countries) (err error) {
-	query := `INSERT INTO countries (id, name) VALUES (:id, :name)`
-	if len(countriesData) == 0 {
-		return errors.New("countries data is empty")
+func (s *seeder) CitiesSeeder(citiesData []records.Cities) (err error) {
+	query := `INSERT INTO cities (id, name) VALUES (:id, :name)`
+	if len(citiesData) == 0 {
+		return errors.New("city data is empty")
 	}
 
-	slog.Info("Seeding countries data...")
-	for _, country := range countriesData {
+	slog.Info("Seeding Cities data...")
+	for _, country := range citiesData {
 		_, err = s.conn.NamedQuery(query, country)
 		if err != nil {
 			return err
 		}
 	}
-	slog.Info("Countries data seeded successfully")
+	slog.Info("Cities data seeded successfully")
 
 	return nil
 }

@@ -9,6 +9,8 @@ type OrdersResponse struct {
 	OrderDetails    []OrderDetailsResponse `json:"order_details"`
 	TotalPrice      float64                `json:"total_price"`
 	DiscountedPrice float64                `json:"discounted_price"`
+	CityId          int                    `json:"city_id"`
+	City            CityResponse           `json:"city"`
 	Status          string                 `json:"status"`
 	Street          string                 `json:"street"`
 	Region          string                 `json:"region"`
@@ -33,6 +35,8 @@ func FromOrdersDomain(inDom domains.OrdersDomain) OrdersResponse {
 		OrderDetails:    ToArrayOfOrderDetailsResponse(inDom.OrderDetails),
 		TotalPrice:      inDom.TotalPrice,
 		DiscountedPrice: inDom.DiscountedPrice,
+		CityId:          inDom.CityId,
+		City:            *FromCityDomain(&inDom.City),
 		Status:          inDom.Status,
 		Street:          inDom.Street,
 		Region:          inDom.Region,

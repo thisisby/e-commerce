@@ -6,18 +6,19 @@ import (
 )
 
 type UserResponse struct {
-	Id          int       `json:"id"`
-	Phone       string    `json:"phone"`
-	Name        string    `json:"name"`
-	DateOfBirth time.Time `json:"date_of_birth"`
-	Role        string    `json:"role"`
-	CountryId   int       `json:"country_id"`
-	Street      *string   `json:"street"`
-	Region      *string   `json:"region"`
-	Apartment   *string   `json:"apartment"`
-	AccessToken string    `json:"access_token"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	Id          int           `json:"id"`
+	Phone       string        `json:"phone"`
+	Name        string        `json:"name"`
+	DateOfBirth time.Time     `json:"date_of_birth"`
+	Role        string        `json:"role"`
+	CityId      int           `json:"city_id"`
+	City        *CityResponse `json:"city"`
+	Street      *string       `json:"street"`
+	Region      *string       `json:"region"`
+	Apartment   *string       `json:"apartment"`
+	AccessToken string        `json:"access_token"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 func FromUserDomain(inDom *domains.UserDomain) UserResponse {
@@ -27,7 +28,8 @@ func FromUserDomain(inDom *domains.UserDomain) UserResponse {
 		Name:        inDom.Name,
 		DateOfBirth: inDom.DateOfBirth,
 		Role:        inDom.Role,
-		CountryId:   inDom.CountryId,
+		CityId:      inDom.CityId,
+		City:        FromCityDomain(&inDom.City),
 		Street:      inDom.Street,
 		Region:      inDom.Region,
 		Apartment:   inDom.Apartment,

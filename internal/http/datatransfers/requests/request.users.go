@@ -22,7 +22,7 @@ type UserRegisterRequest struct {
 }
 
 type UserUpdateRequest struct {
-	CountryId   *int       `json:"country_id"`
+	CityId      *int       `json:"city_id"`
 	Name        *string    `json:"name"`
 	DateOfBirth *time.Time `json:"date_of_birth"`
 	Street      *string    `json:"street"`
@@ -32,7 +32,7 @@ type UserUpdateRequest struct {
 
 func (u *UserUpdateRequest) ToDomain() *domains.UserDomain {
 	return &domains.UserDomain{
-		CountryId: *u.CountryId,
+		CityId:    *u.CityId,
 		Name:      *u.Name,
 		Street:    u.Street,
 		Region:    u.Region,

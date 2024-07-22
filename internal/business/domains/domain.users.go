@@ -10,8 +10,8 @@ type UserDomain struct {
 	Phone string
 	Role  string
 
-	CountryId int
-	Country   CountryDomain
+	CityId int
+	City   CityDomain
 
 	Street    *string
 	Region    *string

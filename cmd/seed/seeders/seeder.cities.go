@@ -2,10 +2,10 @@ package seeders
 
 import "ga_marketplace/internal/datasources/records"
 
-var CountriesData []records.Countries
+var CitiesData []records.Cities
 
 func init() {
-	CountriesData = []records.Countries{
+	CitiesData = []records.Cities{
 		{
 			Id:   1,
 			Name: "Almaty",

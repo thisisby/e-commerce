@@ -12,6 +12,8 @@ type Orders struct {
 	OrderDetails    []OrderDetails `db:"order_details"`
 	TotalPrice      float64        `db:"total_price"`
 	DiscountedPrice float64        `db:"discounted_price"`
+	CityId          int            `db:"city_id"`
+	City            Cities         `db:"city"`
 	Status          string         `db:"status"`
 	Street          string         `db:"street"`
 	Region          string         `db:"region"`
@@ -61,6 +63,8 @@ func (r *Orders) ToDomain() domains.OrdersDomain {
 		OrderDetails:    ToArrayOfOrderDetailsDomain(r.OrderDetails),
 		TotalPrice:      r.TotalPrice,
 		DiscountedPrice: r.DiscountedPrice,
+		CityId:          r.CityId,
+		City:            *r.City.ToDomain(),
 		Status:          r.Status,
 		Street:          r.Street,
 		Region:          r.Region,

@@ -29,12 +29,12 @@ func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) error {
 	}()
 
 	query := `
-		INSERT INTO orders (user_id, total_price, discounted_price, status, street, region, apartment)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO orders (user_id, total_price, discounted_price, city_id, status, street, region, apartment)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id
 	`
 	var orderId int
-	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.Status, orders.Street, orders.Region, orders.Apartment).Scan(&orderId)
+	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.CityId, orders.Status, orders.Street, orders.Region, orders.Apartment).Scan(&orderId)
 	if err != nil {
 		tx.Rollback()
 		return helpers.PostgresErrorTransform(err)
@@ -71,11 +71,13 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 	query := `
 		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.created_at, o.updated_at,
 			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
-			u.country_id "user.country_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
-			u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at"
+			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
+			u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at",
+			c.id "city.id", c.name "city.name"
 		FROM orders o
 		JOIN users u ON o.user_id = u.id
 		LEFT JOIN roles r ON u.role_id = r.id
+		LEFT JOIN cities c ON o.city_id = c.id
 		WHERE o.user_id = $1
 	`
 	args := []interface{}{userId}

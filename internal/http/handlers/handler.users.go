@@ -123,7 +123,7 @@ func (u *UsersHandler) VerifyOTP(ctx echo.Context) error {
 			verifiedKey := fmt.Sprintf("verified:%s", userVerifyOTP.Phone)
 			u.redisCache.Set(verifiedKey, true)
 
-			return NewSuccessResponse(ctx, statusCode, "OTP verified successfully", nil)
+			return NewSuccessResponse(ctx, http.StatusOK, "OTP verified successfully", nil)
 
 		}
 		return NewErrorResponse(ctx, statusCode, err.Error())
@@ -236,8 +236,8 @@ func (u *UsersHandler) UpdateMe(ctx echo.Context) error {
 	if userUpdateRequest.Apartment != nil {
 		user.Apartment = userUpdateRequest.Apartment
 	}
-	if userUpdateRequest.CountryId != nil {
-		user.CountryId = *userUpdateRequest.CountryId
+	if userUpdateRequest.CityId != nil {
+		user.CityId = *userUpdateRequest.CityId
 	}
 
 	statusCode, err = u.userUsecase.Update(user)

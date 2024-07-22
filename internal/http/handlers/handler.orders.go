@@ -95,6 +95,9 @@ func (o *OrdersHandler) Update(ctx echo.Context) error {
 	if orderUpdateRequest.Apartment != nil {
 		orderDomain.Apartment = *orderUpdateRequest.Apartment
 	}
+	if orderUpdateRequest.CityId != nil {
+		orderDomain.CityId = *orderUpdateRequest.CityId
+	}
 
 	statusCode, err = o.ordersUsecase.Update(orderDomain)
 	if err != nil {

@@ -8,7 +8,8 @@ type Users struct {
 	Phone        string    `db:"phone,omitempty"`
 	Role         Roles     `db:"role"`
 	RoleId       int       `db:"role_id,omitempty"`
-	CountryId    int       `db:"country_id,omitempty"`
+	CityId       int       `db:"city_id,omitempty"`
+	City         Cities    `db:"city"`
 	Street       *string   `db:"street,omitempty"`
 	Region       *string   `db:"region,omitempty"`
 	Apartment    *string   `db:"apartment,omitempty"`

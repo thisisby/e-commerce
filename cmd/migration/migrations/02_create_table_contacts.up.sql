@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS contacts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    value VARCHAR(255) NOT NULL
+);

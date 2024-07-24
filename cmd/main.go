@@ -99,6 +99,8 @@ func main() {
 	routes.NewOrdersRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewCitiesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewContactsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewCategoriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewSubcategoriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 

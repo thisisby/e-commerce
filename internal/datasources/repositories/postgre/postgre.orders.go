@@ -67,6 +67,8 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
+		} else {
+			tx.Commit()
 		}
 	}()
 

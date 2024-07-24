@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"net/http"
 )
@@ -19,6 +20,10 @@ func (c *contactsUsecase) FindAll() ([]domains.ContactDomain, int, error) {
 	contacts, err := c.contactsRepo.FindAll()
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(contacts) == 0 {
+		return nil, http.StatusNotFound, errors.New("contacts not found")
 	}
 
 	return contacts, http.StatusOK, nil
@@ -46,6 +51,10 @@ func (c *contactsUsecase) FindById(id int) (domains.ContactDomain, int, error) {
 	contact, err := c.contactsRepo.FindById(id)
 	if err != nil {
 		return domains.ContactDomain{}, http.StatusInternalServerError, err
+	}
+
+	if contact.Id == 0 {
+		return domains.ContactDomain{}, http.StatusNotFound, errors.New("contact not found")
 	}
 
 	return contact, http.StatusOK, nil

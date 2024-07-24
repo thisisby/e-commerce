@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"net/http"
 )
@@ -19,6 +20,10 @@ func (c *categoriesUsecase) FindAll() ([]domains.CategoriesDomain, int, error) {
 	categories, err := c.categoriesRepo.FindAll()
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(categories) == 0 {
+		return nil, http.StatusNotFound, errors.New("categories not found")
 	}
 
 	return categories, http.StatusOK, nil

@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"net/http"
 )
@@ -21,6 +22,10 @@ func (s *subcategoriesUsecase) FindAll() ([]domains.SubcategoriesDomain, int, er
 		return nil, http.StatusInternalServerError, err
 	}
 
+	if len(subcategories) == 0 {
+		return nil, http.StatusNotFound, errors.New("subcategories not found")
+	}
+
 	return subcategories, http.StatusOK, nil
 }
 
@@ -28,6 +33,10 @@ func (s *subcategoriesUsecase) FindAllByCategoryId(categoryId int) ([]domains.Su
 	subcategories, err := s.subcategoriesRepo.FindAllByCategoryId(categoryId)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(subcategories) == 0 {
+		return nil, http.StatusNotFound, errors.New("subcategories not found")
 	}
 
 	return subcategories, http.StatusOK, nil
@@ -64,6 +73,10 @@ func (s *subcategoriesUsecase) FindById(id int) (domains.SubcategoriesDomain, in
 	subcategory, err := s.subcategoriesRepo.FindById(id)
 	if err != nil {
 		return domains.SubcategoriesDomain{}, http.StatusInternalServerError, err
+	}
+
+	if subcategory.Id == 0 {
+		return domains.SubcategoriesDomain{}, http.StatusNotFound, errors.New("subcategory not found")
 	}
 
 	return subcategory, http.StatusOK, nil

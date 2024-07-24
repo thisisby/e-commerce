@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/constants"
 	"net/http"
@@ -46,6 +47,10 @@ func (o *ordersUsecase) FindByUserId(userId int, statusParam string) ([]domains.
 		return nil, http.StatusInternalServerError, err
 	}
 
+	if len(orders) == 0 {
+		return nil, http.StatusNotFound, errors.New("orders not found")
+	}
+
 	return orders, http.StatusOK, nil
 }
 
@@ -64,6 +69,10 @@ func (o *ordersUsecase) FindById(id int) (domains.OrdersDomain, int, error) {
 		return domains.OrdersDomain{}, http.StatusInternalServerError, err
 	}
 
+	if order.Id == 0 {
+		return domains.OrdersDomain{}, http.StatusNotFound, errors.New("order not found")
+	}
+
 	return order, http.StatusOK, nil
 }
 
@@ -71,6 +80,10 @@ func (o *ordersUsecase) FindAll(filter constants.OrderFilter) ([]domains.OrdersD
 	orders, err := o.ordersRepo.FindAll(filter)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(orders) == 0 {
+		return nil, http.StatusNotFound, errors.New("orders not found")
 	}
 
 	return orders, http.StatusOK, nil

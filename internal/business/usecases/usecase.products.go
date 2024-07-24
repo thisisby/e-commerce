@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/pkg/helpers"
 	"net/http"
@@ -31,6 +32,10 @@ func (p *productsUsecase) FindAllForMe(id int) ([]domains.ProductDomain, int, er
 		return nil, http.StatusInternalServerError, err
 	}
 
+	if len(products) == 0 {
+		return nil, http.StatusNotFound, errors.New("products not found")
+	}
+
 	return products, http.StatusOK, nil
 }
 
@@ -48,6 +53,10 @@ func (p *productsUsecase) FindById(id int) (*domains.ProductDomain, int, error) 
 	product, err := p.productsRepo.FindById(id)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
+	}
+
+	if product == nil {
+		return nil, http.StatusNotFound, errors.New("product not found")
 	}
 
 	return product, http.StatusOK, nil

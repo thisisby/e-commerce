@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"net/http"
 )
@@ -21,6 +22,10 @@ func (c *countriesUsecase) FindAll() ([]domains.CountryDomain, int, error) {
 		return nil, http.StatusInternalServerError, err
 	}
 
+	if len(countries) == 0 {
+		return nil, http.StatusNotFound, errors.New("countries not found")
+	}
+
 	return countries, http.StatusOK, nil
 }
 
@@ -28,6 +33,10 @@ func (c *countriesUsecase) FindById(id int) (domains.CountryDomain, int, error) 
 	country, err := c.countriesRepo.FindById(id)
 	if err != nil {
 		return domains.CountryDomain{}, http.StatusInternalServerError, err
+	}
+
+	if country.Id == 0 {
+		return domains.CountryDomain{}, http.StatusNotFound, errors.New("country not found")
 	}
 
 	return country, http.StatusOK, nil

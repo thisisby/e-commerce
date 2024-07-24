@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
 	"net/http"
 )
@@ -19,6 +20,10 @@ func (uc *ProfileSectionsUsecase) FindAll() ([]domains.ProfileSectionsDomain, in
 	profileSections, err := uc.profileSectionRepo.FindAll()
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(profileSections) == 0 {
+		return nil, http.StatusNotFound, errors.New("profile sections not found")
 	}
 
 	return profileSections, http.StatusOK, nil
@@ -46,6 +51,10 @@ func (uc *ProfileSectionsUsecase) FindById(id int) (domains.ProfileSectionsDomai
 	profileSection, err := uc.profileSectionRepo.FindById(id)
 	if err != nil {
 		return domains.ProfileSectionsDomain{}, http.StatusInternalServerError, err
+	}
+
+	if profileSection.Id == 0 {
+		return domains.ProfileSectionsDomain{}, http.StatusNotFound, errors.New("profile section not found")
 	}
 
 	return profileSection, http.StatusOK, nil

@@ -35,7 +35,7 @@ type UserRepository interface {
 type UserUsecase interface {
 	SendOTP(phoneNumber string) (otpCode string, statusCode int, err error)
 	Save(inDom *UserDomain) (outDom *UserDomain, statusCode int, err error)
-	VerifyOTP(userOTP string, redisOTP string) (statusCode int, err error)
+	VerifyOTP(userOTP string, redisOTP string, phone string) (statusCode int, err error)
 	FindByPhone(phone string) (outDom *UserDomain, statusCode int, err error)
 	Login(inDom *UserDomain) (outDom *UserDomain, statusCode int, err error)
 	RefreshToken(refreshToken string) (outDom *UserDomain, statusCode int, err error)

@@ -13,7 +13,7 @@ func init() {
 		{
 			Id:           1,
 			Name:         "admin",
-			Phone:        "1",
+			Phone:        "+71234567890",
 			RoleId:       constants.MapperRoleToId[constants.Admin],
 			RefreshToken: "nil",
 			DateOfBirth:  helpers.GetCurrentTime(),

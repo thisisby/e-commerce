@@ -98,6 +98,12 @@ func (o *OrdersHandler) Update(ctx echo.Context) error {
 	if orderUpdateRequest.CityId != nil {
 		orderDomain.CityId = *orderUpdateRequest.CityId
 	}
+	if orderUpdateRequest.StreetNum != nil {
+		orderDomain.StreetNum = *orderUpdateRequest.StreetNum
+	}
+	if orderUpdateRequest.Email != nil {
+		orderDomain.Email = *orderUpdateRequest.Email
+	}
 
 	statusCode, err = o.ordersUsecase.Update(orderDomain)
 	if err != nil {

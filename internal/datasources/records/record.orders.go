@@ -18,6 +18,8 @@ type Orders struct {
 	Street          string         `db:"street"`
 	Region          string         `db:"region"`
 	Apartment       string         `db:"apartment"`
+	StreetNum       string         `db:"street_num"`
+	Email           string         `db:"email"`
 	CreatedAt       time.Time      `db:"created_at"`
 	UpdatedAt       time.Time      `db:"updated_at"`
 }
@@ -69,6 +71,8 @@ func (r *Orders) ToDomain() domains.OrdersDomain {
 		Street:          r.Street,
 		Region:          r.Region,
 		Apartment:       r.Apartment,
+		StreetNum:       r.StreetNum,
+		Email:           r.Email,
 	}
 
 	return domain

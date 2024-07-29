@@ -16,6 +16,8 @@ type UserResponse struct {
 	Street      *string       `json:"street"`
 	Region      *string       `json:"region"`
 	Apartment   *string       `json:"apartment"`
+	Email       *string       `json:"email"`
+	StreetNum   *string       `json:"street_num"`
 	AccessToken string        `json:"access_token"`
 	CreatedAt   time.Time     `json:"created_at"`
 	UpdatedAt   time.Time     `json:"updated_at"`
@@ -32,6 +34,8 @@ func FromUserDomain(inDom *domains.UserDomain) UserResponse {
 		City:        FromCityDomain(&inDom.City),
 		Street:      inDom.Street,
 		Region:      inDom.Region,
+		Email:       inDom.Email,
+		StreetNum:   inDom.StreetNum,
 		Apartment:   inDom.Apartment,
 		AccessToken: inDom.AccessToken,
 		CreatedAt:   inDom.CreatedAt,

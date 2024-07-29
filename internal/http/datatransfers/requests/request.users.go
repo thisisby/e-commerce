@@ -28,6 +28,8 @@ type UserUpdateRequest struct {
 	Street      *string    `json:"street"`
 	Region      *string    `json:"region"`
 	Apartment   *string    `json:"apartment"`
+	Email       *string    `json:"email"`
+	StreetNum   *string    `json:"street_num"`
 }
 
 func (u *UserUpdateRequest) ToDomain() *domains.UserDomain {
@@ -37,6 +39,8 @@ func (u *UserUpdateRequest) ToDomain() *domains.UserDomain {
 		Street:    u.Street,
 		Region:    u.Region,
 		Apartment: u.Apartment,
+		Email:     u.Email,
+		StreetNum: u.StreetNum,
 	}
 
 }

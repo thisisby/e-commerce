@@ -10,6 +10,8 @@ type Users struct {
 	RoleId       int       `db:"role_id,omitempty"`
 	CityId       int       `db:"city_id,omitempty"`
 	City         Cities    `db:"city"`
+	Email        *string   `db:"email,omitempty"`
+	StreetNum    *string   `db:"street_num,omitempty"`
 	Street       *string   `db:"street,omitempty"`
 	Region       *string   `db:"region,omitempty"`
 	Apartment    *string   `db:"apartment,omitempty"`

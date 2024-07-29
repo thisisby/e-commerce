@@ -23,6 +23,7 @@ func (p *postgreUsersRepository) FindByPhone(phone string) (*domains.UserDomain,
 		SELECT
 		    u.id, u.name, u.phone, r.name "role.name",
 			u.city_id, u.street, u.region, u.apartment,
+			u.email, u.street_num,
 			u.date_of_birth, u.created_at, u.updated_at,
 			c.id "city.id", c.name "city.name"
 		FROM users u 
@@ -70,6 +71,8 @@ func (p *postgreUsersRepository) Update(inDom *domains.UserDomain) error {
 		    street = :street,
 		    region = :region,
 		    apartment = :apartment,
+		    email = :email,
+		    street_num = :street_num,
 		    date_of_birth = :date_of_birth,
 		    refresh_token = :refresh_token,
 		    updated_at = :updated_at
@@ -92,6 +95,7 @@ func (p *postgreUsersRepository) FindById(id int) (*domains.UserDomain, error) {
 		SELECT 
 			u.id, u.name, u.phone, r.name "role.name",
 			u.city_id, u.street, u.region, u.apartment,
+			u.email, u.street_num,
 			u.refresh_token, u.date_of_birth, u.created_at, u.updated_at,
 			c.id "city.id", c.name "city.name"
 		FROM users u
@@ -116,6 +120,7 @@ func (p *postgreUsersRepository) FindAll() ([]domains.UserDomain, error) {
 		SELECT 
 			u.id, u.name, u.phone, r.name "role.name",
 			u.city_id, u.street, u.region, u.apartment,
+			u.email, u.street_num,
 			u.date_of_birth, u.created_at, u.updated_at,
 			c.id "city.id", c.name "city.name"
 		FROM users u

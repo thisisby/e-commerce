@@ -13,6 +13,8 @@ type UserDomain struct {
 	CityId int
 	City   CityDomain
 
+	Email     *string
+	StreetNum *string
 	Street    *string
 	Region    *string
 	Apartment *string

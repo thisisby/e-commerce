@@ -23,5 +23,7 @@ func FromOrdersDomain(data domains.OrdersDomain) Orders {
 		Street:          data.Street,
 		Region:          data.Region,
 		Apartment:       data.Apartment,
+		StreetNum:       data.StreetNum,
+		Email:           data.Email,
 	}
 }

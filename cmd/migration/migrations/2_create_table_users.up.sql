@@ -5,9 +5,11 @@ CREATE TABLE IF NOT EXISTS users(
     date_of_birth DATE NOT NULL,
     refresh_token VARCHAR(255) NULL,
 
-    street VARCHAR(50) NULL,
-    region VARCHAR(50) NULL,
-    apartment VARCHAR(50) NULL,
+    email VARCHAR(255) NULL UNIQUE,
+    street VARCHAR(255) NULL,
+    street_num VARCHAR(255) NULL,
+    region VARCHAR(255) NULL,
+    apartment VARCHAR(255) NULL,
 
     city_id int DEFAULT 1 REFERENCES cities(id),
     role_id int DEFAULT 2 REFERENCES roles(id),

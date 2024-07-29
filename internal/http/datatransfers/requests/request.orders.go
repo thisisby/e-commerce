@@ -7,6 +7,8 @@ type CreateOrderRequest struct {
 	Region    string `json:"region" validate:"required"`
 	Apartment string `json:"apartment" validate:"required"`
 	CityId    int    `json:"city_id" validate:"required"`
+	Email     string `json:"email" validate:"required,email"`
+	StreetNum string `json:"street_num" validate:"required"`
 }
 
 func (r *CreateOrderRequest) ToDomain() domains.OrdersDomain {
@@ -15,6 +17,8 @@ func (r *CreateOrderRequest) ToDomain() domains.OrdersDomain {
 		Region:    r.Region,
 		Apartment: r.Apartment,
 		CityId:    r.CityId,
+		Email:     r.Email,
+		StreetNum: r.StreetNum,
 	}
 }
 
@@ -24,6 +28,8 @@ type UpdateOrderRequest struct {
 	Region    *string `json:"region"`
 	Apartment *string `json:"apartment"`
 	CityId    *int    `json:"city_id"`
+	StreetNum *string `json:"street_num"`
+	Email     *string `json:"email"`
 }
 
 func (r *UpdateOrderRequest) ToDomain() *domains.OrdersDomain {
@@ -33,5 +39,7 @@ func (r *UpdateOrderRequest) ToDomain() *domains.OrdersDomain {
 		Region:    *r.Region,
 		Apartment: *r.Apartment,
 		CityId:    *r.CityId,
+		StreetNum: *r.StreetNum,
+		Email:     *r.Email,
 	}
 }

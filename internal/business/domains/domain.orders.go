@@ -15,6 +15,8 @@ type OrdersDomain struct {
 	Street          string
 	Region          string
 	Apartment       string
+	StreetNum       string
+	Email           string
 }
 
 type OrderDetailsDomain struct {

@@ -241,6 +241,12 @@ func (u *UsersHandler) UpdateMe(ctx echo.Context) error {
 	if userUpdateRequest.CityId != nil {
 		user.CityId = *userUpdateRequest.CityId
 	}
+	if userUpdateRequest.Email != nil {
+		user.Email = userUpdateRequest.Email
+	}
+	if userUpdateRequest.StreetNum != nil {
+		user.StreetNum = userUpdateRequest.StreetNum
+	}
 
 	statusCode, err = u.userUsecase.Update(user)
 	if err != nil {

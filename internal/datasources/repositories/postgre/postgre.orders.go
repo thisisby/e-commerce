@@ -31,12 +31,12 @@ func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) error {
 	}()
 
 	query := `
-		INSERT INTO orders (user_id, total_price, discounted_price, city_id, status, street, region, apartment)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO orders (user_id, total_price, discounted_price, city_id, status, street, region, apartment, street_num, email)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id
 	`
 	var orderId int
-	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.CityId, orders.Status, orders.Street, orders.Region, orders.Apartment).Scan(&orderId)
+	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.CityId, orders.Status, orders.Street, orders.Region, orders.Apartment, orders.StreetNum, orders.Email).Scan(&orderId)
 	if err != nil {
 		tx.Rollback()
 		return helpers.PostgresErrorTransform(err)
@@ -73,10 +73,10 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 	}()
 
 	query := `
-		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.created_at, o.updated_at,
+		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.street_num, o.email, o.created_at, o.updated_at,
 			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
 			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
-			u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at",
+			u.date_of_birth "user.date_of_birth", u.email "user.email", u.street_num "user.street_num", u.created_at "user.created_at", u.updated_at "user.updated_at",
 			c.id "city.id", c.name "city.name"
 		FROM orders o
 		JOIN users u ON o.user_id = u.id
@@ -130,6 +130,8 @@ func (p *postgreOrdersRepository) Update(orders domains.OrdersDomain) error {
 		    region = COALESCE(:region, region),
 		    street = COALESCE(:street, street), 
 		    apartment = COALESCE(:apartment, apartment), 
+		    street_num = COALESCE(:street_num, street_num),
+		    email = COALESCE(:email, email),
 		    updated_at = NOW()
 		WHERE id = :id
 		`
@@ -168,9 +170,10 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 	}()
 
 	query := `
-		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.created_at, o.updated_at,
+		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.email, o.street_num, o.created_at, o.updated_at,
 			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
 			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
+			u.email "user.email", u.street_num "user.street_num",
 			u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at",
 			c.id "city.id", c.name "city.name"
 		FROM orders o

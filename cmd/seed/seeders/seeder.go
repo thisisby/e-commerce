@@ -12,6 +12,8 @@ type Seeder interface {
 	ProductsSeeder(productsData []records.Products) (err error)
 	UsersSeeder(usersData []records.Users) (err error)
 	CitiesSeeder(citiesData []records.Cities) (err error)
+	CategoriesSeeder(categoriesData []records.Categories) (err error)
+	SubCategoriesSeeder(subCategoriesData []records.SubcategoriesRecord) (err error)
 }
 
 type seeder struct {
@@ -19,7 +21,9 @@ type seeder struct {
 }
 
 func NewSeeder(conn *sqlx.DB) Seeder {
-	return &seeder{conn: conn}
+	return &seeder{
+		conn: conn,
+	}
 }
 
 func (s *seeder) RolesSeeder(rolesData []records.Roles) (err error) {
@@ -42,8 +46,8 @@ func (s *seeder) RolesSeeder(rolesData []records.Roles) (err error) {
 
 func (s *seeder) ProductsSeeder(productsData []records.Products) (err error) {
 	query := `
-        INSERT INTO products (name, description, price, image, stock, created_at, updated_at)
-        VALUES (:name, :description, :price, :image, :stock, :created_at, :updated_at)
+        INSERT INTO products (name, description, price, subcategory_id, image, stock, created_at, updated_at)
+        VALUES (:name, :description, :price, :subcategory_id, :image, :stock, :created_at, :updated_at)
     `
 	if len(productsData) == 0 {
 		return errors.New("products data is empty")
@@ -96,6 +100,42 @@ func (s *seeder) CitiesSeeder(citiesData []records.Cities) (err error) {
 		}
 	}
 	slog.Info("Cities data seeded successfully")
+
+	return nil
+}
+
+func (s *seeder) CategoriesSeeder(categoriesData []records.Categories) (err error) {
+	query := `INSERT INTO categories (id, name) VALUES (:id, :name)`
+	if len(categoriesData) == 0 {
+		return errors.New("categories data is empty")
+	}
+
+	slog.Info("Seeding categories data...")
+	for _, category := range categoriesData {
+		_, err = s.conn.NamedQuery(query, category)
+		if err != nil {
+			return err
+		}
+	}
+	slog.Info("Categories data seeded successfully")
+
+	return nil
+}
+
+func (s *seeder) SubCategoriesSeeder(subCategoriesData []records.SubcategoriesRecord) (err error) {
+	query := `INSERT INTO subcategories (id, name, category_id) VALUES (:id, :name, :category_id)`
+	if len(subCategoriesData) == 0 {
+		return errors.New("subcategories data is empty")
+	}
+
+	slog.Info("Seeding subcategories data...")
+	for _, subCategory := range subCategoriesData {
+		_, err = s.conn.NamedQuery(query, subCategory)
+		if err != nil {
+			return err
+		}
+	}
+	slog.Info("Subcategories data seeded successfully")
 
 	return nil
 }

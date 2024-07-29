@@ -61,3 +61,16 @@ func (p *productsUsecase) FindById(id int) (*domains.ProductDomain, int, error) 
 
 	return product, http.StatusOK, nil
 }
+
+func (p *productsUsecase) FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]domains.ProductDomain, int, error) {
+	products, err := p.productsRepo.FindAllForMeBySubcategoryId(id, subcategoryId)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(products) == 0 {
+		return nil, http.StatusNotFound, errors.New("products not found")
+	}
+
+	return products, http.StatusOK, nil
+}

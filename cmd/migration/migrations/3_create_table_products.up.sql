@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS products
     image       TEXT           NOT NULL,
     images      TEXT[]         NULL,
     stock       INTEGER        NOT NULL CHECK (stock >= 0),
+    subcategory_id INT NOT NULL REFERENCES subcategories(id),
 
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP

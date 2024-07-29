@@ -59,12 +59,13 @@ func (p *ProductHandler) Save(ctx echo.Context) error {
 	}
 
 	productDomain := &domains.ProductDomain{
-		Name:        productCreateRequest.Name,
-		Description: productCreateRequest.Description,
-		Price:       productCreateRequest.Price,
-		Image:       mainImageUrl,
-		Images:      imageUrls,
-		Stock:       productCreateRequest.Stock,
+		Name:          productCreateRequest.Name,
+		Description:   productCreateRequest.Description,
+		Price:         productCreateRequest.Price,
+		SubcategoryId: productCreateRequest.SubCategoryId,
+		Image:         mainImageUrl,
+		Images:        imageUrls,
+		Stock:         productCreateRequest.Stock,
 	}
 
 	statusCode, err := p.productUsecase.Save(productDomain)
@@ -143,6 +144,9 @@ func (p *ProductHandler) UpdateById(ctx echo.Context) error {
 	if productUpdateRequest.Stock != nil {
 		product.Stock = *productUpdateRequest.Stock
 	}
+	if productUpdateRequest.SubCategory != nil {
+		product.SubcategoryId = *productUpdateRequest.SubCategory
+	}
 	if image != nil {
 		product.Image = mainImageUrl
 	}
@@ -157,4 +161,21 @@ func (p *ProductHandler) UpdateById(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, statusCode, "Product updated successfully", nil)
 
+}
+
+func (p *ProductHandler) FindBySubCategoryId(ctx echo.Context) error {
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+	subCategoryId := ctx.Param("subcategory_id")
+
+	subCategoryIdInt, err := strconv.Atoi(subCategoryId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid sub category id")
+	}
+
+	products, statusCode, err := p.productUsecase.FindAllForMeBySubcategoryId(jwtClaims.UserId, subCategoryIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
 }

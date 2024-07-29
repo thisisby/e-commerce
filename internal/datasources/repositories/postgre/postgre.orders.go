@@ -101,12 +101,14 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 
 	queryOrderDetails := `
 			SELECT od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
-				p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+				p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+				s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
 				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
 			FROM order_details od
 			JOIN products p ON od.product_id = p.id
 			LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+			JOIN subcategories s ON p.subcategory_id = s.id
 			WHERE od.order_id = $1
 		`
 
@@ -166,6 +168,8 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
+		} else {
+			tx.Commit()
 		}
 	}()
 
@@ -211,12 +215,15 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 
 	queryOrderDetails := `
 			SELECT od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
-				p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+				p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+				s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
 				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
 			FROM order_details od
 			JOIN products p ON od.product_id = p.id
 			LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+			JOIN subcategories s ON p.subcategory_id = s.id
+
 			WHERE od.order_id = $1
 		`
 

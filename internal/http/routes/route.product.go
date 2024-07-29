@@ -42,10 +42,14 @@ func NewProductRoute(
 
 func (r *ProductRoute) Register() {
 	products := r.router.Group("/products")
+	productsBySubcategories := r.router.Group("/subcategories")
 	admin := r.router.Group("/admin/products")
 
 	products.Use(r.authMiddleware.Handle)
 	products.GET("", r.productHandler.FindAllForMe)
+
+	productsBySubcategories.Use(r.authMiddleware.Handle)
+	productsBySubcategories.GET("/:subcategory_id/products", r.productHandler.FindBySubCategoryId)
 
 	admin.Use(r.adminMilddleware.Handle)
 	admin.POST("", r.productHandler.Save)

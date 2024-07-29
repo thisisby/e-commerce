@@ -15,6 +15,8 @@ func (p *Products) ToDomain() *domains.ProductDomain {
 		DiscountedPrice: p.DiscountedPrice,
 		TotalPrice:      p.TotalPrice,
 		Discount:        discountDomain,
+		SubcategoryId:   p.SubcategoryId,
+		Subcategory:     p.Subcategory.ToDomain(),
 		Image:           p.Image,
 		Images:          p.Images,
 		IsInCart:        p.IsInCart,
@@ -27,15 +29,16 @@ func (p *Products) ToDomain() *domains.ProductDomain {
 
 func FromProductDomain(inDom *domains.ProductDomain) Products {
 	return Products{
-		Id:          inDom.Id,
-		Name:        inDom.Name,
-		Description: inDom.Description,
-		Price:       inDom.Price,
-		Image:       inDom.Image,
-		Images:      inDom.Images,
-		Stock:       inDom.Stock,
-		CreatedAt:   inDom.CreatedAt,
-		UpdatedAt:   inDom.UpdatedAt,
+		Id:            inDom.Id,
+		Name:          inDom.Name,
+		Description:   inDom.Description,
+		Price:         inDom.Price,
+		SubcategoryId: inDom.SubcategoryId,
+		Image:         inDom.Image,
+		Images:        inDom.Images,
+		Stock:         inDom.Stock,
+		CreatedAt:     inDom.CreatedAt,
+		UpdatedAt:     inDom.UpdatedAt,
 	}
 }
 

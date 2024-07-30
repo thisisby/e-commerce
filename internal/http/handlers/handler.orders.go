@@ -104,6 +104,9 @@ func (o *OrdersHandler) Update(ctx echo.Context) error {
 	if orderUpdateRequest.Email != nil {
 		orderDomain.Email = *orderUpdateRequest.Email
 	}
+	if orderUpdateRequest.DeliveryMethod != nil {
+		orderDomain.DeliveryMethod = *orderUpdateRequest.DeliveryMethod
+	}
 
 	statusCode, err = o.ordersUsecase.Update(orderDomain)
 	if err != nil {

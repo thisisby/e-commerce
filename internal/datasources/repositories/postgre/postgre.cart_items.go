@@ -23,9 +23,10 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 	query := `
 		SELECT
 		       c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.subcategory_id "product.subcategory_id", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
 		       u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name", u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment", u.date_of_birth "user.date_of_birth", u.email "user.email", u.street_num "user.street_num", u.created_at "user.created_at", u.updated_at "user.updated_at",
 		       city.id "user.city.id", city.name "user.city.name", s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
+		       b.id "product.brand.id", b.name "product.brand.name",
 			   COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 			   CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
 		       CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
@@ -39,6 +40,7 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = u.id
 		LEFT JOIN subcategories s ON p.subcategory_id = s.id
+		JOIN brands b ON p.brand_id = b.id
 		WHERE c.user_id = $1
 		`
 

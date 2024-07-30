@@ -12,6 +12,7 @@ type Validator struct {
 func NewValidator() *Validator {
 	newValidator := validator.New()
 	newValidator.RegisterValidation("orderstatus", helpers.OrderStatusValidator)
+	newValidator.RegisterValidation("order_delivery_method", helpers.OrderDeliveryMethodValidator)
 	return &Validator{
 		validator: newValidator,
 	}

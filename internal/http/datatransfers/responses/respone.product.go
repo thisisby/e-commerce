@@ -18,6 +18,8 @@ type ProductResponse struct {
 	Stock           int                  `json:"stock"`
 	SubCategoryId   int                  `json:"sub_category_id"`
 	SubCategory     *SubcategoryResponse `json:"sub_category"`
+	BrandId         int                  `json:"brand_id"`
+	Brand           *BrandResponse       `json:"brand"`
 	Image           string               `json:"image"`
 	Images          []string             `json:"images"`
 	CreatedAt       time.Time            `json:"created_at"`
@@ -38,6 +40,8 @@ func FromProductDomain(inDom *domains.ProductDomain) ProductResponse {
 		Stock:           inDom.Stock,
 		SubCategoryId:   inDom.SubcategoryId,
 		SubCategory:     FromSubcategoryDomain(inDom.Subcategory),
+		BrandId:         inDom.BrandId,
+		Brand:           FromBrandDomain(inDom.Brand),
 		Image:           inDom.Image,
 		Images:          inDom.Images,
 		CreatedAt:       inDom.CreatedAt,

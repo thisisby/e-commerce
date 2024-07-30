@@ -19,13 +19,15 @@ func NewPostgreProductsRepository(conn *sqlx.DB) domains.ProductsRepository {
 
 func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.stock, p.subcategory_id, p.image, p.images, p.created_at, p.updated_at,
+		SELECT p.id, p.name, p.description, p.price, p.stock, p.subcategory_id, p.brand_id, p.image, p.images, p.created_at, p.updated_at,
 		       s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
+		       b.id "brand.id", b.name "brand.name",
 		       COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 		    	CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		JOIN subcategories s ON p.subcategory_id = s.id
+		JOIN brands b ON p.brand_id = b.id
 		WHERE p.id = $1
 		`
 
@@ -41,8 +43,8 @@ func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, er
 
 func (p *postgreProductsRepository) Save(product *domains.ProductDomain) error {
 	query := `
-		INSERT INTO products (name, description, price, subcategory_id, image, images, stock)
-		VALUES (:name, :description, :price, :subcategory_id, :image, :images, :stock)		
+		INSERT INTO products (name, description, price, subcategory_id, image, images, stock, brand_id)
+		VALUES (:name, :description, :price, :subcategory_id, :image, :images, :stock, :brand_id)		
 		`
 
 	productRecord := records.FromProductDomain(product)
@@ -57,9 +59,10 @@ func (p *postgreProductsRepository) Save(product *domains.ProductDomain) error {
 
 func (p *postgreProductsRepository) FindAllForMe(id int) ([]domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id,
+		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
 			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 			s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
+			b.id "brand.id", b.name "brand.name",
 		CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
 		CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_wishlist",
 		CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
@@ -68,6 +71,7 @@ func (p *postgreProductsRepository) FindAllForMe(id int) ([]domains.ProductDomai
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = $1
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		JOIN subcategories s ON p.subcategory_id = s.id
+		JOIN brands b ON p.brand_id = b.id
 		`
 
 	var productsRecord []records.Products
@@ -97,11 +101,11 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 
 	updateQuery := `
 		UPDATE products
-		SET name = $1, description = $2, price = $3, image = $4, images = $5, stock = $6, subcategory_id = $8
+		SET name = $1, description = $2, price = $3, image = $4, images = $5, stock = $6, subcategory_id = $8, brand_id = $9
 		WHERE id = $7
 	`
 
-	_, err = tx.Exec(updateQuery, productRecord.Name, productRecord.Description, productRecord.Price, productRecord.Image, productRecord.Images, productRecord.Stock, productRecord.Id, productRecord.SubcategoryId)
+	_, err = tx.Exec(updateQuery, productRecord.Name, productRecord.Description, productRecord.Price, productRecord.Image, productRecord.Images, productRecord.Stock, productRecord.SubcategoryId, productRecord.BrandId, productRecord.Id)
 	if err != nil {
 		tx.Rollback()
 		return helpers.PostgresErrorTransform(err)
@@ -130,9 +134,10 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 
 func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id,
+		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
 			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 			s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
+			b.id "brand.id", b.name "brand.name",
 		CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
 		CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_wishlist",
 		CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
@@ -141,12 +146,41 @@ func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcateg
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = $1
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN subcategories s ON p.subcategory_id = s.id
+		JOIN brands b ON p.brand_id = b.id
 		WHERE p.subcategory_id = $2
 		`
 
 	var productsRecord []records.Products
 
 	err := p.conn.Select(&productsRecord, query, id, subcategoryId)
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return records.ToArrayOfProductsDomain(productsRecord), nil
+}
+
+func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) ([]domains.ProductDomain, error) {
+	query := `
+		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
+			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+			s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
+			b.id "brand.id", b.name "brand.name",
+		CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
+		CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_wishlist",
+		CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
+		FROM products p
+		LEFT JOIN cart_items c ON p.id = c.product_id AND c.user_id = $1
+		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = $1
+		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+		JOIN subcategories s ON p.subcategory_id = s.id
+		LEFT JOIN brands b ON p.brand_id = b.id
+		WHERE p.brand_id = $2
+		`
+
+	var productsRecord []records.Products
+
+	err := p.conn.Select(&productsRecord, query, id, brandId)
 	if err != nil {
 		return nil, helpers.PostgresErrorTransform(err)
 	}

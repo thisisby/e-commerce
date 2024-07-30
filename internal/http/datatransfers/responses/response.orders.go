@@ -17,6 +17,7 @@ type OrdersResponse struct {
 	Apartment       string                 `json:"apartment"`
 	StreetNum       string                 `json:"street_num"`
 	Email           string                 `json:"email"`
+	DeliveryMethod  string                 `json:"delivery_method"`
 }
 
 type OrderDetailsResponse struct {
@@ -45,6 +46,7 @@ func FromOrdersDomain(inDom domains.OrdersDomain) OrdersResponse {
 		Apartment:       inDom.Apartment,
 		StreetNum:       inDom.StreetNum,
 		Email:           inDom.Email,
+		DeliveryMethod:  inDom.DeliveryMethod,
 	}
 }
 

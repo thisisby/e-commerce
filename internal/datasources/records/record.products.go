@@ -15,6 +15,8 @@ type Products struct {
 	Discount        *Discounts           `db:"discount"`
 	SubcategoryId   int                  `db:"subcategory_id"`
 	Subcategory     *SubcategoriesRecord `db:"subcategory"`
+	BrandId         int                  `db:"brand_id"`
+	Brand           *Brands              `db:"brand"`
 	Image           string               `db:"image"`
 	Images          pq.StringArray       `db:"images"`
 	Stock           int                  `db:"stock"`

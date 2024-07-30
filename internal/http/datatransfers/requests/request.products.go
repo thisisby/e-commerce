@@ -6,6 +6,7 @@ type ProductCreateRequest struct {
 	Price         float64 `form:"price" validate:"required"`
 	Stock         int     `form:"stock" validate:"required"`
 	SubCategoryId int     `form:"sub_category_id" validate:"required"`
+	BrandId       int     `form:"brand_id" validate:"required"`
 }
 
 type ProductUpdateRequest struct {
@@ -14,4 +15,5 @@ type ProductUpdateRequest struct {
 	Price       *float64 `form:"price"`
 	Stock       *int     `form:"stock"`
 	SubCategory *int     `form:"sub_category_id"`
+	BrandId     *int     `form:"brand_id"`
 }

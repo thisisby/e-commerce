@@ -14,6 +14,7 @@ type Seeder interface {
 	CitiesSeeder(citiesData []records.Cities) (err error)
 	CategoriesSeeder(categoriesData []records.Categories) (err error)
 	SubCategoriesSeeder(subCategoriesData []records.SubcategoriesRecord) (err error)
+	BrandSeeder(brandsData []records.Brands) (err error)
 }
 
 type seeder struct {
@@ -46,8 +47,8 @@ func (s *seeder) RolesSeeder(rolesData []records.Roles) (err error) {
 
 func (s *seeder) ProductsSeeder(productsData []records.Products) (err error) {
 	query := `
-        INSERT INTO products (name, description, price, subcategory_id, image, stock, created_at, updated_at)
-        VALUES (:name, :description, :price, :subcategory_id, :image, :stock, :created_at, :updated_at)
+        INSERT INTO products (name, description, price, subcategory_id, brand_id, image, stock, created_at, updated_at)
+        VALUES (:name, :description, :price, :subcategory_id, :brand_id, :image, :stock, :created_at, :updated_at)
     `
 	if len(productsData) == 0 {
 		return errors.New("products data is empty")
@@ -136,6 +137,24 @@ func (s *seeder) SubCategoriesSeeder(subCategoriesData []records.SubcategoriesRe
 		}
 	}
 	slog.Info("Subcategories data seeded successfully")
+
+	return nil
+}
+
+func (s *seeder) BrandSeeder(brandsData []records.Brands) (err error) {
+	query := `INSERT INTO brands (id, name) VALUES (:id, :name)`
+	if len(brandsData) == 0 {
+		return errors.New("brands data is empty")
+	}
+
+	slog.Info("Seeding brands data...")
+	for _, brand := range brandsData {
+		_, err = s.conn.NamedQuery(query, brand)
+		if err != nil {
+			return err
+		}
+	}
+	slog.Info("Brands data seeded successfully")
 
 	return nil
 }

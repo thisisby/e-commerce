@@ -21,8 +21,9 @@ func NewPostgreWishRepository(conn *sqlx.DB) domains.WishRepository {
 func (p *postgreWishRepository) FindByUserId(id int) ([]domains.WishDomain, error) {
 	var query = `
 		SELECT w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", "product.subcategory_id",  p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at",
+		       p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",  p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at",
 		       s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
+		       b.id "product.brand.id", b.name "product.brand.name",
 		COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 			   CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
 		       CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
@@ -33,6 +34,7 @@ func (p *postgreWishRepository) FindByUserId(id int) ([]domains.WishDomain, erro
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN cart_items c ON p.id = c.product_id AND c.user_id = w.user_id
 		JOIN subcategories s ON p.subcategory_id = s.id
+		JOIN brands b ON p.brand_id = b.id
 		WHERE w.user_id = $1
 		`
 	var wishRecord []records.Wish

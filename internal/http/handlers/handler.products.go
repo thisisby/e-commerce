@@ -147,6 +147,9 @@ func (p *ProductHandler) UpdateById(ctx echo.Context) error {
 	if productUpdateRequest.SubCategory != nil {
 		product.SubcategoryId = *productUpdateRequest.SubCategory
 	}
+	if productUpdateRequest.BrandId != nil {
+		product.BrandId = *productUpdateRequest.BrandId
+	}
 	if image != nil {
 		product.Image = mainImageUrl
 	}
@@ -173,6 +176,23 @@ func (p *ProductHandler) FindBySubCategoryId(ctx echo.Context) error {
 	}
 
 	products, statusCode, err := p.productUsecase.FindAllForMeBySubcategoryId(jwtClaims.UserId, subCategoryIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
+}
+
+func (p *ProductHandler) FindByBrandId(ctx echo.Context) error {
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+	brandId := ctx.Param("brand_id")
+
+	brandIdInt, err := strconv.Atoi(brandId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid brand id")
+	}
+
+	products, statusCode, err := p.productUsecase.FindAllForMeByBrandId(jwtClaims.UserId, brandIdInt)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}

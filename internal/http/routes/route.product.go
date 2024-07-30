@@ -43,6 +43,7 @@ func NewProductRoute(
 func (r *ProductRoute) Register() {
 	products := r.router.Group("/products")
 	productsBySubcategories := r.router.Group("/subcategories")
+	productsByBrands := r.router.Group("/brands")
 	admin := r.router.Group("/admin/products")
 
 	products.Use(r.authMiddleware.Handle)
@@ -50,6 +51,9 @@ func (r *ProductRoute) Register() {
 
 	productsBySubcategories.Use(r.authMiddleware.Handle)
 	productsBySubcategories.GET("/:subcategory_id/products", r.productHandler.FindBySubCategoryId)
+
+	productsByBrands.Use(r.authMiddleware.Handle)
+	productsByBrands.GET("/:brand_id/products", r.productHandler.FindByBrandId)
 
 	admin.Use(r.adminMilddleware.Handle)
 	admin.POST("", r.productHandler.Save)

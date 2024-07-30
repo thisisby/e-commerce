@@ -38,6 +38,8 @@ func BindAndValidate(c echo.Context, req any) error {
 				e = fmt.Errorf("field '%s' must be exactly %v characters long", err.Field(), err.Param())
 			case "orderstatus":
 				e = fmt.Errorf("field '%s' must be one of [pending, shipping, delivered, cancelled]", err.Field())
+			case "order_delivery_method":
+				e = fmt.Errorf("field '%s' must be one of [pickup, delivery]", err.Field())
 			default:
 				e = fmt.Errorf("field '%s': '%v' must satisfy '%s' '%v' criteria", err.Field(), err.Value(), err.Tag(), err.Param())
 			}
@@ -69,6 +71,15 @@ func OrderStatusValidator(fl validator.FieldLevel) bool {
 	status := fl.Field().String()
 	switch status {
 	case constants.Pending, constants.Shipping, constants.Delivered, constants.Cancelled:
+		return true
+	}
+	return false
+}
+
+func OrderDeliveryMethodValidator(fl validator.FieldLevel) bool {
+	deliveryMethod := fl.Field().String()
+	switch deliveryMethod {
+	case constants.DeliveryMethodPickup, constants.DeliveryMethodDelivery:
 		return true
 	}
 	return false

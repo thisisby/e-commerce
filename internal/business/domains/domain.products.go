@@ -12,6 +12,8 @@ type ProductDomain struct {
 	Discount        *DiscountsDomain
 	SubcategoryId   int
 	Subcategory     *SubcategoriesDomain
+	BrandId         int
+	Brand           *BrandsDomain
 	Image           string
 	Images          []string
 	Stock           int
@@ -27,6 +29,7 @@ type ProductsRepository interface {
 	FindAllForMe(id int) ([]ProductDomain, error)
 	UpdateById(inDom ProductDomain) error
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, error)
+	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, error)
 }
 
 type ProductsUsecase interface {
@@ -35,4 +38,5 @@ type ProductsUsecase interface {
 	UpdateById(inDom ProductDomain) (int, error)
 	FindById(id int) (*ProductDomain, int, error)
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, int, error)
+	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, int, error)
 }

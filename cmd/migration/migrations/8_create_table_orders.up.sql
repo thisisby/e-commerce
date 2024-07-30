@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS orders
     street_num       VARCHAR(255)   NULL,
     region           VARCHAR(255)   NULL,
     apartment        VARCHAR(255)   NULL,
+    delivery_method  VARCHAR(255)   NULL,
     city_id          int            NOT NULL references cities (id) ON DELETE CASCADE,
     created_at       TIMESTAMP               DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP               DEFAULT CURRENT_TIMESTAMP

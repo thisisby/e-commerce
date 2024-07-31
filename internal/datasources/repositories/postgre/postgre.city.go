@@ -19,7 +19,7 @@ func NewPostgreCityRepository(Conn *sqlx.DB) domains.CitiesRepository {
 
 func (p *postgreCityRepository) FindAll() ([]domains.CityDomain, error) {
 	query := `
-		SELECT id, name
+		SELECT id, name, delivery_duration_days
 		FROM cities
 	`
 
@@ -35,7 +35,7 @@ func (p *postgreCityRepository) FindAll() ([]domains.CityDomain, error) {
 
 func (p *postgreCityRepository) FindById(id int) (domains.CityDomain, error) {
 	query := `
-		SELECT id, name
+		SELECT id, name, delivery_duration_days
 		FROM cities
 		WHERE id = $1
 	`
@@ -51,7 +51,7 @@ func (p *postgreCityRepository) FindById(id int) (domains.CityDomain, error) {
 }
 
 func (p *postgreCityRepository) Save(city domains.CityDomain) error {
-	query := `INSERT INTO cities (name) VALUES (:name)`
+	query := `INSERT INTO cities (name, delivery_duration_days) VALUES (:name, :delivery_duration_days)`
 	cityRecord := records.FromCityDomain(&city)
 
 	_, err := p.Conn.NamedQuery(query, cityRecord)
@@ -63,7 +63,7 @@ func (p *postgreCityRepository) Save(city domains.CityDomain) error {
 }
 
 func (p *postgreCityRepository) Update(city domains.CityDomain) error {
-	query := `UPDATE cities SET name = :name WHERE id = :id`
+	query := `UPDATE cities SET name = :name, delivery_duration_days = :delivery_duration_days WHERE id = :id`
 	cityRecord := records.FromCityDomain(&city)
 
 	_, err := p.Conn.NamedQuery(query, cityRecord)

@@ -1,8 +1,9 @@
 package domains
 
 type CityDomain struct {
-	Id   int
-	Name string
+	Id                   int
+	Name                 string
+	DeliveryDurationDays int
 }
 
 type CitiesRepository interface {

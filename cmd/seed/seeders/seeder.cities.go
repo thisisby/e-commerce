@@ -7,12 +7,14 @@ var CitiesData []records.Cities
 func init() {
 	CitiesData = []records.Cities{
 		{
-			Id:   1,
-			Name: "Almaty",
+			Id:                   1,
+			Name:                 "Almaty",
+			DeliveryDurationDays: 3,
 		},
 		{
-			Id:   2,
-			Name: "Astana",
+			Id:                   2,
+			Name:                 "Astana",
+			DeliveryDurationDays: 5,
 		},
 	}
 }

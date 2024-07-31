@@ -4,15 +4,17 @@ import "ga_marketplace/internal/business/domains"
 
 func (r *Cities) ToDomain() *domains.CityDomain {
 	return &domains.CityDomain{
-		Id:   r.Id,
-		Name: r.Name,
+		Id:                   r.Id,
+		Name:                 r.Name,
+		DeliveryDurationDays: r.DeliveryDurationDays,
 	}
 }
 
 func FromCityDomain(domain *domains.CityDomain) *Cities {
 	return &Cities{
-		Id:   domain.Id,
-		Name: domain.Name,
+		Id:                   domain.Id,
+		Name:                 domain.Name,
+		DeliveryDurationDays: domain.DeliveryDurationDays,
 	}
 }
 

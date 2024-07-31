@@ -88,7 +88,7 @@ func (s *seeder) UsersSeeder(usersData []records.Users) (err error) {
 }
 
 func (s *seeder) CitiesSeeder(citiesData []records.Cities) (err error) {
-	query := `INSERT INTO cities (id, name) VALUES (:id, :name)`
+	query := `INSERT INTO cities (id, name, delivery_duration_days) VALUES (:id, :name, :delivery_duration_days)`
 	if len(citiesData) == 0 {
 		return errors.New("city data is empty")
 	}

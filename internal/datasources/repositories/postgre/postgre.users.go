@@ -25,7 +25,7 @@ func (p *postgreUsersRepository) FindByPhone(phone string) (*domains.UserDomain,
 			u.city_id, u.street, u.region, u.apartment,
 			u.email, u.street_num,
 			u.date_of_birth, u.created_at, u.updated_at,
-			c.id "city.id", c.name "city.name"
+			c.id "city.id", c.name "city.name", c.delivery_duration_days "city.delivery_duration_days"
 		FROM users u 
 		INNER JOIN roles r ON u.role_id = r.id 
 		LEFT JOIN cities c ON u.city_id = c.id
@@ -97,7 +97,7 @@ func (p *postgreUsersRepository) FindById(id int) (*domains.UserDomain, error) {
 			u.city_id, u.street, u.region, u.apartment,
 			u.email, u.street_num,
 			u.refresh_token, u.date_of_birth, u.created_at, u.updated_at,
-			c.id "city.id", c.name "city.name"
+			c.id "city.id", c.name "city.name", c.delivery_duration_days "city.delivery_duration_days"
 		FROM users u
 		INNER JOIN roles r ON u.role_id = r.id
 		LEFT JOIN cities c ON u.city_id = c.id
@@ -122,7 +122,7 @@ func (p *postgreUsersRepository) FindAll() ([]domains.UserDomain, error) {
 			u.city_id, u.street, u.region, u.apartment,
 			u.email, u.street_num,
 			u.date_of_birth, u.created_at, u.updated_at,
-			c.id "city.id", c.name "city.name"
+			c.id "city.id", c.name "city.name", c.delivery_duration_days "city.delivery_duration_days"
 		FROM users u
 		INNER JOIN roles r ON u.role_id = r.id
 		LEFT JOIN cities c ON u.city_id = c.id

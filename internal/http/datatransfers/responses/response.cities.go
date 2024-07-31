@@ -3,14 +3,16 @@ package responses
 import "ga_marketplace/internal/business/domains"
 
 type CityResponse struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id                   int    `json:"id"`
+	Name                 string `json:"name"`
+	DeliveryDurationDays int    `json:"delivery_duration_days"`
 }
 
 func FromCityDomain(inDom *domains.CityDomain) *CityResponse {
 	return &CityResponse{
-		Id:   inDom.Id,
-		Name: inDom.Name,
+		Id:                   inDom.Id,
+		Name:                 inDom.Name,
+		DeliveryDurationDays: inDom.DeliveryDurationDays,
 	}
 }
 

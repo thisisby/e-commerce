@@ -77,7 +77,7 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
 			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
 			u.date_of_birth "user.date_of_birth", u.email "user.email", u.street_num "user.street_num", u.created_at "user.created_at", u.updated_at "user.updated_at",
-			c.id "city.id", c.name "city.name"
+			c.id "city.id", c.name "city.name", c.delivery_duration_days "city.delivery_duration_days"
 		FROM orders o
 		JOIN users u ON o.user_id = u.id
 		LEFT JOIN roles r ON u.role_id = r.id
@@ -182,7 +182,7 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
 			u.email "user.email", u.street_num "user.street_num",
 			u.date_of_birth "user.date_of_birth", u.created_at "user.created_at", u.updated_at "user.updated_at",
-			c.id "city.id", c.name "city.name"
+			c.id "city.id", c.name "city.name", c.delivery_duration_days "city.delivery_duration_days"
 		FROM orders o
 		JOIN users u ON o.user_id = u.id
 		LEFT JOIN roles r ON u.role_id = r.id

@@ -9,6 +9,7 @@ type BaseResponse struct {
 }
 
 func NewSuccessResponse(ctx echo.Context, statusCode int, message string, payload any) error {
+	ctx.Response().Header().Set(echo.HeaderContentType, "application/json; charset=utf-8")
 	return ctx.JSON(statusCode, BaseResponse{
 		Status:  statusCode,
 		Message: message,
@@ -17,6 +18,7 @@ func NewSuccessResponse(ctx echo.Context, statusCode int, message string, payloa
 }
 
 func NewErrorResponse(ctx echo.Context, statusCode int, message string) error {
+	ctx.Response().Header().Set(echo.HeaderContentType, "application/json; charset=utf-8")
 	return ctx.JSON(statusCode, BaseResponse{
 		Status:  statusCode,
 		Message: message,

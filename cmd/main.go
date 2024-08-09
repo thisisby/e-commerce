@@ -102,6 +102,11 @@ func main() {
 	routes.NewCategoriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewSubcategoriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewBrandsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewServicesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewSubservicesRoutes(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewServiceItemRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewServiceAddressRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewStaffRoute(conn, v1, s3Client, clientAuthMiddleware, adminAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 

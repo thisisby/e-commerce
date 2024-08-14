@@ -11,8 +11,11 @@ type ServiceItemResponse struct {
 	SubserviceId int     `json:"subservice_id"`
 }
 
-func FromDomain(domain domains.ServiceItemDomain) ServiceItemResponse {
-	return ServiceItemResponse{
+func FromServiceItemDomain(domain domains.ServiceItemDomain) *ServiceItemResponse {
+	if domain.Id == 0 {
+		return nil
+	}
+	return &ServiceItemResponse{
 		Id:           domain.Id,
 		Title:        domain.Title,
 		Duration:     domain.Duration,
@@ -25,7 +28,7 @@ func FromDomain(domain domains.ServiceItemDomain) ServiceItemResponse {
 func ToArrayOfServiceItem(domain []domains.ServiceItemDomain) []ServiceItemResponse {
 	var result []ServiceItemResponse
 	for _, item := range domain {
-		result = append(result, FromDomain(item))
+		result = append(result, *FromServiceItemDomain(item))
 	}
 	return result
 }

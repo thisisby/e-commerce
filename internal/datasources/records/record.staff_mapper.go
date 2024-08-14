@@ -3,24 +3,29 @@ package records
 import "ga_marketplace/internal/business/domains"
 
 func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
+	if rec == nil || rec.Id == 0 {
+		return nil
+	}
 	return &domains.StaffDomain{
-		Id:         rec.Id,
-		FullName:   rec.FullName,
-		Occupation: rec.Occupation,
-		Experience: rec.Experience,
-		Avatar:     rec.Avatar,
-		ServiceId:  rec.ServiceId,
+		Id:               rec.Id,
+		FullName:         rec.FullName,
+		Occupation:       rec.Occupation,
+		Experience:       rec.Experience,
+		Avatar:           rec.Avatar,
+		ServiceId:        rec.ServiceId,
+		ServiceAddressId: rec.ServiceAddressId,
 	}
 }
 
 func FromStaffDomain(dom *domains.StaffDomain) *StaffRecord {
 	return &StaffRecord{
-		Id:         dom.Id,
-		FullName:   dom.FullName,
-		Occupation: dom.Occupation,
-		Experience: dom.Experience,
-		Avatar:     dom.Avatar,
-		ServiceId:  dom.ServiceId,
+		Id:               dom.Id,
+		FullName:         dom.FullName,
+		Occupation:       dom.Occupation,
+		Experience:       dom.Experience,
+		Avatar:           dom.Avatar,
+		ServiceId:        dom.ServiceId,
+		ServiceAddressId: dom.ServiceAddressId,
 	}
 }
 

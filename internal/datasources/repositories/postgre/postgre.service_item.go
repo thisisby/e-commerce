@@ -58,7 +58,7 @@ func (p *postgreServiceItemRepository) FindById(id int) (domains.ServiceItemDoma
 		return domains.ServiceItemDomain{}, helpers.PostgresErrorTransform(err)
 	}
 
-	return serviceItem.ToDomain(), nil
+	return *serviceItem.ToDomain(), nil
 }
 
 func (p *postgreServiceItemRepository) FindBySubServiceId(subServiceId int) ([]domains.ServiceItemDomain, error) {

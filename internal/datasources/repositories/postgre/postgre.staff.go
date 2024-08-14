@@ -31,7 +31,11 @@ func (p *postgreStaffRepository) FindById(id int) (*domains.StaffDomain, error) 
 }
 
 func (p *postgreStaffRepository) Save(staff *domains.StaffDomain) error {
-	query := `INSERT INTO staff (full_name, occupation, experience, avatar, service_id) VALUES (:full_name, :occupation, :experience, :avatar, :service_id)`
+	query := `
+		INSERT INTO staff 
+    		(full_name, occupation, experience, avatar, service_id, service_address_id) 
+		VALUES 
+		    (:full_name, :occupation, :experience, :avatar, :service_id, :service_address_id)`
 
 	staffRecord := records.FromStaffDomain(staff)
 
@@ -57,7 +61,16 @@ func (p *postgreStaffRepository) FindAll() ([]domains.StaffDomain, error) {
 }
 
 func (p *postgreStaffRepository) Update(inDom domains.StaffDomain) error {
-	query := `UPDATE staff SET full_name = :full_name, occupation = :occupation, experience = :experience, avatar = :avatar, service_id = :service_id WHERE id = :id`
+	query := `
+			UPDATE staff 
+			SET 
+			    full_name = :full_name, 
+			    occupation = :occupation, 
+			    experience = :experience, 
+			    avatar = :avatar, 
+			    service_id = :service_id, 
+			    service_address_id = :service_address_id
+			WHERE id = :id`
 
 	staffRecord := records.FromStaffDomain(&inDom)
 
@@ -86,6 +99,19 @@ func (p *postgreStaffRepository) FindByServiceId(serviceId int) ([]domains.Staff
 	var staffRecords []records.StaffRecord
 
 	err := p.conn.Select(&staffRecords, query, serviceId)
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return records.ToArrayOfStaffDomain(staffRecords), nil
+}
+
+func (p *postgreStaffRepository) FindByServiceAddressId(serviceAddressId int) ([]domains.StaffDomain, error) {
+	query := `SELECT * FROM staff WHERE service_address_id = $1`
+
+	var staffRecords []records.StaffRecord
+
+	err := p.conn.Select(&staffRecords, query, serviceAddressId)
 	if err != nil {
 		return nil, helpers.PostgresErrorTransform(err)
 	}

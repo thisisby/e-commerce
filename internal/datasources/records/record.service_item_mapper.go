@@ -2,8 +2,11 @@ package records
 
 import "ga_marketplace/internal/business/domains"
 
-func (r *ServiceItem) ToDomain() domains.ServiceItemDomain {
-	return domains.ServiceItemDomain{
+func (r *ServiceItem) ToDomain() *domains.ServiceItemDomain {
+	if r == nil || r.Id == 0 {
+		return nil
+	}
+	return &domains.ServiceItemDomain{
 		Id:           r.Id,
 		Title:        r.Title,
 		Duration:     r.Duration,
@@ -26,7 +29,7 @@ func FromServiceItemDomain(domain domains.ServiceItemDomain) ServiceItem {
 
 func ToArrayOfServiceItemDomain(data []ServiceItem) (result []domains.ServiceItemDomain) {
 	for _, v := range data {
-		result = append(result, v.ToDomain())
+		result = append(result, *v.ToDomain())
 	}
 	return
 }

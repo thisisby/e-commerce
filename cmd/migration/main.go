@@ -75,7 +75,10 @@ func migrate(db *sqlx.DB, action string) (err error) {
 		return errors.New("error when get files name")
 	}
 
+	slog.Info(fmt.Sprintf("[Migration] %s migration files: %v", action, files))
+
 	for _, file := range files {
+		slog.Info(fmt.Sprintf("[Migration] %s migration file: %v", action, file))
 		data, err := os.ReadFile(file)
 		if err != nil {
 			return errors.New("error when read file")

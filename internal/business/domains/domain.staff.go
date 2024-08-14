@@ -1,12 +1,13 @@
 package domains
 
 type StaffDomain struct {
-	Id         int
-	FullName   string
-	Occupation string
-	Experience int
-	Avatar     *string
-	ServiceId  int
+	Id               int
+	FullName         string
+	Occupation       string
+	Experience       int
+	Avatar           *string
+	ServiceId        int
+	ServiceAddressId int
 }
 
 type StaffRepository interface {
@@ -16,6 +17,7 @@ type StaffRepository interface {
 	Update(inDom StaffDomain) error
 	Delete(id int) error
 	FindByServiceId(serviceId int) ([]StaffDomain, error)
+	FindByServiceAddressId(serviceAddressId int) ([]StaffDomain, error)
 }
 
 type StaffUsecase interface {
@@ -25,4 +27,5 @@ type StaffUsecase interface {
 	FindById(id int) (*StaffDomain, int, error)
 	Delete(id int) (int, error)
 	FindByServiceId(serviceId int) ([]StaffDomain, int, error)
+	FindByServiceAddressId(serviceAddressId int) ([]StaffDomain, int, error)
 }

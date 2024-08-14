@@ -37,11 +37,12 @@ func (h *StaffHandler) Save(ctx echo.Context) error {
 	avatarUrl, err := h.s3Client.UploadFile(image.Filename, image)
 
 	staffDomain := &domains.StaffDomain{
-		FullName:   staffCreateRequest.FullName,
-		Occupation: staffCreateRequest.Occupation,
-		Experience: staffCreateRequest.Experience,
-		Avatar:     &avatarUrl,
-		ServiceId:  staffCreateRequest.ServiceId,
+		FullName:         staffCreateRequest.FullName,
+		Occupation:       staffCreateRequest.Occupation,
+		Experience:       staffCreateRequest.Experience,
+		Avatar:           &avatarUrl,
+		ServiceId:        staffCreateRequest.ServiceId,
+		ServiceAddressId: staffCreateRequest.ServiceAddressId,
 	}
 
 	statusCode, err := h.staffUsecase.Save(staffDomain)
@@ -100,6 +101,9 @@ func (h *StaffHandler) Update(ctx echo.Context) error {
 	if staffUpdateRequest.ServiceId != nil {
 		staff.ServiceId = *staffUpdateRequest.ServiceId
 	}
+	if staffUpdateRequest.ServiceAddressId != nil {
+		staff.ServiceAddressId = *staffUpdateRequest.ServiceAddressId
+	}
 	if avatar != nil {
 		staff.Avatar = &avatarUrl
 	}
@@ -135,6 +139,21 @@ func (h *StaffHandler) FindByServiceId(ctx echo.Context) error {
 	}
 
 	staff, statusCode, err := h.staffUsecase.FindByServiceId(serviceIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Staffs found", staff)
+}
+
+func (h *StaffHandler) FindByServiceAddressId(ctx echo.Context) error {
+	serviceAddressId := ctx.Param("service_address_id")
+	serviceAddressIdInt, err := strconv.Atoi(serviceAddressId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid service address id")
+	}
+
+	staff, statusCode, err := h.staffUsecase.FindByServiceAddressId(serviceAddressIdInt)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}

@@ -44,9 +44,13 @@ func (r *StaffRoute) Register() {
 	staff := r.router.Group("/staff")
 	admin := r.router.Group("/admin/staff")
 	services := r.router.Group("/services")
+	serviceAddress := r.router.Group("/service-address")
 
 	staff.Use(r.authMiddleware.Handle)
 	staff.GET("", r.staffHandler.FindAll)
+
+	serviceAddress.Use(r.authMiddleware.Handle)
+	serviceAddress.GET("/:service_address_id/staff", r.staffHandler.FindByServiceAddressId)
 
 	services.Use(r.authMiddleware.Handle)
 	services.GET("/:service_id/staff", r.staffHandler.FindByServiceId)

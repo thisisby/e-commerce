@@ -81,3 +81,16 @@ func (s *staffUsecase) FindByServiceId(serviceId int) ([]domains.StaffDomain, in
 
 	return staffs, http.StatusOK, nil
 }
+
+func (s *staffUsecase) FindByServiceAddressId(serviceAddressId int) ([]domains.StaffDomain, int, error) {
+	staffs, err := s.staffRepo.FindByServiceAddressId(serviceAddressId)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(staffs) == 0 {
+		return nil, http.StatusNotFound, errors.New("staffs not found")
+	}
+
+	return staffs, http.StatusOK, nil
+}

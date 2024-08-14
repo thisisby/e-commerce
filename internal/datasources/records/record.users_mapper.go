@@ -6,6 +6,9 @@ import (
 )
 
 func (r *Users) ToDomain() *domains.UserDomain {
+	if r == nil || r.Id == 0 {
+		return nil
+	}
 	return &domains.UserDomain{
 		Id:           r.Id,
 		Name:         r.Name,

@@ -14,6 +14,8 @@ type AppointmentDomain struct {
 	ServiceItemDomain *ServiceItemDomain
 	Comments          *string
 	Status            string
+	FullName          string
+	PhoneNumber       string
 }
 
 type AppointmentRepository interface {
@@ -24,6 +26,7 @@ type AppointmentRepository interface {
 	Delete(id int) error
 	FindById(id int) (AppointmentDomain, error)
 	IsOverlapping(appointmentId int, staffId int, startTime time.Time, endTime time.Time) (bool, error)
+	FindAllByStaffId(staffId int) ([]AppointmentDomain, error)
 }
 
 type AppointmentUsecase interface {
@@ -34,4 +37,5 @@ type AppointmentUsecase interface {
 	Delete(id int) (int, error)
 	FindById(id int) (AppointmentDomain, int, error)
 	ChangeTime(AppointmentDomain) (int, error)
+	FindAllByStaffId(staffId int) ([]AppointmentDomain, int, error)
 }

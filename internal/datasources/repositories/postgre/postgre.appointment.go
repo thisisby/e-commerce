@@ -21,7 +21,7 @@ func NewPostgreAppointmentsRepository(conn *sqlx.DB) domains.AppointmentReposito
 func (p *postgreAppointmentsRepository) FindAll() ([]domains.AppointmentDomain, error) {
 	query := `
 		SELECT
-			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status,
+			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
 			s.id "staff.id", s.full_name "staff.full_name", s.occupation "staff.occupation", s.experience "staff.experience", s.avatar "staff.avatar", s.service_id "staff.service_id", s.service_address_id "staff.service_address_id",
 			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id"
 		FROM appointments a	
@@ -41,7 +41,7 @@ func (p *postgreAppointmentsRepository) FindAll() ([]domains.AppointmentDomain, 
 func (p *postgreAppointmentsRepository) FindByUserId(userId int) ([]domains.AppointmentDomain, error) {
 	query := `
 		SELECT
-			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status,
+			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
 			s.id "staff.id", s.full_name "staff.full_name", s.occupation "staff.occupation", s.experience "staff.experience", s.avatar "staff.avatar", s.service_id "staff.service_id", s.service_address_id "staff.service_address_id",
 			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id"
 		FROM appointments a	
@@ -62,8 +62,8 @@ func (p *postgreAppointmentsRepository) FindByUserId(userId int) ([]domains.Appo
 
 func (p *postgreAppointmentsRepository) Save(domain domains.AppointmentDomain) error {
 	query := `
-		INSERT INTO appointments (user_id, staff_id, start_time, end_time, service_item_id, comments, status)
-		VALUES (:user_id, :staff_id, :start_time, :end_time, :service_item_id, :comments, :status)
+		INSERT INTO appointments (user_id, staff_id, start_time, end_time, service_item_id, comments, status, full_name, phone_number)
+		VALUES (:user_id, :staff_id, :start_time, :end_time, :service_item_id, :comments, :status, :full_name, :phone_number)
 	`
 
 	appointmentRecord := records.FromAppointmentDomain(domain)
@@ -78,7 +78,16 @@ func (p *postgreAppointmentsRepository) Save(domain domains.AppointmentDomain) e
 func (p *postgreAppointmentsRepository) Update(domain domains.AppointmentDomain) error {
 	query := `
 		UPDATE appointments
-		SET user_id = :user_id, staff_id = :staff_id, start_time = :start_time, end_time = :end_time, service_item_id = :service_item_id, comments = :comments, status = :status
+		SET 
+		    user_id = :user_id, 
+		    staff_id = :staff_id, 
+		    start_time = :start_time, 
+		    end_time = :end_time, 
+		    service_item_id = :service_item_id,
+		    comments = :comments, 
+		    status = :status,
+		    full_name = :full_name,
+		    phone_number = :phone_number
 		WHERE id = :id
 	`
 
@@ -109,7 +118,7 @@ func (p *postgreAppointmentsRepository) Delete(id int) error {
 func (p *postgreAppointmentsRepository) FindById(id int) (domains.AppointmentDomain, error) {
 	query := `
 		SELECT 
-			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status,
+			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
 			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id"
 		FROM appointments a
 		JOIN service_items si ON a.service_item_id = si.id
@@ -143,4 +152,23 @@ func (p *postgreAppointmentsRepository) IsOverlapping(appointmentId int, staffId
 	}
 
 	return count > 0, nil
+}
+
+func (p *postgreAppointmentsRepository) FindAllByStaffId(staffId int) ([]domains.AppointmentDomain, error) {
+	query := `
+		SELECT
+			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
+			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id"
+		FROM appointments a	
+		JOIN service_items si ON a.service_item_id = si.id
+		WHERE a.staff_id = $1	
+	`
+
+	var appointmentRecord []records.Appointment
+	err := p.conn.Select(&appointmentRecord, query, staffId)
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return records.ToArrayOfAppointmentDomain(appointmentRecord), nil
 }

@@ -14,4 +14,6 @@ type Appointment struct {
 	ServiceItem   *ServiceItem `db:"service_item"`
 	Comments      *string      `db:"comments"`
 	Status        string       `db:"status"`
+	FullName      string       `db:"full_name"`
+	PhoneNumber   string       `db:"phone_number"`
 }

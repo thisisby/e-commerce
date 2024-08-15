@@ -76,6 +76,12 @@ func (h *AppointmentHandler) UpdateAppointment(ctx echo.Context) error {
 	if appointmentUpdateRequest.Comments != nil {
 		appointment.Comments = appointmentUpdateRequest.Comments
 	}
+	if appointmentUpdateRequest.FullName != nil {
+		appointment.FullName = *appointmentUpdateRequest.FullName
+	}
+	if appointmentUpdateRequest.PhoneNumber != nil {
+		appointment.PhoneNumber = *appointmentUpdateRequest.PhoneNumber
+	}
 
 	statusCode, err = h.appointmentUsecase.Update(appointment)
 	if err != nil {
@@ -151,4 +157,20 @@ func (h *AppointmentHandler) ChangeTime(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, statusCode, "Appointment time changed successfully", nil)
+}
+
+func (h *AppointmentHandler) FindAllAppointmentsByStaffId(ctx echo.Context) error {
+	staffId := ctx.Param("staff_id")
+
+	staffIdInt, err := strconv.Atoi(staffId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid staff id")
+	}
+
+	appointments, statusCode, err := h.appointmentUsecase.FindAllByStaffId(staffIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Appointments found", appointments)
 }

@@ -16,6 +16,8 @@ type AppointmentResponse struct {
 	ServiceItem   *ServiceItemResponse `json:"service_item"`
 	Comments      *string              `json:"comments"`
 	Status        string               `json:"status"`
+	FullName      string               `json:"full_name"`
+	PhoneNumber   string               `json:"phone_number"`
 }
 
 func FromAppointmentDomain(inDom *domains.AppointmentDomain) AppointmentResponse {
@@ -30,6 +32,8 @@ func FromAppointmentDomain(inDom *domains.AppointmentDomain) AppointmentResponse
 		ServiceItem:   FromServiceItemDomain(*inDom.ServiceItemDomain),
 		Comments:      inDom.Comments,
 		Status:        inDom.Status,
+		FullName:      inDom.FullName,
+		PhoneNumber:   inDom.PhoneNumber,
 	}
 }
 

@@ -15,6 +15,8 @@ func (r *Appointment) ToDomain() *domains.AppointmentDomain {
 		ServiceItemDomain: r.ServiceItem.ToDomain(),
 		Comments:          r.Comments,
 		Status:            r.Status,
+		FullName:          r.FullName,
+		PhoneNumber:       r.PhoneNumber,
 	}
 }
 
@@ -28,6 +30,8 @@ func FromAppointmentDomain(domain domains.AppointmentDomain) Appointment {
 		ServiceItemId: domain.ServiceItemId,
 		Comments:      domain.Comments,
 		Status:        domain.Status,
+		FullName:      domain.FullName,
+		PhoneNumber:   domain.PhoneNumber,
 	}
 }
 

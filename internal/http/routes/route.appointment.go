@@ -43,6 +43,10 @@ func NewAppointmentRoute(
 func (r *AppointmentRoute) Register() {
 	appointments := r.router.Group("/appointments")
 	appointmentsAdmin := r.router.Group("/admin/appointments")
+	staffAppointments := r.router.Group("/staff/:staff_id/appointments")
+
+	staffAppointments.Use(r.authMiddleware.Handle)
+	staffAppointments.GET("", r.appointmentHandler.FindAllAppointmentsByStaffId)
 
 	appointments.Use(r.authMiddleware.Handle)
 	appointments.POST("", r.appointmentHandler.CreateAppointment)

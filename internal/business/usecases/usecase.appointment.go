@@ -142,3 +142,16 @@ func (a *appointmentUsecase) ChangeTime(domain domains.AppointmentDomain) (int, 
 
 	return http.StatusOK, nil
 }
+
+func (a *appointmentUsecase) FindAllByStaffId(staffId int) ([]domains.AppointmentDomain, int, error) {
+	appointments, err := a.appointmentRepository.FindAllByStaffId(staffId)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(appointments) == 0 {
+		return nil, http.StatusNotFound, nil
+	}
+
+	return appointments, http.StatusOK, nil
+}

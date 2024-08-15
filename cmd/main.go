@@ -74,7 +74,23 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+			echo.HeaderAccessControlAllowHeaders,
+			echo.HeaderAccessControlAllowOrigin,
+		},
+		AllowMethods: []string{
+			echo.GET,
+			echo.POST,
+			echo.PUT,
+			echo.DELETE,
+			echo.OPTIONS,
+			echo.PATCH,
+		},
+		AllowCredentials: true,
 	}))
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 

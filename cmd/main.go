@@ -53,6 +53,7 @@ func main() {
 		slog.Error("failed to create app: ", err)
 		return
 	}
+	defer conn.Close()
 
 	slog.Info("success to connect to database")
 

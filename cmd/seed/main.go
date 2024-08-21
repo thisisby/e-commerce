@@ -57,11 +57,6 @@ func main() {
 		slog.Error("[Seed]: failed to seed brands data", err)
 	}
 
-	err = seeder.ProductsSeeder(seeders.ProductsData)
-	if err != nil {
-		slog.Error("[Seed]: failed to seed products data", err)
-	}
-
 	err = seeder.UsersSeeder(seeders.UsersData)
 	if err != nil {
 		slog.Error("[Seed]: failed to seed users data", err)

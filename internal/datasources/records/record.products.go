@@ -9,6 +9,10 @@ type Products struct {
 	Id              int                  `db:"id"`
 	Name            string               `db:"name"`
 	Description     string               `db:"description"`
+	Ingredients     string               `db:"ingredients"`
+	Article         string               `db:"article"`
+	CCode           string               `db:"c_code"`
+	EdIzm           string               `db:"ed_izm"`
 	Price           float64              `db:"price"`
 	DiscountedPrice float64              `db:"discounted_price"`
 	TotalPrice      *float64             `db:"total_price"`
@@ -19,7 +23,6 @@ type Products struct {
 	Brand           *Brands              `db:"brand"`
 	Image           string               `db:"image"`
 	Images          pq.StringArray       `db:"images"`
-	Stock           int                  `db:"stock"`
 	IsInCart        bool                 `db:"is_in_cart"`
 	IsInWishlist    bool                 `db:"is_in_wishlist"`
 	CreatedAt       time.Time            `db:"created_at"`

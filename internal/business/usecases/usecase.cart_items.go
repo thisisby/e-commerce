@@ -58,19 +58,13 @@ func (c *cartItemsUsecase) Save(inDom *domains.CartItemsDomain) (statusCode int,
 	}
 
 	// Check if product exists
-	product, err := c.productRepo.FindById(inDom.ProductId)
+	_, err = c.productRepo.FindById(inDom.ProductId)
 	if err != nil {
 		if errors.Is(err, constants.ErrRowNotFound) {
 			return http.StatusBadRequest, fmt.Errorf("product id not found: %d", inDom.ProductId)
 		}
 		slog.Error("cartItemsUsecase.Save", err)
 		return http.StatusInternalServerError, err
-	}
-
-	if product.Stock < inDom.Quantity {
-		return http.StatusBadRequest, fmt.Errorf("product stock is not enough")
-	} else if product.Stock <= 0 {
-		return http.StatusBadRequest, fmt.Errorf("product stock is empty")
 	}
 
 	inDom.CreatedAt = helpers.GetCurrentTime()

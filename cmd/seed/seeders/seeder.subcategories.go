@@ -8,7 +8,7 @@ func init() {
 	SubCategoriesData = []records.SubcategoriesRecord{
 		{
 			Id:         1,
-			Name:       "SubCategory 1",
+			Name:       "No Category 1",
 			CategoryId: 1,
 		},
 		{

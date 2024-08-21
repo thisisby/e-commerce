@@ -6,18 +6,18 @@ import (
 )
 
 type CartItemsResponse struct {
-	Id        int             `json:"id"`
-	UserId    int             `json:"user_id"`
-	ProductId int             `json:"product_id"`
-	Product   ProductResponse `json:"product"`
-	Quantity  int             `json:"quantity"`
-	CreatedAt time.Time       `json:"created_at"`
-	UpdatedAt time.Time       `json:"updated_at"`
+	Id        int              `json:"id"`
+	UserId    int              `json:"user_id"`
+	ProductId int              `json:"product_id"`
+	Product   *ProductResponse `json:"product"`
+	Quantity  int              `json:"quantity"`
+	CreatedAt time.Time        `json:"created_at"`
+	UpdatedAt time.Time        `json:"updated_at"`
 }
 
 type CartItemsAdminResponse struct {
 	CartItemsResponse
-	User UserResponse `json:"user"`
+	User *UserResponse `json:"user"`
 }
 
 type CartItemTotalAmountResponse struct {
@@ -31,12 +31,12 @@ func FromCartItemsAdminDomain(inDom *domains.CartItemsDomain) CartItemsAdminResp
 			Id:        inDom.Id,
 			UserId:    inDom.UserId,
 			ProductId: inDom.ProductId,
-			Product:   FromProductDomain(&inDom.Product),
+			Product:   FromProductDomain(inDom.Product),
 			Quantity:  inDom.Quantity,
 			CreatedAt: inDom.CreatedAt,
 			UpdatedAt: inDom.UpdatedAt,
 		},
-		User: FromUserDomain(&inDom.User),
+		User: FromUserDomain(inDom.User),
 	}
 }
 
@@ -54,7 +54,7 @@ func FromCartItemsDomain(inDom *domains.CartItemsDomain) CartItemsResponse {
 		Id:        inDom.Id,
 		UserId:    inDom.UserId,
 		ProductId: inDom.ProductId,
-		Product:   FromProductDomain(&inDom.Product),
+		Product:   FromProductDomain(inDom.Product),
 		Quantity:  inDom.Quantity,
 		CreatedAt: inDom.CreatedAt,
 		UpdatedAt: inDom.UpdatedAt,

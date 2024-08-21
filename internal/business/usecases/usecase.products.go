@@ -87,3 +87,16 @@ func (p *productsUsecase) FindAllForMeByBrandId(id int, brandId int) ([]domains.
 
 	return products, http.StatusOK, nil
 }
+
+func (p *productsUsecase) SaveFrom1c(product *domains.ProductDomainV2) (int, error) {
+	product.BrandId = 1
+	product.SubcategoryId = 1
+	product.Ingredients = " "
+	product.Image = " "
+	err := p.productsRepo.SaveFrom1c(product)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusCreated, nil
+}

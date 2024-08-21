@@ -64,8 +64,6 @@ func (p *ProfileSectionsHandler) UpdateById(ctx echo.Context) error {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	slog.Info("profileSectionUpdateRequest", profileSectionUpdateRequest)
-	slog.Info("profile", profile)
 	if profileSectionUpdateRequest.Name != nil {
 		profile.Name = *profileSectionUpdateRequest.Name
 	}

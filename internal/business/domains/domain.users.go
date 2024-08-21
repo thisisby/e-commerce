@@ -11,7 +11,7 @@ type UserDomain struct {
 	Role  string
 
 	CityId int
-	City   CityDomain
+	City   *CityDomain
 
 	Email     *string
 	StreetNum *string

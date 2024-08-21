@@ -5,12 +5,12 @@ import "ga_marketplace/internal/constants"
 type OrdersDomain struct {
 	Id              int
 	UserId          int
-	User            UserDomain
+	User            *UserDomain
 	OrderDetails    []OrderDetailsDomain
 	TotalPrice      float64
 	DiscountedPrice float64
 	CityId          int
-	City            CityDomain
+	City            *CityDomain
 	Status          string
 	Street          string
 	Region          string
@@ -24,7 +24,7 @@ type OrderDetailsDomain struct {
 	Id        int
 	OrderId   int
 	ProductId int
-	Product   ProductDomain
+	Product   *ProductDomain
 	Quantity  int
 	Price     float64
 	SubTotal  float64

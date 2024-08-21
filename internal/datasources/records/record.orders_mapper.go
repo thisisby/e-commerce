@@ -1,13 +1,14 @@
 package records
 
-import "ga_marketplace/internal/business/domains"
+import (
+	"ga_marketplace/internal/business/domains"
+)
 
 func ToArrayOfOrdersDomain(data []Orders) []domains.OrdersDomain {
 	var result []domains.OrdersDomain
 	for _, val := range data {
 		result = append(result, val.ToDomain())
 	}
-
 	return result
 }
 
@@ -18,7 +19,7 @@ func FromOrdersDomain(data domains.OrdersDomain) Orders {
 		TotalPrice:      data.TotalPrice,
 		DiscountedPrice: data.DiscountedPrice,
 		CityId:          data.CityId,
-		City:            *FromCityDomain(&data.City),
+		City:            FromCityDomain(data.City),
 		Status:          data.Status,
 		Street:          data.Street,
 		Region:          data.Region,

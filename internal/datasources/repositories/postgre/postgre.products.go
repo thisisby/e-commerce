@@ -19,11 +19,18 @@ func NewPostgreProductsRepository(conn *sqlx.DB) domains.ProductsRepository {
 
 func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.stock, p.subcategory_id, p.brand_id, p.image, p.images, p.created_at, p.updated_at,
-		       s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
-		       b.id "brand.id", b.name "brand.name",
-		       COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
-		    	CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
+		SELECT 
+		    p.id, p.name, p.description, p.ingredients, p.c_code, 
+		    p.ed_izm, p.article, p.price, p.subcategory_id, p.brand_id, 
+		    p.image, p.images, p.created_at, p.updated_at,
+		    s.id "subcategory.id", s.name "subcategory.name", 
+		    s.category_id "subcategory.category_id",
+		    b.id "brand.id", b.name "brand.name",
+		    COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
+		    COALESCE(d.discount, 0) "discount.discount", 
+		    COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", 
+		    COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+		    CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		JOIN subcategories s ON p.subcategory_id = s.id
@@ -43,8 +50,8 @@ func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, er
 
 func (p *postgreProductsRepository) Save(product *domains.ProductDomain) error {
 	query := `
-		INSERT INTO products (name, description, price, subcategory_id, image, images, stock, brand_id)
-		VALUES (:name, :description, :price, :subcategory_id, :image, :images, :stock, :brand_id)		
+		INSERT INTO products (name, description, price, subcategory_id, image, images, brand_id)
+		VALUES (:name, :description, :price, :subcategory_id, :image, :images, :brand_id)		
 		`
 
 	productRecord := records.FromProductDomain(product)
@@ -59,8 +66,14 @@ func (p *postgreProductsRepository) Save(product *domains.ProductDomain) error {
 
 func (p *postgreProductsRepository) FindAllForMe(id int) ([]domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
-			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+		SELECT 
+		    p.id, p.name, p.description, p.price, p.ingredients, 
+		    p.c_code, p.ed_izm, p.article, p.image, p.images, 
+		    p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
+			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
+			COALESCE(d.discount, 0) "discount.discount", 
+			COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", 
+			COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 			s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
 			b.id "brand.id", b.name "brand.name",
 		CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
@@ -101,23 +114,18 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 
 	updateQuery := `
 		UPDATE products
-		SET name = $1, description = $2, price = $3, image = $4, images = $5, stock = $6, subcategory_id = $8, brand_id = $9
+		SET 
+		    name = $1, 
+		    description = $2, 
+		    price = $3, 
+		    image = $4,
+		    images = $5,
+		    subcategory_id = $8,
+		    brand_id = $9
 		WHERE id = $7
 	`
 
-	_, err = tx.Exec(updateQuery, productRecord.Name, productRecord.Description, productRecord.Price, productRecord.Image, productRecord.Images, productRecord.Stock, productRecord.SubcategoryId, productRecord.BrandId, productRecord.Id)
-	if err != nil {
-		tx.Rollback()
-		return helpers.PostgresErrorTransform(err)
-	}
-
-	// Delete cart items where quantity exceeds the new stock
-	deleteQuery := `
-		DELETE FROM cart_items
-		WHERE product_id = $1 AND quantity > $2
-	`
-
-	_, err = tx.Exec(deleteQuery, inDom.Id, inDom.Stock)
+	_, err = tx.Exec(updateQuery, productRecord.Name, productRecord.Description, productRecord.Price, productRecord.Image, productRecord.Images, productRecord.SubcategoryId, productRecord.BrandId, productRecord.Id)
 	if err != nil {
 		tx.Rollback()
 		return helpers.PostgresErrorTransform(err)
@@ -134,8 +142,14 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 
 func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
-			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+		SELECT 
+		    p.id, p.name, p.description, p.price, p.image, 
+		    p.ingredients, p.c_code, p.ed_izm, p.article,
+		    p.images, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
+			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
+			COALESCE(d.discount, 0) "discount.discount", 
+			COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", 
+			COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 			s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
 			b.id "brand.id", b.name "brand.name",
 		CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
@@ -162,8 +176,14 @@ func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcateg
 
 func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) ([]domains.ProductDomain, error) {
 	query := `
-		SELECT p.id, p.name, p.description, p.price, p.image, p.images, stock, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
-			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", COALESCE(d.discount, 0) "discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+		SELECT
+		    p.id, p.name, p.description, p.price, p.image, p.images, 
+		    p.ingredients, p.c_code, p.ed_izm, p.article,
+		    p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
+			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
+			COALESCE(d.discount, 0) "discount.discount",
+			COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date",
+			COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 			s.id "subcategory.id", s.name "subcategory.name", s.category_id "subcategory.category_id",
 			b.id "brand.id", b.name "brand.name",
 		CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
@@ -174,7 +194,7 @@ func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) (
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = $1
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		JOIN subcategories s ON p.subcategory_id = s.id
-		LEFT JOIN brands b ON p.brand_id = b.id
+		JOIN brands b ON p.brand_id = b.id
 		WHERE p.brand_id = $2
 		`
 
@@ -186,4 +206,44 @@ func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) (
 	}
 
 	return records.ToArrayOfProductsDomain(productsRecord), nil
+}
+
+func (p *postgreProductsRepository) SaveFrom1c(product *domains.ProductDomainV2) error {
+	query := `
+		INSERT INTO products (
+		                      name, 
+		                      description, 
+		                      price, 
+		                      article,
+		                      c_code,
+		                      ed_izm,
+		                      subcategory_id, 
+		                      brand_id,
+		                      ingredients,
+		                      image, 
+		                      created_at,
+		                      updated_at
+		                      )
+		VALUES (
+		        :name, 
+		        :description, 
+		        :price, 
+		        :article, 
+		        :c_code, 
+		        :ed_izm,
+		        :subcategory_id, 
+		        :brand_id,
+		        :ingredients,
+		        :image, 
+		        NOW(),
+		        NOW()
+		        )
+		`
+
+	_, err := p.conn.NamedQuery(query, product)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
 }

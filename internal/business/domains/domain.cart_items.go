@@ -5,9 +5,9 @@ import "time"
 type CartItemsDomain struct {
 	Id        int
 	UserId    int
-	User      UserDomain
+	User      *UserDomain
 	ProductId int
-	Product   ProductDomain
+	Product   *ProductDomain
 	Quantity  int
 	CreatedAt time.Time
 	UpdatedAt time.Time

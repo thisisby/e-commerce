@@ -92,7 +92,6 @@ func (u *usersUsecase) FindByPhone(phone string) (outDom *domains.UserDomain, st
 }
 
 func (u *usersUsecase) Login(inDom *domains.UserDomain) (outDom *domains.UserDomain, statusCode int, err error) {
-	slog.Info("inDom login: ", inDom)
 	if inDom.Role == constants.Client {
 		inDom.AccessToken, err = u.jwtService.GenerateToken(inDom.Id, false, time.Duration(config.AppConfig.JWTExpires))
 		inDom.RefreshToken, err = u.jwtService.GenerateToken(inDom.Id, false, time.Duration(config.AppConfig.JWTRefreshExpires))

@@ -3,6 +3,9 @@ package records
 import "ga_marketplace/internal/business/domains"
 
 func (r *SubcategoriesRecord) ToDomain() *domains.SubcategoriesDomain {
+	if r == nil {
+		return nil
+	}
 	return &domains.SubcategoriesDomain{
 		Id:         r.Id,
 		Name:       r.Name,

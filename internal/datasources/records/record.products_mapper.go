@@ -3,6 +3,9 @@ package records
 import "ga_marketplace/internal/business/domains"
 
 func (p *Products) ToDomain() *domains.ProductDomain {
+	if p == nil || p.Id == 0 {
+		return nil
+	}
 	var discountDomain *domains.DiscountsDomain
 	if p.Discount != nil {
 		discountDomain = p.Discount.ToDiscountsDomain()
@@ -12,6 +15,10 @@ func (p *Products) ToDomain() *domains.ProductDomain {
 		Name:            p.Name,
 		Description:     p.Description,
 		Price:           p.Price,
+		Ingredients:     p.Ingredients,
+		Article:         p.Article,
+		CCode:           p.CCode,
+		EdIzm:           p.EdIzm,
 		DiscountedPrice: p.DiscountedPrice,
 		TotalPrice:      p.TotalPrice,
 		Discount:        discountDomain,
@@ -23,7 +30,6 @@ func (p *Products) ToDomain() *domains.ProductDomain {
 		Images:          p.Images,
 		IsInCart:        p.IsInCart,
 		IsInWishlist:    p.IsInWishlist,
-		Stock:           p.Stock,
 		CreatedAt:       p.CreatedAt,
 		UpdatedAt:       p.UpdatedAt,
 	}
@@ -39,7 +45,6 @@ func FromProductDomain(inDom *domains.ProductDomain) Products {
 		BrandId:       inDom.BrandId,
 		Image:         inDom.Image,
 		Images:        inDom.Images,
-		Stock:         inDom.Stock,
 		CreatedAt:     inDom.CreatedAt,
 		UpdatedAt:     inDom.UpdatedAt,
 	}

@@ -23,15 +23,15 @@ type UserResponse struct {
 	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
-func FromUserDomain(inDom *domains.UserDomain) UserResponse {
-	return UserResponse{
+func FromUserDomain(inDom *domains.UserDomain) *UserResponse {
+	return &UserResponse{
 		Id:          inDom.Id,
 		Phone:       inDom.Phone,
 		Name:        inDom.Name,
 		DateOfBirth: inDom.DateOfBirth,
 		Role:        inDom.Role,
 		CityId:      inDom.CityId,
-		City:        FromCityDomain(&inDom.City),
+		City:        FromCityDomain(inDom.City),
 		Street:      inDom.Street,
 		Region:      inDom.Region,
 		Email:       inDom.Email,
@@ -47,7 +47,7 @@ func FromUsersDomain(inDom []domains.UserDomain) []UserResponse {
 	var outDom []UserResponse
 
 	for _, rec := range inDom {
-		outDom = append(outDom, FromUserDomain(&rec))
+		outDom = append(outDom, *FromUserDomain(&rec))
 	}
 
 	return outDom

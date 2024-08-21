@@ -65,7 +65,6 @@ func (p *ProductHandler) Save(ctx echo.Context) error {
 		SubcategoryId: productCreateRequest.SubCategoryId,
 		Image:         mainImageUrl,
 		Images:        imageUrls,
-		Stock:         productCreateRequest.Stock,
 	}
 
 	statusCode, err := p.productUsecase.Save(productDomain)
@@ -141,9 +140,6 @@ func (p *ProductHandler) UpdateById(ctx echo.Context) error {
 	if productUpdateRequest.Price != nil {
 		product.Price = *productUpdateRequest.Price
 	}
-	if productUpdateRequest.Stock != nil {
-		product.Stock = *productUpdateRequest.Stock
-	}
 	if productUpdateRequest.SubCategory != nil {
 		product.SubcategoryId = *productUpdateRequest.SubCategory
 	}
@@ -198,4 +194,19 @@ func (p *ProductHandler) FindByBrandId(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, statusCode, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
+}
+
+func (p *ProductHandler) SaveFrom1c(ctx echo.Context) error {
+	var productCreateRequest domains.ProductDomainV2
+
+	if err := helpers.BindAndValidate(ctx, &productCreateRequest); err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	statusCode, err := p.productUsecase.SaveFrom1c(&productCreateRequest)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusCreated, "Saved successfully", nil)
 }

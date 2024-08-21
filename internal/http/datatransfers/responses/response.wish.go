@@ -6,12 +6,12 @@ import (
 )
 
 type WishResponse struct {
-	Id        int             `json:"id"`
-	UserId    int             `json:"user_id"`
-	ProductId int             `json:"product_id"`
-	Product   ProductResponse `json:"product"`
-	CreatedAt time.Time       `json:"created_at"`
-	UpdatedAt time.Time       `json:"updated_at"`
+	Id        int              `json:"id"`
+	UserId    int              `json:"user_id"`
+	ProductId int              `json:"product_id"`
+	Product   *ProductResponse `json:"product"`
+	CreatedAt time.Time        `json:"created_at"`
+	UpdatedAt time.Time        `json:"updated_at"`
 }
 
 func FromWishDomain(inDom *domains.WishDomain) WishResponse {

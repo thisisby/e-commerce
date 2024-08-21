@@ -8,7 +8,7 @@ func init() {
 	BrandsData = []records.Brands{
 		{
 			Id:   1,
-			Name: "Brand 1",
+			Name: "No brands",
 		},
 		{
 			Id:   2,

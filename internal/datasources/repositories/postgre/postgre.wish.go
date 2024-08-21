@@ -20,15 +20,20 @@ func NewPostgreWishRepository(conn *sqlx.DB) domains.WishRepository {
 
 func (p *postgreWishRepository) FindByUserId(id int) ([]domains.WishDomain, error) {
 	var query = `
-		SELECT w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",  p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at",
-		       s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
-		       b.id "product.brand.id", b.name "product.brand.name",
-		COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
-			   CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
-		       CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
-		       CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_cart",
-			   CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_wishlist"
+		SELECT 
+		    w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
+			p.id "product.id", p.name "product.name", p.description "product.description",
+			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
+			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+			p.price "product.price", p.image "product.image", p.images "product.images",
+			p.created_at "product.created_at", p.updated_at "product.updated_at",
+		    s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
+		    b.id "product.brand.id", b.name "product.brand.name",
+			COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
+			CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
+		    CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
+		    CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_cart",
+			CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_wishlist"
 		FROM wishes w
 		JOIN products p ON w.product_id = p.id
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
@@ -43,8 +48,6 @@ func (p *postgreWishRepository) FindByUserId(id int) ([]domains.WishDomain, erro
 	if err != nil {
 		return nil, helpers.PostgresErrorTransform(err)
 	}
-
-	slog.Info("postgreWishRepository.FindByUserId", wishRecord)
 
 	return records.ToArrayOfWishesDomain(wishRecord), nil
 }
@@ -82,7 +85,8 @@ func (p *postgreWishRepository) DeleteByIdAndUserId(id int, userId int) error {
 func (p *postgreWishRepository) FindById(id int) (*domains.WishDomain, error) {
 	query := `
 		SELECT w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
+		       p.id "product.id", p.name "product.name", p.description "product.description", 
+		       p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
 		FROM wishes w
 		JOIN products p ON w.product_id = p.id
 		WHERE w.id = $1
@@ -100,8 +104,13 @@ func (p *postgreWishRepository) FindById(id int) (*domains.WishDomain, error) {
 
 func (p *postgreWishRepository) FindByUserIdAndProductId(userId int, productId int) (*domains.WishDomain, error) {
 	query := `
-		SELECT w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
+		SELECT 
+		    w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
+		    p.id "product.id", p.name "product.name", p.description "product.description",
+			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
+			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+			p.price "product.price", p.image "product.image", p.images "product.images",
+			p.created_at "product.created_at", p.updated_at "product.updated_at"
 		FROM wishes w
 		JOIN products p ON w.product_id = p.id
 		WHERE w.user_id = $1 AND w.product_id = $2
@@ -118,8 +127,13 @@ func (p *postgreWishRepository) FindByUserIdAndProductId(userId int, productId i
 
 func (p *postgreWishRepository) FindAll() ([]domains.WishDomain, error) {
 	query := `
-		SELECT w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
+		SELECT
+		    w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
+		    p.id "product.id", p.name "product.name", p.description "product.description",
+			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
+			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+			p.price "product.price", p.image "product.image", p.images "product.images",
+			p.created_at "product.created_at", p.updated_at "product.updated_at"
 		FROM wishes w
 		JOIN products p ON w.product_id = p.id
 		`

@@ -9,7 +9,6 @@ import (
 
 type Seeder interface {
 	RolesSeeder(rolesData []records.Roles) (err error)
-	ProductsSeeder(productsData []records.Products) (err error)
 	UsersSeeder(usersData []records.Users) (err error)
 	CitiesSeeder(citiesData []records.Cities) (err error)
 	CategoriesSeeder(categoriesData []records.Categories) (err error)
@@ -22,9 +21,7 @@ type seeder struct {
 }
 
 func NewSeeder(conn *sqlx.DB) Seeder {
-	return &seeder{
-		conn: conn,
-	}
+	return &seeder{conn: conn}
 }
 
 func (s *seeder) RolesSeeder(rolesData []records.Roles) (err error) {
@@ -41,27 +38,6 @@ func (s *seeder) RolesSeeder(rolesData []records.Roles) (err error) {
 		}
 	}
 	slog.Info("Roles data seeded successfully")
-
-	return nil
-}
-
-func (s *seeder) ProductsSeeder(productsData []records.Products) (err error) {
-	query := `
-        INSERT INTO products (name, description, price, subcategory_id, brand_id, image, stock, created_at, updated_at)
-        VALUES (:name, :description, :price, :subcategory_id, :brand_id, :image, :stock, :created_at, :updated_at)
-    `
-	if len(productsData) == 0 {
-		return errors.New("products data is empty")
-	}
-
-	slog.Info("Seeding products data...")
-	for _, product := range productsData {
-		_, err = s.conn.NamedExec(query, product)
-		if err != nil {
-			return err
-		}
-	}
-	slog.Info("Products data seeded successfully")
 
 	return nil
 }

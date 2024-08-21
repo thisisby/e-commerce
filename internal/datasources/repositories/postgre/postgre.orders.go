@@ -73,11 +73,17 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 	}()
 
 	query := `
-		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.street_num, o.email, o.delivery_method, o.created_at, o.updated_at,
-			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
-			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
-			u.date_of_birth "user.date_of_birth", u.email "user.email", u.street_num "user.street_num", u.created_at "user.created_at", u.updated_at "user.updated_at",
-			c.id "city.id", c.name "city.name", c.delivery_duration_days "city.delivery_duration_days"
+		SELECT 
+		    o.id, o.user_id, o.total_price, o.discounted_price,
+		    o.status, o.street, o.region, o.apartment, o.street_num,
+		    o.email, o.delivery_method, o.created_at, o.updated_at,
+			u.id "user.id", u.name "user.name", u.phone "user.phone",
+			r.name "user.role.name", u.city_id "user.city_id", u.street "user.street",
+			u.region "user.region", u.apartment "user.apartment",
+			u.date_of_birth "user.date_of_birth", u.email "user.email",
+			u.street_num "user.street_num", u.created_at "user.created_at",
+			u.updated_at "user.updated_at", c.id "city.id", c.name "city.name",
+			c.delivery_duration_days "city.delivery_duration_days"
 		FROM orders o
 		JOIN users u ON o.user_id = u.id
 		LEFT JOIN roles r ON u.role_id = r.id
@@ -100,11 +106,20 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 	}
 
 	queryOrderDetails := `
-			SELECT od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
-				p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
-				s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
-				b.id "product.brand.id", b.name "product.brand.name",
-				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
+			SELECT 
+			    od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
+			    p.id "product.id", p.name "product.name", p.description "product.description",
+			    p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
+			    p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+				p.price "product.price", p.image "product.image", p.images "product.images",
+				p.created_at "product.created_at", p.updated_at "product.updated_at",
+				s.id "product.subcategory.id", s.name "product.subcategory.name",
+				s.category_id "product.subcategory.category_id", b.id "product.brand.id",
+				b.name "product.brand.name",
+				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id",
+				COALESCE(d.discount, 0) "product.discount.discount", 
+				COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date",
+				COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
 			FROM order_details od
 			JOIN products p ON od.product_id = p.id
@@ -124,7 +139,9 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 		ordersRecord[i].OrderDetails = orderDetailsRecord
 	}
 
-	return records.ToArrayOfOrdersDomain(ordersRecord), nil
+	mappedOrders := records.ToArrayOfOrdersDomain(ordersRecord)
+
+	return mappedOrders, nil
 }
 
 func (p *postgreOrdersRepository) Update(orders domains.OrdersDomain) error {
@@ -136,6 +153,7 @@ func (p *postgreOrdersRepository) Update(orders domains.OrdersDomain) error {
 		    apartment = COALESCE(:apartment, apartment), 
 		    street_num = COALESCE(:street_num, street_num),
 		    email = COALESCE(:email, email),
+		    city_id = COALESCE(:city_id, city_id),
 		    delivery_method = COALESCE(:delivery_method, delivery_method),
 		    updated_at = NOW()
 		WHERE id = :id
@@ -217,11 +235,19 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 	}
 
 	queryOrderDetails := `
-			SELECT od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
-				p.id "product.id", p.name "product.name", p.description "product.description", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id", p.price "product.price", p.image "product.image", p.images "product.images", p.stock "product.stock", p.created_at "product.created_at", p.updated_at "product.updated_at",
+			SELECT 
+			    od.id, od.order_id, od.product_id, od.quantity, od.price, od.sub_total,
+			    p.id "product.id", p.name "product.name", p.description "product.description",
+			    p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
+			    p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+				p.price "product.price", p.image "product.image", p.images "product.images",
+				p.created_at "product.created_at", p.updated_at "product.updated_at",
 				s.id "product.subcategory.id", s.name "product.subcategory.name", s.category_id "product.subcategory.category_id",
 				b.id "product.brand.id", b.name "product.brand.name",
-				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id", COALESCE(d.discount, 0) "product.discount.discount", COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date", COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
+				COALESCE(d.id, -1) "product.discount.id", COALESCE(d.product_id, 0) "product.discount.product_id",
+				COALESCE(d.discount, 0) "product.discount.discount", 
+				COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date",
+				COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
 				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
 			FROM order_details od
 			JOIN products p ON od.product_id = p.id

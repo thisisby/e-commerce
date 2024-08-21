@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS service_items (
     duration INT NOT NULL,
     description VARCHAR(255) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    subservice_id INT NOT NULL REFERENCES subservices(id)
+    subservice_id INT NOT NULL REFERENCES subservices(id) ON DELETE CASCADE
 );

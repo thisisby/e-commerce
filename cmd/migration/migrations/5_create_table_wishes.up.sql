@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS wishes
 (
     id         SERIAL PRIMARY KEY,
-    user_id    int NOT NULL REFERENCES users(id),
-    product_id INT NOT NULL REFERENCES products(id),
+    user_id    int NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

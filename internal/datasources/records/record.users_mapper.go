@@ -15,7 +15,7 @@ func (r *Users) ToDomain() *domains.UserDomain {
 		Phone:        r.Phone,
 		Role:         r.Role.Name,
 		CityId:       r.CityId,
-		City:         *r.City.ToDomain(),
+		City:         r.City.ToDomain(),
 		Email:        r.Email,
 		StreetNum:    r.StreetNum,
 		Street:       r.Street,

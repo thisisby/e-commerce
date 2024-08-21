@@ -3,6 +3,9 @@ package records
 import "ga_marketplace/internal/business/domains"
 
 func (r *Cities) ToDomain() *domains.CityDomain {
+	if r == nil || r.Id == 0 {
+		return nil
+	}
 	return &domains.CityDomain{
 		Id:                   r.Id,
 		Name:                 r.Name,
@@ -11,6 +14,9 @@ func (r *Cities) ToDomain() *domains.CityDomain {
 }
 
 func FromCityDomain(domain *domains.CityDomain) *Cities {
+	if domain == nil {
+		return nil
+	}
 	return &Cities{
 		Id:                   domain.Id,
 		Name:                 domain.Name,

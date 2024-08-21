@@ -9,6 +9,9 @@ type CityResponse struct {
 }
 
 func FromCityDomain(inDom *domains.CityDomain) *CityResponse {
+	if inDom == nil {
+		return nil
+	}
 	return &CityResponse{
 		Id:                   inDom.Id,
 		Name:                 inDom.Name,

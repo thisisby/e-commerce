@@ -8,12 +8,12 @@ import (
 type Orders struct {
 	Id              int            `db:"id"`
 	UserId          int            `db:"user_id"`
-	User            Users          `db:"user"`
+	User            *Users         `db:"user"`
 	OrderDetails    []OrderDetails `db:"order_details"`
 	TotalPrice      float64        `db:"total_price"`
 	DiscountedPrice float64        `db:"discounted_price"`
 	CityId          int            `db:"city_id"`
-	City            Cities         `db:"city"`
+	City            *Cities        `db:"city"`
 	Status          string         `db:"status"`
 	Street          string         `db:"street"`
 	Region          string         `db:"region"`
@@ -26,13 +26,13 @@ type Orders struct {
 }
 
 type OrderDetails struct {
-	Id        int      `db:"id"`
-	OrderId   int      `db:"order_id"`
-	ProductId int      `db:"product_id"`
-	Product   Products `db:"product"`
-	Quantity  int      `db:"quantity"`
-	Price     float64  `db:"price"`
-	SubTotal  float64  `db:"sub_total"`
+	Id        int       `db:"id"`
+	OrderId   int       `db:"order_id"`
+	ProductId int       `db:"product_id"`
+	Product   *Products `db:"product"`
+	Quantity  int       `db:"quantity"`
+	Price     float64   `db:"price"`
+	SubTotal  float64   `db:"sub_total"`
 }
 
 func (r *OrderDetails) ToDomain() domains.OrderDetailsDomain {
@@ -40,7 +40,7 @@ func (r *OrderDetails) ToDomain() domains.OrderDetailsDomain {
 		Id:        r.Id,
 		OrderId:   r.OrderId,
 		ProductId: r.ProductId,
-		Product:   *r.Product.ToDomain(),
+		Product:   r.Product.ToDomain(),
 		Quantity:  r.Quantity,
 		Price:     r.Price,
 		SubTotal:  r.SubTotal,
@@ -62,12 +62,12 @@ func (r *Orders) ToDomain() domains.OrdersDomain {
 	domain := domains.OrdersDomain{
 		Id:              r.Id,
 		UserId:          r.UserId,
-		User:            *r.User.ToDomain(),
+		User:            r.User.ToDomain(),
 		OrderDetails:    ToArrayOfOrderDetailsDomain(r.OrderDetails),
 		TotalPrice:      r.TotalPrice,
 		DiscountedPrice: r.DiscountedPrice,
 		CityId:          r.CityId,
-		City:            *r.City.ToDomain(),
+		City:            r.City.ToDomain(),
 		Status:          r.Status,
 		Street:          r.Street,
 		Region:          r.Region,
@@ -76,6 +76,5 @@ func (r *Orders) ToDomain() domains.OrdersDomain {
 		Email:           r.Email,
 		DeliveryMethod:  r.DeliveryMethod,
 	}
-
 	return domain
 }

@@ -10,7 +10,7 @@ func init() {
 	CategoriesData = []records.Categories{
 		{
 			Id:   1,
-			Name: "Category 1",
+			Name: "No Category",
 		},
 		{
 			Id:   2,

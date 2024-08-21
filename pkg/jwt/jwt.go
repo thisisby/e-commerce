@@ -37,10 +37,13 @@ func (j *jwtService) GenerateToken(userId int, isAdmin bool, duration time.Durat
 		userId,
 		isAdmin,
 		jwt.StandardClaims{
-			ExpiresAt: helpers.GetCurrentTime().Add(time.Hour * duration).Unix(),
-			Issuer:    j.issuer,
-			IssuedAt:  helpers.GetCurrentTime().Unix(),
+			Issuer:   j.issuer,
+			IssuedAt: helpers.GetCurrentTime().Unix(),
 		},
+	}
+
+	if !isAdmin {
+		claims.ExpiresAt = helpers.GetCurrentTime().Add(time.Hour * duration).Unix()
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

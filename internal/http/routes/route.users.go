@@ -63,8 +63,10 @@ func (r *UsersRoute) Register() {
 
 	users.Use(r.authMiddleware.Handle)
 	users.PATCH("", r.usersHandler.UpdateMe)
+	users.DELETE("", r.usersHandler.DeleteMe)
 
 	admin.Use(r.adminMid.Handle)
 	admin.GET("", r.usersHandler.GetAllUsers)
+	admin.DELETE("/:id", r.usersHandler.DeleteUser)
 
 }

@@ -138,3 +138,17 @@ func (p *postgreUsersRepository) FindAll() ([]domains.UserDomain, error) {
 
 	return records.ToArrayOfUsersDomain(usersRecord), nil
 }
+
+func (p *postgreUsersRepository) Delete(id int) error {
+	query := `
+		DELETE FROM users WHERE id = $1
+		`
+
+	_, err := p.conn.Exec(query, id)
+	if err != nil {
+		slog.Error("PostgreUsersRepository.Delete: ", err)
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}

@@ -125,6 +125,7 @@ func main() {
 	routes.NewServiceAddressRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewStaffRoute(conn, v1, s3Client, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewAppointmentRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewProductStockRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 

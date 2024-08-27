@@ -100,3 +100,25 @@ func (p *productsUsecase) SaveFrom1c(product *domains.ProductDomainV2) (int, err
 
 	return http.StatusCreated, nil
 }
+
+func (p *productsUsecase) UpdateFrom1c(code string, product *domains.ProductDomain) (int, error) {
+	err := p.productsRepo.UpdateFrom1c(code, product)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func (p *productsUsecase) FindByCode(code string) (*domains.ProductDomain, int, error) {
+	product, err := p.productsRepo.FindByCode(code)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if product == nil {
+		return nil, http.StatusNotFound, errors.New("product not found")
+	}
+
+	return product, http.StatusOK, nil
+}

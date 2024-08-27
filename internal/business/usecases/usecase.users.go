@@ -188,3 +188,12 @@ func (u *usersUsecase) FindAll() (outDom []domains.UserDomain, statusCode int, e
 
 	return outDom, http.StatusOK, nil
 }
+
+func (u *usersUsecase) Delete(id int) (statusCode int, err error) {
+	err = u.userRepo.Delete(id)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}

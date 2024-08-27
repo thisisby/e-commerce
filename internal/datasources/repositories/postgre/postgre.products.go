@@ -22,7 +22,7 @@ func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, er
 		SELECT 
 		    p.id, p.name, p.description, p.ingredients, p.c_code, 
 		    p.ed_izm, p.article, p.price, p.subcategory_id, p.brand_id, 
-		    p.image, p.images, p.created_at, p.updated_at,
+		    p.image, p.images, p.weight, p.created_at, p.updated_at,
 		    s.id "subcategory.id", s.name "subcategory.name", 
 		    s.category_id "subcategory.category_id",
 		    b.id "brand.id", b.name "brand.name",
@@ -68,7 +68,7 @@ func (p *postgreProductsRepository) FindAllForMe(id int) ([]domains.ProductDomai
 	query := `
 		SELECT 
 		    p.id, p.name, p.description, p.price, p.ingredients, 
-		    p.c_code, p.ed_izm, p.article, p.image, p.images, 
+		    p.c_code, p.ed_izm, p.article, p.image, p.images, p.weight,
 		    p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
 			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
 			COALESCE(d.discount, 0) "discount.discount", 
@@ -115,17 +115,22 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 	updateQuery := `
 		UPDATE products
 		SET 
-		    name = $1, 
-		    description = $2, 
-		    price = $3, 
-		    image = $4,
-		    images = $5,
-		    subcategory_id = $8,
-		    brand_id = $9
-		WHERE id = $7
+		    weight = $1,
+		    image = $2,
+		    images = $3,
+		    subcategory_id = $4,
+		    brand_id = $5
+		WHERE id = $6
 	`
 
-	_, err = tx.Exec(updateQuery, productRecord.Name, productRecord.Description, productRecord.Price, productRecord.Image, productRecord.Images, productRecord.SubcategoryId, productRecord.BrandId, productRecord.Id)
+	_, err = tx.Exec(updateQuery,
+		productRecord.Weight,
+		productRecord.Image,
+		productRecord.Images,
+		productRecord.SubcategoryId,
+		productRecord.BrandId,
+		productRecord.Id,
+	)
 	if err != nil {
 		tx.Rollback()
 		return helpers.PostgresErrorTransform(err)
@@ -144,7 +149,7 @@ func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcateg
 	query := `
 		SELECT 
 		    p.id, p.name, p.description, p.price, p.image, 
-		    p.ingredients, p.c_code, p.ed_izm, p.article,
+		    p.ingredients, p.c_code, p.ed_izm, p.article, p.weight,
 		    p.images, p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
 			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
 			COALESCE(d.discount, 0) "discount.discount", 
@@ -178,7 +183,7 @@ func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) (
 	query := `
 		SELECT
 		    p.id, p.name, p.description, p.price, p.image, p.images, 
-		    p.ingredients, p.c_code, p.ed_izm, p.article,
+		    p.ingredients, p.c_code, p.ed_izm, p.article, p.weight,
 		    p.created_at, p.updated_at, p.subcategory_id, p.brand_id,
 			COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
 			COALESCE(d.discount, 0) "discount.discount",
@@ -246,4 +251,65 @@ func (p *postgreProductsRepository) SaveFrom1c(product *domains.ProductDomainV2)
 	}
 
 	return nil
+}
+
+func (p *postgreProductsRepository) UpdateFrom1c(code string, product *domains.ProductDomain) error {
+	query := `
+		UPDATE products
+		SET 
+		    name = $1,
+		    description = $2,
+		    price = $3,
+		    article = $4,
+		    c_code = $5,
+		    ed_izm = $6,
+		    updated_at = NOW()
+		WHERE c_code = $7
+		`
+
+	_, err := p.conn.Exec(query,
+		product.Name,
+		product.Description,
+		product.Price,
+		product.Article,
+		product.CCode,
+		product.EdIzm,
+		code,
+	)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}
+
+func (p *postgreProductsRepository) FindByCode(code string) (*domains.ProductDomain, error) {
+	query := `
+		SELECT 
+		    p.id, p.name, p.description, p.ingredients, p.c_code, 
+		    p.ed_izm, p.article, p.price, p.subcategory_id, p.brand_id, 
+		    p.image, p.images, p.weight, p.created_at, p.updated_at,
+		    s.id "subcategory.id", s.name "subcategory.name", 
+		    s.category_id "subcategory.category_id",
+		    b.id "brand.id", b.name "brand.name",
+		    COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
+		    COALESCE(d.discount, 0) "discount.discount", 
+		    COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", 
+		    COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
+		    CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price"
+		FROM products p
+		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+		JOIN subcategories s ON p.subcategory_id = s.id
+		JOIN brands b ON p.brand_id = b.id
+		WHERE p.c_code = $1
+		`
+
+	var productRecord records.Products
+
+	err := p.conn.Get(&productRecord, query, code)
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return productRecord.ToDomain(), nil
 }

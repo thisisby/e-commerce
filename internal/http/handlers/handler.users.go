@@ -14,6 +14,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"net/http"
+	"strconv"
 )
 
 type UsersHandler struct {
@@ -263,4 +264,39 @@ func (u *UsersHandler) GetAllUsers(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Users found", responses.FromUsersDomain(users))
+}
+
+func (u *UsersHandler) DeleteUser(ctx echo.Context) error {
+	idStr := ctx.Param("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid ID")
+	}
+
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	statusCode, err := u.userUsecase.Delete(id)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "User deleted successfully", nil)
+}
+
+func (u *UsersHandler) DeleteMe(ctx echo.Context) error {
+	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
+
+	if &jwtClaims == nil {
+		return NewErrorResponse(ctx, http.StatusUnauthorized, "User not found")
+	}
+
+	statusCode, err := u.userUsecase.Delete(jwtClaims.UserId)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "User deleted successfully", nil)
 }

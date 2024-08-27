@@ -14,6 +14,7 @@ type ProductResponse struct {
 	CCode           string               `json:"c_code"`
 	EdIzm           string               `json:"ed_izm"`
 	Price           float64              `json:"price"`
+	Weight          *float64             `json:"weight"`
 	DiscountedPrice float64              `json:"discounted_price"`
 	TotalPrice      *float64             `json:"total_price"`
 	IsInCart        bool                 `json:"is_in_cart"`
@@ -45,6 +46,7 @@ func FromProductDomain(inDom *domains.ProductDomain) *ProductResponse {
 		IsInCart:        inDom.IsInCart,
 		IsInWishlist:    inDom.IsInWishlist,
 		SubCategoryId:   inDom.SubcategoryId,
+		Weight:          inDom.Weight,
 		SubCategory:     FromSubcategoryDomain(inDom.Subcategory),
 		BrandId:         inDom.BrandId,
 		Brand:           FromBrandDomain(inDom.Brand),

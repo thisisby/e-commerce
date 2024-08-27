@@ -58,5 +58,6 @@ func (r *ProductRoute) Register() {
 	admin.Use(r.adminMilddleware.Handle)
 	admin.POST("", r.productHandler.Save)
 	admin.POST("/from1c", r.productHandler.SaveFrom1c)
+	admin.PATCH("/from1c/:c_code", r.productHandler.UpdateFrom1c)
 	admin.PATCH("/:id", r.productHandler.UpdateById)
 }

@@ -9,9 +9,16 @@ type ProductCreateRequest struct {
 }
 
 type ProductUpdateRequest struct {
-	Name        *string  `form:"name"`
-	Description *string  `form:"description"`
-	Price       *float64 `form:"price"`
+	Weight      *float64 `form:"weight"`
 	SubCategory *int     `form:"sub_category_id"`
 	BrandId     *int     `form:"brand_id"`
+}
+
+type ProductUpdateFrom1c struct {
+	Name        *string  `json:"name"`
+	Description *string  `json:"description"`
+	Price       *float64 `json:"price"`
+	Article     *string  `json:"article"`
+	CCode       *string  `json:"c_code"`
+	EdIzm       *string  `json:"ed_izm"`
 }

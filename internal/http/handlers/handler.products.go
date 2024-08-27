@@ -131,14 +131,8 @@ func (p *ProductHandler) UpdateById(ctx echo.Context) error {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	if productUpdateRequest.Name != nil {
-		product.Name = *productUpdateRequest.Name
-	}
-	if productUpdateRequest.Description != nil {
-		product.Description = *productUpdateRequest.Description
-	}
-	if productUpdateRequest.Price != nil {
-		product.Price = *productUpdateRequest.Price
+	if productUpdateRequest.Weight != nil {
+		product.Weight = productUpdateRequest.Weight
 	}
 	if productUpdateRequest.SubCategory != nil {
 		product.SubcategoryId = *productUpdateRequest.SubCategory
@@ -209,4 +203,44 @@ func (p *ProductHandler) SaveFrom1c(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, http.StatusCreated, "Saved successfully", nil)
+}
+
+func (p *ProductHandler) UpdateFrom1c(ctx echo.Context) error {
+	var productUpdateRequest requests.ProductUpdateFrom1c
+	cCode := ctx.Param("c_code")
+
+	if err := helpers.BindAndValidate(ctx, &productUpdateRequest); err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	product, statusCode, err := p.productUsecase.FindByCode(cCode)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	if productUpdateRequest.Name != nil {
+		product.Name = *productUpdateRequest.Name
+	}
+	if productUpdateRequest.Description != nil {
+		product.Description = *productUpdateRequest.Description
+	}
+	if productUpdateRequest.Price != nil {
+		product.Price = *productUpdateRequest.Price
+	}
+	if productUpdateRequest.Article != nil {
+		product.Article = *productUpdateRequest.Article
+	}
+	if productUpdateRequest.CCode != nil {
+		product.CCode = *productUpdateRequest.CCode
+	}
+	if productUpdateRequest.EdIzm != nil {
+		product.EdIzm = *productUpdateRequest.EdIzm
+	}
+
+	statusCode, err = p.productUsecase.UpdateFrom1c(cCode, product)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Updated successfully", nil)
 }

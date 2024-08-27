@@ -23,7 +23,7 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 	query := `
 		SELECT
 		    c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
-			p.id "product.id", p.name "product.name", p.description "product.description",
+			p.id "product.id", p.name "product.name", p.weight "product.weight", p.description "product.description",
 			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
 			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
 			p.price "product.price", p.image "product.image", p.images "product.images",
@@ -104,7 +104,8 @@ func (p *postgreCartsRepository) FindById(id int) (*domains.CartItemsDomain, err
 		    c.id, c.user_id, c.product_id, c.quantity, c.created_at, c.updated_at,
 		    p.id "product.id", p.name "product.name", p.description "product.description",
 			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
-			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id", 
+			p.weight "product.weight",
 			p.price "product.price", p.image "product.image", p.images "product.images",
 			p.created_at "product.created_at", p.updated_at "product.updated_at",
 		FROM cart_items c

@@ -23,7 +23,7 @@ func (p *postgreWishRepository) FindByUserId(id int) ([]domains.WishDomain, erro
 		SELECT 
 		    w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
 			p.id "product.id", p.name "product.name", p.description "product.description",
-			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
+			p.ingredients "product.ingredients", p.weight "product.weight", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
 			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
 			p.price "product.price", p.image "product.image", p.images "product.images",
 			p.created_at "product.created_at", p.updated_at "product.updated_at",
@@ -85,7 +85,7 @@ func (p *postgreWishRepository) DeleteByIdAndUserId(id int, userId int) error {
 func (p *postgreWishRepository) FindById(id int) (*domains.WishDomain, error) {
 	query := `
 		SELECT w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		       p.id "product.id", p.name "product.name", p.description "product.description", 
+		       p.id "product.id", p.weight "product.weight", p.name "product.name", p.description "product.description", 
 		       p.price "product.price", p.created_at "product.created_at", p.updated_at "product.updated_at"
 		FROM wishes w
 		JOIN products p ON w.product_id = p.id
@@ -108,7 +108,7 @@ func (p *postgreWishRepository) FindByUserIdAndProductId(userId int, productId i
 		    w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
 		    p.id "product.id", p.name "product.name", p.description "product.description",
 			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
-			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
+			p.article "product.article", p.weight "product.weight", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
 			p.price "product.price", p.image "product.image", p.images "product.images",
 			p.created_at "product.created_at", p.updated_at "product.updated_at"
 		FROM wishes w
@@ -129,7 +129,7 @@ func (p *postgreWishRepository) FindAll() ([]domains.WishDomain, error) {
 	query := `
 		SELECT
 		    w.id, w.user_id, w.product_id, w.created_at, w.updated_at,
-		    p.id "product.id", p.name "product.name", p.description "product.description",
+		    p.id "product.id", p.weight "product.weight", p.name "product.name", p.description "product.description",
 			p.ingredients "product.ingredients", p.c_code "product.c_code", p.ed_izm "product.ed_izm",
 			p.article "product.article", p.subcategory_id "product.subcategory_id", p.brand_id "product.brand_id",
 			p.price "product.price", p.image "product.image", p.images "product.images",

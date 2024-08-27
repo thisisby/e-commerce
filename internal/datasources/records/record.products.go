@@ -14,6 +14,7 @@ type Products struct {
 	CCode           string               `db:"c_code"`
 	EdIzm           string               `db:"ed_izm"`
 	Price           float64              `db:"price"`
+	Weight          *float64             `db:"weight"`
 	DiscountedPrice float64              `db:"discounted_price"`
 	TotalPrice      *float64             `db:"total_price"`
 	Discount        *Discounts           `db:"discount"`

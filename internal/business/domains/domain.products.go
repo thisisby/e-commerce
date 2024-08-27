@@ -11,6 +11,7 @@ type ProductDomain struct {
 	CCode           string
 	EdIzm           string
 	Price           float64
+	Weight          *float64
 	DiscountedPrice float64
 	TotalPrice      *float64
 	Discount        *DiscountsDomain
@@ -48,6 +49,8 @@ type ProductsRepository interface {
 	UpdateById(inDom ProductDomain) error
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, error)
 	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, error)
+	UpdateFrom1c(code string, product *ProductDomain) error
+	FindByCode(code string) (*ProductDomain, error)
 }
 
 type ProductsUsecase interface {
@@ -58,4 +61,6 @@ type ProductsUsecase interface {
 	FindById(id int) (*ProductDomain, int, error)
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, int, error)
 	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, int, error)
+	UpdateFrom1c(code string, product *ProductDomain) (int, error)
+	FindByCode(code string) (*ProductDomain, int, error)
 }

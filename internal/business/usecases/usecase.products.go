@@ -3,6 +3,7 @@ package usecases
 import (
 	"errors"
 	"ga_marketplace/internal/business/domains"
+	"ga_marketplace/internal/constants"
 	"ga_marketplace/pkg/helpers"
 	"net/http"
 )
@@ -95,6 +96,9 @@ func (p *productsUsecase) SaveFrom1c(product *domains.ProductDomainV2) (int, err
 	product.Image = " "
 	err := p.productsRepo.SaveFrom1c(product)
 	if err != nil {
+		if errors.Is(err, constants.ErrRowExists) {
+			return http.StatusConflict, err
+		}
 		return http.StatusInternalServerError, err
 	}
 
@@ -113,6 +117,9 @@ func (p *productsUsecase) UpdateFrom1c(code string, product *domains.ProductDoma
 func (p *productsUsecase) FindByCode(code string) (*domains.ProductDomain, int, error) {
 	product, err := p.productsRepo.FindByCode(code)
 	if err != nil {
+		if errors.Is(err, constants.ErrRowNotFound) {
+			return nil, http.StatusNotFound, errors.New("product not found")
+		}
 		return nil, http.StatusInternalServerError, err
 	}
 

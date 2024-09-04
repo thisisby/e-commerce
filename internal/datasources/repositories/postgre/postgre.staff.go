@@ -33,9 +33,9 @@ func (p *postgreStaffRepository) FindById(id int) (*domains.StaffDomain, error) 
 func (p *postgreStaffRepository) Save(staff *domains.StaffDomain) error {
 	query := `
 		INSERT INTO staff 
-    		(full_name, occupation, experience, avatar, service_id, service_address_id) 
+    		(full_name, occupation, experience, avatar, service_id, service_address_id, start_time, end_time) 
 		VALUES 
-		    (:full_name, :occupation, :experience, :avatar, :service_id, :service_address_id)`
+		    (:full_name, :occupation, :experience, :avatar, :service_id, :service_address_id, :start_time, :end_time)`
 
 	staffRecord := records.FromStaffDomain(staff)
 
@@ -69,7 +69,9 @@ func (p *postgreStaffRepository) Update(inDom domains.StaffDomain) error {
 			    experience = :experience, 
 			    avatar = :avatar, 
 			    service_id = :service_id, 
-			    service_address_id = :service_address_id
+			    service_address_id = :service_address_id,
+			    start_time = :start_time,
+			    end_time = :end_time
 			WHERE id = :id`
 
 	staffRecord := records.FromStaffDomain(&inDom)

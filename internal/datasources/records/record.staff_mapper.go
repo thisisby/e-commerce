@@ -14,6 +14,8 @@ func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
 		Avatar:           rec.Avatar,
 		ServiceId:        rec.ServiceId,
 		ServiceAddressId: rec.ServiceAddressId,
+		StartTime:        rec.StartTime,
+		EndTime:          rec.EndTime,
 	}
 }
 
@@ -26,6 +28,8 @@ func FromStaffDomain(dom *domains.StaffDomain) *StaffRecord {
 		Avatar:           dom.Avatar,
 		ServiceId:        dom.ServiceId,
 		ServiceAddressId: dom.ServiceAddressId,
+		StartTime:        dom.StartTime,
+		EndTime:          dom.EndTime,
 	}
 }
 

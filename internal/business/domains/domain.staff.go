@@ -1,5 +1,7 @@
 package domains
 
+import "time"
+
 type StaffDomain struct {
 	Id               int
 	FullName         string
@@ -8,6 +10,8 @@ type StaffDomain struct {
 	Avatar           *string
 	ServiceId        int
 	ServiceAddressId int
+	StartTime        time.Time
+	EndTime          time.Time
 }
 
 type StaffRepository interface {

@@ -43,6 +43,8 @@ func (h *StaffHandler) Save(ctx echo.Context) error {
 		Avatar:           &avatarUrl,
 		ServiceId:        staffCreateRequest.ServiceId,
 		ServiceAddressId: staffCreateRequest.ServiceAddressId,
+		StartTime:        staffCreateRequest.StartTime,
+		EndTime:          staffCreateRequest.EndTime,
 	}
 
 	statusCode, err := h.staffUsecase.Save(staffDomain)
@@ -106,6 +108,12 @@ func (h *StaffHandler) Update(ctx echo.Context) error {
 	}
 	if avatar != nil {
 		staff.Avatar = &avatarUrl
+	}
+	if staffUpdateRequest.StartTime != nil {
+		staff.StartTime = *staffUpdateRequest.StartTime
+	}
+	if staffUpdateRequest.EndTime != nil {
+		staff.EndTime = *staffUpdateRequest.EndTime
 	}
 
 	statusCode, err = h.staffUsecase.Update(*staff)

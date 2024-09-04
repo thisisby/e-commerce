@@ -403,9 +403,12 @@ func (p *postgreProductsRepository) FindByCode(code string) (*domains.ProductDom
                  END), 0) AS "stock"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.c_code = $1
+		GROUP BY p.id, d.id, s.id, b.id
 		`
 
 	var productRecord records.Products

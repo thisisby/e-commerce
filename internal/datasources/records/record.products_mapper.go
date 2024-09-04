@@ -31,6 +31,7 @@ func (p *Products) ToDomain() *domains.ProductDomain {
 		Images:          p.Images,
 		IsInCart:        p.IsInCart,
 		IsInWishlist:    p.IsInWishlist,
+		Stock:           p.Stock,
 		CreatedAt:       p.CreatedAt,
 		UpdatedAt:       p.UpdatedAt,
 	}

@@ -3,12 +3,16 @@ package records
 import "time"
 
 type ProductStock struct {
-	Id                int       `db:"id"`
-	CCode             string    `db:"c_code"`
-	Date              time.Time `db:"date"`
-	TransactionType   int       `db:"transaction_type"`
-	TransactionId     string    `db:"transaction_id"`
-	Quantity          int       `db:"quantity"`
-	TotalSum          float64   `db:"total_sum"`
-	TransactionStatus int       `db:"transaction_status"`
+	TransactionId string    `db:"transaction_id"`
+	CustomerId    int       `db:"customer_id"`
+	Date          time.Time `db:"date"`
+	Active        bool      `db:"active"`
+}
+
+type ProductStockItem struct {
+	TransactionId   string  `db:"transaction_id"`
+	ProductCode     string  `db:"product_code"`
+	Quantity        int     `db:"quantity"`
+	Amount          float64 `db:"amount"`
+	TransactionType int     `db:"transaction_type"`
 }

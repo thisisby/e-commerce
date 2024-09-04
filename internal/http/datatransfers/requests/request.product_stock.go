@@ -6,33 +6,52 @@ import (
 )
 
 type CreateProductStockRequest struct {
-	CCode             string    `json:"c_code" validate:"required"`
-	Date              time.Time `json:"date" validate:"required"`
-	TransactionType   int       `json:"transaction_type" validate:"required"`
-	TransactionId     string    `json:"transaction_id" validate:"required"`
-	Quantity          int       `json:"quantity" validate:"required"`
-	TotalSum          float64   `json:"total_sum" validate:"required"`
-	TransactionStatus int       `json:"transaction_status" validate:"required"`
+	Date          time.Time `json:"date" validate:"required"`
+	TransactionId string    `json:"transaction_id_mp" validate:"required"`
+	CustomerId    int       `json:"customer_id" validate:"required"`
+	Active        bool      `json:"active" validate:"required"`
+	Items         []CreateProductStockItemRequest
+}
+
+type CreateProductStockItemRequest struct {
+	ProductCode     string  `json:"product_id" validate:"required"`
+	Quantity        int     `json:"quantity" validate:"required"`
+	Amount          float64 `json:"amount" validate:"required"`
+	TransactionType int     `json:"transaction_type" validate:"required"`
 }
 
 type UpdateProductStockRequest struct {
-	CCode             *string    `json:"c_code"`
-	Date              *time.Time `json:"date"`
-	TransactionType   *int       `json:"transaction_type"`
-	TransactionId     *string    `json:"transaction_id"`
-	Quantity          *int       `json:"quantity"`
-	TotalSum          *float64   `json:"total_sum"`
-	TransactionStatus *int       `json:"transaction_status"`
+	Date          *time.Time `json:"date"`
+	TransactionId *string    `json:"transaction_id_mp"`
+	CustomerId    *int       `json:"customer_id"`
+	Active        *bool      `json:"active"`
 }
 
-func (r *CreateProductStockRequest) ToDomain() domains.ProductStockDomain {
+type UpdateProductStockItemRequest struct {
+	ProductCode     *string  `json:"product_id"`
+	Quantity        *int     `json:"quantity"`
+	Amount          *float64 `json:"amount"`
+	TransactionType *int     `json:"transaction_type"`
+}
+
+func ConvertToProductStockDomain(req CreateProductStockRequest) domains.ProductStockDomain {
+	items := make([]domains.ProductStockItemDomain, len(req.Items))
+
+	for i, item := range req.Items {
+		items[i] = domains.ProductStockItemDomain{
+			TransactionId:   req.TransactionId,
+			ProductCode:     item.ProductCode,
+			Quantity:        item.Quantity,
+			Amount:          item.Amount,
+			TransactionType: item.TransactionType,
+		}
+	}
+
 	return domains.ProductStockDomain{
-		CCode:             r.CCode,
-		Date:              r.Date,
-		TransactionType:   r.TransactionType,
-		TransactionId:     r.TransactionId,
-		Quantity:          r.Quantity,
-		TotalSum:          r.TotalSum,
-		TransactionStatus: r.TransactionStatus,
+		TransactionId: req.TransactionId,
+		Date:          req.Date,
+		Active:        req.Active,
+		Items:         items,
+		CustomerId:    req.CustomerId,
 	}
 }

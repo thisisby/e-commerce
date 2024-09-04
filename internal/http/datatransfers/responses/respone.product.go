@@ -18,7 +18,7 @@ type ProductResponse struct {
 	DiscountedPrice float64              `json:"discounted_price"`
 	TotalPrice      *float64             `json:"total_price"`
 	IsInCart        bool                 `json:"is_in_cart"`
-	IsInWishlist    bool                 `json:"is_in_wishlist"`
+	IsInWishlist    int                  `json:"is_in_wishlist"`
 	Discount        *DiscountResponse    `json:"discount"`
 	SubCategoryId   int                  `json:"sub_category_id"`
 	SubCategory     *SubcategoryResponse `json:"sub_category"`
@@ -26,6 +26,7 @@ type ProductResponse struct {
 	Brand           *BrandResponse       `json:"brand"`
 	Image           string               `json:"image"`
 	Images          []string             `json:"images"`
+	Stock           int                  `json:"stock"`
 	CreatedAt       time.Time            `json:"created_at"`
 	UpdatedAt       time.Time            `json:"updated_at"`
 }
@@ -52,6 +53,7 @@ func FromProductDomain(inDom *domains.ProductDomain) *ProductResponse {
 		Brand:           FromBrandDomain(inDom.Brand),
 		Image:           inDom.Image,
 		Images:          inDom.Images,
+		Stock:           inDom.Stock,
 		CreatedAt:       inDom.CreatedAt,
 		UpdatedAt:       inDom.UpdatedAt,
 	}

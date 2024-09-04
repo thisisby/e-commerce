@@ -25,7 +25,8 @@ type Products struct {
 	Image           string               `db:"image"`
 	Images          pq.StringArray       `db:"images"`
 	IsInCart        bool                 `db:"is_in_cart"`
-	IsInWishlist    bool                 `db:"is_in_wishlist"`
+	IsInWishlist    int                  `db:"is_in_wishlist"`
+	Stock           int                  `db:"stock"`
 	CreatedAt       time.Time            `db:"created_at"`
 	UpdatedAt       time.Time            `db:"updated_at"`
 }

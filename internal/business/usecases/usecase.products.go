@@ -26,8 +26,8 @@ func (p *productsUsecase) Save(product *domains.ProductDomain) (int, error) {
 	return http.StatusCreated, nil
 }
 
-func (p *productsUsecase) FindAllForMe(id int) ([]domains.ProductDomain, int, error) {
-	products, err := p.productsRepo.FindAllForMe(id)
+func (p *productsUsecase) FindAllForMe(id int, filter domains.ProductFilter) ([]domains.ProductDomain, int, error) {
+	products, err := p.productsRepo.FindAllForMe(id, filter)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
@@ -112,6 +112,19 @@ func (p *productsUsecase) UpdateFrom1c(code string, product *domains.ProductDoma
 
 func (p *productsUsecase) FindByCode(code string) (*domains.ProductDomain, int, error) {
 	product, err := p.productsRepo.FindByCode(code)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if product == nil {
+		return nil, http.StatusNotFound, errors.New("product not found")
+	}
+
+	return product, http.StatusOK, nil
+}
+
+func (p *productsUsecase) FindByIdForUser(id int, userId int) (*domains.ProductDomain, int, error) {
+	product, err := p.productsRepo.FindByIdForUser(id, userId)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

@@ -3,24 +3,33 @@ package domains
 import "time"
 
 type ProductStockDomain struct {
-	Id                int
-	CCode             string
-	Date              time.Time
-	TransactionType   int
-	TransactionId     string
-	Quantity          int
-	TotalSum          float64
-	TransactionStatus int
+	TransactionId string
+	CustomerId    int
+	Date          time.Time
+	Active        bool
+	Items         []ProductStockItemDomain
+}
+
+type ProductStockItemDomain struct {
+	TransactionId   string
+	ProductCode     string
+	Quantity        int
+	Amount          float64
+	TransactionType int
 }
 
 type ProductStockRepository interface {
 	Save(productStock ProductStockDomain) error
-	Update(productStock ProductStockDomain) error
+	Update(productStock ProductStockDomain, transactionId string) error
 	FindById(id string) (ProductStockDomain, error)
+	FindStockItem(transactionId string, productId string) (ProductStockItemDomain, error)
+	UpdateProductStockItem(item ProductStockItemDomain, transactionId string, productId string) error
 }
 
 type ProductStockUsecase interface {
 	Save(productStock ProductStockDomain) (int, error)
-	Update(productStock ProductStockDomain) (int, error)
+	Update(productStock ProductStockDomain, transactionId string) (int, error)
 	FindById(id string) (ProductStockDomain, int, error)
+	FindStockItem(transactionId string, productId string) (ProductStockItemDomain, int, error)
+	UpdateProductStockItem(item ProductStockItemDomain, transactionId string, productId string) (int, error)
 }

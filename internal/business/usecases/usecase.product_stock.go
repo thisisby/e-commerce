@@ -24,8 +24,8 @@ func (p *productStockUsecase) Save(productStock domains.ProductStockDomain) (int
 	return http.StatusCreated, nil
 }
 
-func (p *productStockUsecase) Update(productStock domains.ProductStockDomain) (int, error) {
-	err := p.productStockRepo.Update(productStock)
+func (p *productStockUsecase) Update(productStock domains.ProductStockDomain, transactionId string) (int, error) {
+	err := p.productStockRepo.Update(productStock, transactionId)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -40,4 +40,22 @@ func (p *productStockUsecase) FindById(id string) (domains.ProductStockDomain, i
 	}
 
 	return productStock, http.StatusOK, nil
+}
+
+func (p *productStockUsecase) FindStockItem(transactionId string, productId string) (domains.ProductStockItemDomain, int, error) {
+	productStockItem, err := p.productStockRepo.FindStockItem(transactionId, productId)
+	if err != nil {
+		return productStockItem, http.StatusInternalServerError, err
+	}
+
+	return productStockItem, http.StatusOK, nil
+}
+
+func (p *productStockUsecase) UpdateProductStockItem(item domains.ProductStockItemDomain, id string, id2 string) (int, error) {
+	err := p.productStockRepo.UpdateProductStockItem(item, id, id2)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/http/datatransfers/requests"
 	"ga_marketplace/pkg/helpers"
@@ -25,7 +26,9 @@ func (p *ProductStockHandler) Save(ctx echo.Context) error {
 		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 	}
 
-	productStockDomain := productStockCreateRequest.ToDomain()
+	productStockDomain := requests.ConvertToProductStockDomain(productStockCreateRequest)
+
+	fmt.Println("productStockDomain", productStockDomain)
 
 	statusCode, err := p.productStockUsecase.Save(productStockDomain)
 	if err != nil {
@@ -36,45 +39,73 @@ func (p *ProductStockHandler) Save(ctx echo.Context) error {
 }
 
 func (p *ProductStockHandler) Update(ctx echo.Context) error {
-	var productStockUpdateRequest requests.UpdateProductStockRequest
+	var productStockCreateRequest requests.UpdateProductStockRequest
 
-	if err := helpers.BindAndValidate(ctx, &productStockUpdateRequest); err != nil {
+	if err := helpers.BindAndValidate(ctx, &productStockCreateRequest); err != nil {
 		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
 	}
 
-	id := ctx.Param("id")
-	productStockDomain, statusCode, err := p.productStockUsecase.FindById(id)
+	transactionId := ctx.Param("transaction_id")
+
+	productStock, statusCode, err := p.productStockUsecase.FindById(transactionId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	if productStockUpdateRequest.CCode != nil {
-		productStockDomain.CCode = *productStockUpdateRequest.CCode
+	if productStockCreateRequest.TransactionId != nil {
+		productStock.TransactionId = *productStockCreateRequest.TransactionId
 	}
-	if productStockUpdateRequest.Date != nil {
-		productStockDomain.Date = *productStockUpdateRequest.Date
+	if productStockCreateRequest.Date != nil {
+		productStock.Date = *productStockCreateRequest.Date
 	}
-	if productStockUpdateRequest.TransactionType != nil {
-		productStockDomain.TransactionType = *productStockUpdateRequest.TransactionType
+	if productStockCreateRequest.CustomerId != nil {
+		productStock.CustomerId = *productStockCreateRequest.CustomerId
 	}
-	if productStockUpdateRequest.TransactionId != nil {
-		productStockDomain.TransactionId = *productStockUpdateRequest.TransactionId
-	}
-	if productStockUpdateRequest.Quantity != nil {
-		productStockDomain.Quantity = *productStockUpdateRequest.Quantity
-	}
-	if productStockUpdateRequest.TotalSum != nil {
-		productStockDomain.TotalSum = *productStockUpdateRequest.TotalSum
-	}
-	if productStockUpdateRequest.TransactionStatus != nil {
-		productStockDomain.TransactionStatus = *productStockUpdateRequest.TransactionStatus
+	if productStockCreateRequest.Active != nil {
+		productStock.Active = *productStockCreateRequest.Active
 	}
 
-	statusCode, err = p.productStockUsecase.Update(productStockDomain)
+	statusCode, err = p.productStockUsecase.Update(productStock, transactionId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Product stock updated successfully", nil)
 
+}
+
+func (p *ProductStockHandler) UpdateProductStockItem(ctx echo.Context) error {
+	var productStockCreateRequest requests.UpdateProductStockItemRequest
+
+	if err := helpers.BindAndValidate(ctx, &productStockCreateRequest); err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	transactionId := ctx.Param("transaction_id")
+	productId := ctx.Param("product_id")
+
+	productStockItem, statusCode, err := p.productStockUsecase.FindStockItem(transactionId, productId)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	if productStockCreateRequest.ProductCode != nil {
+		productStockItem.ProductCode = *productStockCreateRequest.ProductCode
+	}
+	if productStockCreateRequest.Quantity != nil {
+		productStockItem.Quantity = *productStockCreateRequest.Quantity
+	}
+	if productStockCreateRequest.Amount != nil {
+		productStockItem.Amount = *productStockCreateRequest.Amount
+	}
+	if productStockCreateRequest.TransactionType != nil {
+		productStockItem.TransactionType = *productStockCreateRequest.TransactionType
+	}
+
+	statusCode, err = p.productStockUsecase.UpdateProductStockItem(productStockItem, transactionId, productId)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Product stock item updated successfully", nil)
 }

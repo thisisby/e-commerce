@@ -120,13 +120,21 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 				COALESCE(d.discount, 0) "product.discount.discount", 
 				COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date",
 				COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
-				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
+				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
+				COALESCE(SUM(CASE 
+                    WHEN psi.transaction_type = 1 THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    ELSE 0 
+                 END), 0) AS "product.stock"
 			FROM order_details od
 			JOIN products p ON od.product_id = p.id
 			LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 			JOIN subcategories s ON p.subcategory_id = s.id
 			JOIN brands b ON p.brand_id = b.id
+			LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
+			LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
 			WHERE od.order_id = $1
+			GROUP BY od.id, p.id, d.id, s.id, b.id
 		`
 
 	for i, order := range ordersRecord {
@@ -248,13 +256,21 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 				COALESCE(d.discount, 0) "product.discount.discount", 
 				COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.start_date",
 				COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "product.discount.end_date",
-				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price"
+				CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
+				COALESCE(SUM(CASE 
+                    WHEN psi.transaction_type = 1 THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    ELSE 0 
+                 END), 0) AS "product.stock"
 			FROM order_details od
 			JOIN products p ON od.product_id = p.id
 			LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 			JOIN subcategories s ON p.subcategory_id = s.id
 			JOIN brands b ON p.brand_id = b.id
+			LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
+			LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
 			WHERE od.order_id = $1
+			GROUP BY od.id, p.id, d.id, s.id, b.id
 		`
 
 	for i, order := range ordersRecord {

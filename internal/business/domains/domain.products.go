@@ -1,6 +1,8 @@
 package domains
 
-import "time"
+import (
+	"time"
+)
 
 type ProductDomain struct {
 	Id              int
@@ -22,7 +24,8 @@ type ProductDomain struct {
 	Image           string
 	Images          []string
 	IsInCart        bool
-	IsInWishlist    bool
+	IsInWishlist    int
+	Stock           int
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 }
@@ -41,11 +44,27 @@ type ProductDomainV2 struct {
 	Image         string  `db:"image" json:"image"`
 }
 
+type ProductFilter struct {
+	Name          string
+	MinPrice      string
+	MaxPrice      string
+	SubcategoryID string
+	BrandID       string
+	Page          int
+	PageSize      int
+}
+
+type ProductPagination struct {
+	Page     int
+	PageSize int
+}
+
 type ProductsRepository interface {
 	FindById(id int) (*ProductDomain, error)
+	FindByIdForUser(id int, userId int) (*ProductDomain, error)
 	Save(product *ProductDomain) error
 	SaveFrom1c(product *ProductDomainV2) error
-	FindAllForMe(id int) ([]ProductDomain, error)
+	FindAllForMe(id int, filter ProductFilter) ([]ProductDomain, error)
 	UpdateById(inDom ProductDomain) error
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, error)
 	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, error)
@@ -56,11 +75,12 @@ type ProductsRepository interface {
 type ProductsUsecase interface {
 	Save(product *ProductDomain) (int, error)
 	SaveFrom1c(product *ProductDomainV2) (int, error)
-	FindAllForMe(id int) ([]ProductDomain, int, error)
+	FindAllForMe(id int, filter ProductFilter) ([]ProductDomain, int, error)
 	UpdateById(inDom ProductDomain) (int, error)
 	FindById(id int) (*ProductDomain, int, error)
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, int, error)
 	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, int, error)
 	UpdateFrom1c(code string, product *ProductDomain) (int, error)
 	FindByCode(code string) (*ProductDomain, int, error)
+	FindByIdForUser(id int, userId int) (*ProductDomain, int, error)
 }

@@ -42,7 +42,12 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 			CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
 		    CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
 		    CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_cart",
-			CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_wishlist"
+			CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "product.is_in_wishlist",
+			COALESCE(SUM(CASE 
+                    WHEN psi.transaction_type = 1 THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    ELSE 0 
+                 END), 0) AS "product.stock"
 		FROM cart_items c
 		JOIN users u ON c.user_id = u.id
 		JOIN roles r ON u.role_id = r.id 
@@ -51,8 +56,11 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = u.id
 		LEFT JOIN subcategories s ON p.subcategory_id = s.id
+		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
 		JOIN brands b ON p.brand_id = b.id
 		WHERE c.user_id = $1
+		GROUP BY p.id, d.id, s.id, b.id, c.id, u.id, city.id, w.id, r.id
 		`
 
 	var cartRecord []records.CartItems
@@ -108,10 +116,18 @@ func (p *postgreCartsRepository) FindById(id int) (*domains.CartItemsDomain, err
 			p.weight "product.weight",
 			p.price "product.price", p.image "product.image", p.images "product.images",
 			p.created_at "product.created_at", p.updated_at "product.updated_at",
+			COALESCE(SUM(CASE 
+                    WHEN ps.transaction_type = 1 AND ps.transaction_status = 1 THEN ps.quantity 
+                    WHEN ps.transaction_type = 2 AND ps.transaction_status = 1 THEN -ps.quantity 
+                    ELSE 0 
+                 END), 0) "product.stock"
 		FROM cart_items c
 		JOIN users u ON c.user_id = u.id
 		JOIN products p ON c.product_id = p.id
+		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
 		WHERE c.id = $1
+		GROUP BY p.id
 		`
 
 	var cartRecord records.CartItems

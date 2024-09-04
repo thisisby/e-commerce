@@ -33,7 +33,7 @@ func (p *postgreWishRepository) FindByUserId(id int) ([]domains.WishDomain, erro
 			CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "product.discounted_price",
 		    CASE WHEN d.discount IS NOT NULL THEN (p.price - (p.price * d.discount / 100)) * c.quantity ELSE p.price * c.quantity END AS "product.total_price",
 		    CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_cart",
-			CASE WHEN w.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_wishlist"
+			CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "product.is_in_wishlist"
 		FROM wishes w
 		JOIN products p ON w.product_id = p.id
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()

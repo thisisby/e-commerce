@@ -42,5 +42,6 @@ func (r *ProductStockRoute) Register() {
 
 	adminRoute.Use(r.adminMiddleware.Handle)
 	adminRoute.POST("", r.productStockHandler.Save)
-	adminRoute.PATCH("/:id", r.productStockHandler.Update)
+	adminRoute.PATCH("/:transaction_id", r.productStockHandler.Update)
+	adminRoute.PATCH("/:transaction_id/item/:product_id", r.productStockHandler.UpdateProductStockItem)
 }

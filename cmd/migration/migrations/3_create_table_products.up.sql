@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS products
     name           VARCHAR(100)   NOT NULL,
     description    TEXT,
     ingredients    TEXT,
-    c_code         VARCHAR(255)   NOT NULL,
+    c_code         VARCHAR(255)   NOT NULL UNIQUE,
     ed_izm         VARCHAR(255)   NOT NULL,
     article        VARCHAR(255)   NOT NULL,
     price          DECIMAL(10, 2) NOT NULL CHECK (price >= 0),

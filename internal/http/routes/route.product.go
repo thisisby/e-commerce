@@ -48,6 +48,7 @@ func (r *ProductRoute) Register() {
 
 	products.Use(r.authMiddleware.Handle)
 	products.GET("", r.productHandler.FindAllForMe)
+	products.GET("/:id", r.productHandler.FindByIdForUser)
 
 	productsBySubcategories.Use(r.authMiddleware.Handle)
 	productsBySubcategories.GET("/:subcategory_id/products", r.productHandler.FindBySubCategoryId)

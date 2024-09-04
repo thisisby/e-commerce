@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS product_stock;
+DROP TABLE IF EXISTS product_stock CASCADE;

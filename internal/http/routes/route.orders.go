@@ -26,10 +26,11 @@ func NewOrdersRoute(
 
 	cartRepo := postgre.NewPostgreCartsRepository(db)
 	productRepo := postgre.NewPostgreProductsRepository(db)
+	productStockRepo := postgre.NewPostgreProductStockRepository(db)
 	userRepo := postgre.NewPostgreUsersRepository(db)
 	cartItemsUsecase := usecases.NewCartsUsecase(cartRepo, userRepo, productRepo)
 	ordersRepo := postgre.NewPostgreOrdersRepository(db)
-	ordersUsecase := usecases.NewOrdersUsecase(ordersRepo)
+	ordersUsecase := usecases.NewOrdersUsecase(ordersRepo, productStockRepo)
 	orderHandler := handlers.NewOrdersHandler(ordersUsecase, cartItemsUsecase)
 
 	return &OrdersRoute{
@@ -48,6 +49,7 @@ func (r *OrdersRoute) Register() {
 	orders.Use(r.authMiddleware.Handle)
 	orders.POST("", r.orderHandler.Save)
 	orders.GET("", r.orderHandler.FindMyOrders)
+	orders.POST("/:id/cancel", r.orderHandler.Cancel)
 
 	admin.Use(r.adminMiddleware.Handle)
 	admin.GET("", r.orderHandler.FindAll)

@@ -8,6 +8,7 @@ import (
 	"ga_marketplace/pkg/helpers"
 	"ga_marketplace/pkg/jwt"
 	"github.com/labstack/echo/v4"
+	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -37,6 +38,8 @@ func (o *OrdersHandler) Save(ctx echo.Context) error {
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
+
+	slog.Info("Cart items: ", cartItems)
 	totalAmount, statusCode, err := o.cartItemsUsecase.FindTotalAmountByUserId(jwtClaims.UserId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
@@ -140,4 +143,20 @@ func (o *OrdersHandler) FindAll(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, statusCode, "Orders found", responses.ToArrayOfOrdersResponse(orders))
+}
+
+func (o *OrdersHandler) Cancel(ctx echo.Context) error {
+	orderId := ctx.Param("id")
+
+	orderIdInt, err := strconv.Atoi(orderId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid order id")
+	}
+
+	statusCode, err := o.ordersUsecase.Cancel(orderIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, statusCode, "Order canceled successfully", nil)
 }

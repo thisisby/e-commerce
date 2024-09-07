@@ -21,21 +21,23 @@ type OrdersDomain struct {
 }
 
 type OrderDetailsDomain struct {
-	Id        int
-	OrderId   int
-	ProductId int
-	Product   *ProductDomain
-	Quantity  int
-	Price     float64
-	SubTotal  float64
+	Id           int
+	OrderId      int
+	ProductId    int
+	ProductCCode string
+	Product      *ProductDomain
+	Quantity     int
+	Price        float64
+	SubTotal     float64
 }
 
 type OrdersRepository interface {
-	Save(orders OrdersDomain) error
+	Save(orders OrdersDomain) (int, error)
 	FindByUserId(userId int, statusParam string) ([]OrdersDomain, error)
 	Update(orders OrdersDomain) error
 	FindById(id int) (OrdersDomain, error)
 	FindAll(filter constants.OrderFilter) ([]OrdersDomain, error)
+	Cancel(id int) error
 }
 
 type OrdersUsecase interface {
@@ -44,4 +46,5 @@ type OrdersUsecase interface {
 	Update(orders OrdersDomain) (int, error)
 	FindById(id int) (OrdersDomain, int, error)
 	FindAll(filter constants.OrderFilter) ([]OrdersDomain, int, error)
+	Cancel(id int) (int, error)
 }

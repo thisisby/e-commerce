@@ -8,6 +8,7 @@ import (
 	"ga_marketplace/pkg/helpers"
 	"ga_marketplace/pkg/jwt"
 	"ga_marketplace/third_party/mobizon"
+	"ga_marketplace/third_party/one_c"
 	"log/slog"
 	"net/http"
 	"time"
@@ -17,13 +18,15 @@ type usersUsecase struct {
 	userRepo      domains.UserRepository
 	jwtService    jwt.JWTService
 	mobizonClient mobizon.Client
+	oneCClient    one_c.Client
 }
 
-func NewUsersUsecase(userRepo domains.UserRepository, jwtService jwt.JWTService, mobizonClient mobizon.Client) domains.UserUsecase {
+func NewUsersUsecase(userRepo domains.UserRepository, jwtService jwt.JWTService, mobizonClient mobizon.Client, oneCClient one_c.Client) domains.UserUsecase {
 	return &usersUsecase{
 		userRepo:      userRepo,
 		jwtService:    jwtService,
 		mobizonClient: mobizonClient,
+		oneCClient:    oneCClient,
 	}
 }
 
@@ -74,6 +77,17 @@ func (u *usersUsecase) Save(inDom *domains.UserDomain) (outDom *domains.UserDoma
 			return nil, http.StatusNotFound, constants.ErrUserNotFound
 		}
 		return nil, http.StatusInternalServerError, err
+	}
+
+	// create customer in 1C
+	customer := one_c.Customer{
+		Name:        outDom.Name,
+		PhoneNumber: outDom.Phone,
+	}
+
+	err = u.oneCClient.CreateCustomerRequest(customer)
+	if err != nil {
+		slog.Error("UserUsecase.Save: failed to create customer in 1C: ", err)
 	}
 
 	return outDom, http.StatusOK, nil

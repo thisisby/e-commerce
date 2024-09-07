@@ -112,8 +112,8 @@ func (p *postgreProductsRepository) FindAllForMe(id int, filter domains.ProductF
         ELSE p.price 
     END AS "discounted_price",
     COALESCE(SUM(CASE 
-                    WHEN psi.transaction_type = 1 THEN psi.quantity 
-                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
                  END), 0) AS "stock"
 FROM 
@@ -127,7 +127,7 @@ LEFT JOIN
 LEFT JOIN 
     product_stock_item psi ON p.c_code = psi.product_code
 LEFT JOIN 
-    product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+    product_stock ps ON psi.transaction_id = ps.transaction_id
 JOIN 
     subcategories s ON p.subcategory_id = s.id
 JOIN 

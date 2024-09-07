@@ -30,6 +30,10 @@ type Config struct {
 	AwsAccessKeySecret string `mapstructure:"AWS_ACCESS_KEY_SECRET"`
 	AwsBucketName      string `mapstructure:"AWS_BUCKET_NAME"`
 	AwsBucketRegion    string `mapstructure:"AWS_BUCKET_REGION"`
+
+	OneCBaseUrl  string `mapstructure:"ONE_C_BASE_URL"`
+	OneCUsername string `mapstructure:"ONE_C_USERNAME"`
+	OneCPassword string `mapstructure:"ONE_C_PASSWORD"`
 }
 
 func InitializeAppConfig() error {

@@ -8,6 +8,7 @@ import (
 	"ga_marketplace/internal/http/middlewares"
 	"ga_marketplace/pkg/jwt"
 	"ga_marketplace/third_party/mobizon"
+	"ga_marketplace/third_party/one_c"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
@@ -29,9 +30,10 @@ func NewUsersRoute(
 	clientAuthMiddleware middlewares.AuthMiddleware,
 	authMiddleware middlewares.AuthMiddleware,
 	mobizonClient mobizon.Client,
+	oneCClient one_c.Client,
 ) *UsersRoute {
 	userRepo := postgre.NewPostgreUsersRepository(db)
-	userUsecase := usecases.NewUsersUsecase(userRepo, jwtService, mobizonClient)
+	userUsecase := usecases.NewUsersUsecase(userRepo, jwtService, mobizonClient, oneCClient)
 	usersHandler := handlers.NewUsersHandler(userUsecase, redisCache)
 
 	return &UsersRoute{

@@ -11,6 +11,7 @@ import (
 	"ga_marketplace/pkg/jwt"
 	"ga_marketplace/third_party/aws"
 	"ga_marketplace/third_party/mobizon"
+	"ga_marketplace/third_party/one_c"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -103,9 +104,11 @@ func main() {
 	clientAuthMiddleware := middlewares.NewAuthMiddleware(jwtService, false)
 	adminAuthMiddleware := middlewares.NewAuthMiddleware(jwtService, true)
 
+	oneCClient := one_c.NewClient(config.AppConfig.OneCBaseUrl, config.AppConfig.OneCUsername, config.AppConfig.OneCPassword)
+
 	v1 := e.Group("/api/v1")
 	routes.NewRolesRoute(conn, v1).Register()
-	routes.NewUsersRoute(conn, v1, redisCache, jwtService, clientAuthMiddleware, adminAuthMiddleware, mobizonClient).Register()
+	routes.NewUsersRoute(conn, v1, redisCache, jwtService, clientAuthMiddleware, adminAuthMiddleware, mobizonClient, oneCClient).Register()
 	routes.NewCartsRoute(conn, v1, redisCache, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewWishRoute(conn, v1, clientAuthMiddleware).Register()
 	routes.NewDiscountRoute(conn, v1, adminAuthMiddleware).Register()

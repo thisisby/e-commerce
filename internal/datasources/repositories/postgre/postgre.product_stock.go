@@ -1,7 +1,6 @@
 package postgre
 
 import (
-	"fmt"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/datasources/records"
 	"ga_marketplace/pkg/helpers"
@@ -41,7 +40,6 @@ func (p *postgreProductStockRepository) Save(productStock domains.ProductStockDo
 
 	for _, item := range productStock.Items {
 		itemRecord := records.FromProductStockItemDomain(item)
-		fmt.Println("itemRecord", itemRecord)
 		_, err = tx.NamedExec(itemQuery, itemRecord)
 		if err != nil {
 			tx.Rollback()

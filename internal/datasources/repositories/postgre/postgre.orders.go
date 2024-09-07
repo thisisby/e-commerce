@@ -19,10 +19,10 @@ func NewPostgreOrdersRepository(conn *sqlx.DB) domains.OrdersRepository {
 	}
 }
 
-func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) error {
+func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) (int, error) {
 	tx, err := p.conn.Begin()
 	if err != nil {
-		return helpers.PostgresErrorTransform(err)
+		return 0, helpers.PostgresErrorTransform(err)
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -39,7 +39,7 @@ func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) error {
 	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.CityId, orders.Status, orders.Street, orders.Region, orders.Apartment, orders.StreetNum, orders.Email, orders.DeliveryMethod).Scan(&orderId)
 	if err != nil {
 		tx.Rollback()
-		return helpers.PostgresErrorTransform(err)
+		return 0, helpers.PostgresErrorTransform(err)
 	}
 	orders.Id = orderId
 
@@ -52,11 +52,16 @@ func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) error {
 		_, err = tx.Exec(queryDetails, detail.OrderId, detail.ProductId, detail.Quantity, detail.Price, detail.SubTotal)
 		if err != nil {
 			tx.Rollback()
-			return helpers.PostgresErrorTransform(err)
+			return 0, helpers.PostgresErrorTransform(err)
 		}
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return 0, err
+	}
+
+	return orderId, nil
 }
 
 func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) ([]domains.OrdersDomain, error) {
@@ -284,4 +289,14 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 	}
 
 	return records.ToArrayOfOrdersDomain(ordersRecord), nil
+}
+
+func (p *postgreOrdersRepository) Cancel(id int) error {
+	query := `UPDATE orders SET status = 'canceled' WHERE id = $1`
+	_, err := p.conn.Exec(query, id)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
 }

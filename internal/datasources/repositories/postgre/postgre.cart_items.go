@@ -44,8 +44,8 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 		    CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "product.is_in_cart",
 			CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "product.is_in_wishlist",
 			COALESCE(SUM(CASE 
-                    WHEN psi.transaction_type = 1 THEN psi.quantity 
-                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
                  END), 0) AS "product.stock"
 		FROM cart_items c
@@ -57,7 +57,7 @@ func (p *postgreCartsRepository) FindAllByUserId(id int) ([]domains.CartItemsDom
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = u.id
 		LEFT JOIN subcategories s ON p.subcategory_id = s.id
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id 
 		JOIN brands b ON p.brand_id = b.id
 		WHERE c.user_id = $1
 		GROUP BY p.id, d.id, s.id, b.id, c.id, u.id, city.id, w.id, r.id

@@ -4,35 +4,64 @@ import (
 	"errors"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/constants"
+	"ga_marketplace/pkg/helpers"
 	"net/http"
+	"time"
 )
 
 type ordersUsecase struct {
-	ordersRepo domains.OrdersRepository
+	ordersRepo       domains.OrdersRepository
+	productStockRepo domains.ProductStockRepository
 }
 
-func NewOrdersUsecase(ordersRepo domains.OrdersRepository) domains.OrdersUsecase {
+func NewOrdersUsecase(ordersRepo domains.OrdersRepository, productStockRepo domains.ProductStockRepository) domains.OrdersUsecase {
 	return &ordersUsecase{
-		ordersRepo: ordersRepo,
+		ordersRepo:       ordersRepo,
+		productStockRepo: productStockRepo,
 	}
 }
 
 func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.CartItemsDomain, totalAmount domains.CartItemTotalAmount) (int, error) {
 
-	orders.Status = constants.Pending
+	orders.Status = constants.OrderPending
 	orders.TotalPrice = totalAmount.TotalAmount + totalAmount.TotalDiscount
 	orders.DiscountedPrice = totalAmount.TotalAmount
 
 	for _, detail := range cartItems {
 		orders.OrderDetails = append(orders.OrderDetails, domains.OrderDetailsDomain{
-			ProductId: detail.ProductId,
-			Quantity:  detail.Quantity,
-			Price:     detail.Product.DiscountedPrice,
-			SubTotal:  detail.Product.DiscountedPrice * float64(detail.Quantity),
+			ProductId:    detail.ProductId,
+			Quantity:     detail.Quantity,
+			Price:        detail.Product.DiscountedPrice,
+			SubTotal:     detail.Product.DiscountedPrice * float64(detail.Quantity),
+			ProductCCode: detail.Product.CCode,
 		})
 	}
 
-	err := o.ordersRepo.Save(orders)
+	orderId, err := o.ordersRepo.Save(orders)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	transactionId := helpers.GenerateUUID()
+	productStockDomain := domains.ProductStockDomain{
+		TransactionId: transactionId,
+		CustomerId:    orders.UserId,
+		Date:          time.Now(),
+		Active:        true,
+		OrderId:       orderId,
+	}
+
+	for _, detail := range orders.OrderDetails {
+		productStockDomain.Items = append(productStockDomain.Items, domains.ProductStockItemDomain{
+			TransactionId:   transactionId,
+			ProductCode:     detail.ProductCCode,
+			Quantity:        detail.Quantity,
+			Amount:          detail.SubTotal,
+			TransactionType: constants.ProductStockTransactionTypeOut,
+		})
+	}
+
+	err = o.productStockRepo.Save(productStockDomain)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -87,4 +116,22 @@ func (o *ordersUsecase) FindAll(filter constants.OrderFilter) ([]domains.OrdersD
 	}
 
 	return orders, http.StatusOK, nil
+}
+
+func (o *ordersUsecase) Cancel(id int) (int, error) {
+	order, err := o.ordersRepo.FindById(id)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	if order.Status != constants.OrderPending {
+		return http.StatusBadRequest, errors.New("order cannot be cancelled at this state")
+	}
+
+	err = o.ordersRepo.Cancel(id)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }

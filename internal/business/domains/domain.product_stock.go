@@ -8,6 +8,7 @@ type ProductStockDomain struct {
 	Date          time.Time
 	Active        bool
 	Items         []ProductStockItemDomain
+	OrderId       int
 }
 
 type ProductStockItemDomain struct {

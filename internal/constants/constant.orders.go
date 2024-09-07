@@ -1,10 +1,10 @@
 package constants
 
 const (
-	Pending   = "pending"
-	Shipping  = "shipping"
-	Delivered = "delivered"
-	Cancelled = "cancelled"
+	OrderPending   = "pending"
+	OrderShipping  = "shipping"
+	OrderDelivered = "delivered"
+	OrderCancelled = "cancelled"
 )
 
 const (

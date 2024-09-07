@@ -70,7 +70,7 @@ func (v validationErrors) Error() string {
 func OrderStatusValidator(fl validator.FieldLevel) bool {
 	status := fl.Field().String()
 	switch status {
-	case constants.Pending, constants.Shipping, constants.Delivered, constants.Cancelled:
+	case constants.OrderPending, constants.OrderShipping, constants.OrderDelivered, constants.OrderCancelled:
 		return true
 	}
 	return false

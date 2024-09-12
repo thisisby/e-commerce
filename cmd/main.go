@@ -106,6 +106,7 @@ func main() {
 
 	oneCClient := one_c.NewClient(config.AppConfig.OneCBaseUrl, config.AppConfig.OneCUsername, config.AppConfig.OneCPassword)
 
+	fmt.Printf("initt: ", config.AppConfig.OneCBaseUrl)
 	v1 := e.Group("/api/v1")
 	routes.NewRolesRoute(conn, v1).Register()
 	routes.NewUsersRoute(conn, v1, redisCache, jwtService, clientAuthMiddleware, adminAuthMiddleware, mobizonClient, oneCClient).Register()
@@ -116,7 +117,7 @@ func main() {
 	routes.NewProductRoute(conn, v1, s3Client, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewHealthCheckRoute(v1).Register()
 	routes.NewCountriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
-	routes.NewOrdersRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewOrdersRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware, oneCClient).Register()
 	routes.NewCitiesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewContactsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewCategoriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()

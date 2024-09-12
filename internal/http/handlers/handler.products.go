@@ -277,3 +277,22 @@ func (p *ProductHandler) FindByIdForUser(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Product fetched successfully", responses.FromProductDomain(product))
 }
+
+func (p *ProductHandler) FindAll(ctx echo.Context) error {
+	filter := domains.ProductFilter{
+		Name:          ctx.QueryParam("name"),
+		MinPrice:      ctx.QueryParam("min_price"),
+		MaxPrice:      ctx.QueryParam("max_price"),
+		SubcategoryID: ctx.QueryParam("subcategory_id"),
+		BrandID:       ctx.QueryParam("brand_id"),
+		Page:          helpers.ToInt(ctx.QueryParam("page"), 1),
+		PageSize:      helpers.ToInt(ctx.QueryParam("page_size"), 10),
+	}
+
+	products, statusCode, err := p.productUsecase.FindAll(filter)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
+}

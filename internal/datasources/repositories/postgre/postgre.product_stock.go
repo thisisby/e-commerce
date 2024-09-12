@@ -139,3 +139,16 @@ func (p *postgreProductStockRepository) UpdateProductStockItem(item domains.Prod
 
 	return nil
 }
+
+func (p *postgreProductStockRepository) IsTransactionIdExist(transactionId string) (bool, error) {
+	query := `
+		SELECT EXISTS(SELECT 1 FROM product_stock WHERE transaction_id = $1)
+	`
+
+	var exist bool
+	err := p.conn.Get(&exist, query, transactionId)
+	if err != nil {
+		return false, helpers.PostgresErrorTransform(err)
+	}
+	return exist, nil
+}

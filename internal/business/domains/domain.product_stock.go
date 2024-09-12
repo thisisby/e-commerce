@@ -25,6 +25,7 @@ type ProductStockRepository interface {
 	FindById(id string) (ProductStockDomain, error)
 	FindStockItem(transactionId string, productId string) (ProductStockItemDomain, error)
 	UpdateProductStockItem(item ProductStockItemDomain, transactionId string, productId string) error
+	IsTransactionIdExist(transactionId string) (bool, error)
 }
 
 type ProductStockUsecase interface {

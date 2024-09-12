@@ -142,3 +142,16 @@ func (p *productsUsecase) FindByIdForUser(id int, userId int) (*domains.ProductD
 
 	return product, http.StatusOK, nil
 }
+
+func (p *productsUsecase) FindAll(filter domains.ProductFilter) ([]domains.ProductDomain, int, error) {
+	products, total, err := p.productsRepo.FindAll(filter)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+
+	if len(products) == 0 {
+		return nil, http.StatusNotFound, errors.New("products not found")
+	}
+
+	return products, total, nil
+}

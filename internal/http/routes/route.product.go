@@ -46,6 +46,8 @@ func (r *ProductRoute) Register() {
 	productsByBrands := r.router.Group("/brands")
 	admin := r.router.Group("/admin/products")
 
+	products.GET("/no-auth", r.productHandler.FindAll)
+
 	products.Use(r.authMiddleware.Handle)
 	products.GET("", r.productHandler.FindAllForMe)
 	products.GET("/:id", r.productHandler.FindByIdForUser)

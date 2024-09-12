@@ -457,3 +457,86 @@ func (p *postgreProductsRepository) FindByIdForUser(id int, userId int) (*domain
 
 	return productRecord.ToDomain(), nil
 }
+
+func (p *postgreProductsRepository) FindAll(filter domains.ProductFilter) ([]domains.ProductDomain, int, error) {
+	query := `
+		SELECT 
+			p.id, p.name, p.description, p.price, p.ingredients, p.c_code, 
+			p.ed_izm, p.article, p.image, p.images, p.weight, p.created_at, 
+	p.updated_at, 	p.subcategory_id,	p.brand_id,	COALESCE(d.id, -1) AS "discount.id", 
+	COALESCE(d.product_id, 0) AS "discount.product_id",	COALESCE(d.discount, 0) AS "discount.discount", 
+	COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) AS "discount.start_date", 
+	COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) AS "discount.end_date",
+	s.id AS "subcategory.id", 	s.name AS "subcategory.name",	s.category_id AS "subcategory.category_id",
+	b.id AS "brand.id", 	b.name AS "brand.name", 	
+	FALSE AS "is_in_cart",
+	-1 AS "is_in_wishlist",
+	CASE 
+		WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) 
+		ELSE p.price 
+	END AS "discounted_price",
+	COALESCE(SUM(CASE 
+					WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+					WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
+					ELSE 0 
+				 END), 0) AS "stock"
+	FROM
+		products p
+	LEFT JOIN 
+		discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
+	LEFT JOIN
+		product_stock_item psi ON p.c_code = psi.product_code
+	LEFT JOIN
+		product_stock ps ON psi.transaction_id = ps.transaction_id
+	JOIN 
+		subcategories s ON p.subcategory_id = s.id
+	JOIN
+		brands b ON p.brand_id = b.id
+	`
+
+	var filters []string
+	var args []interface{}
+
+	if filter.Name != "" {
+		filters = append(filters, "p.name ILIKE '%' || $"+strconv.Itoa(len(args)+1)+" || '%'")
+		args = append(args, filter.Name)
+	}
+
+	if filter.MinPrice != "" {
+		filters = append(filters, "p.price >= $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.MinPrice)
+	}
+
+	if filter.MaxPrice != "" {
+		filters = append(filters, "p.price <= $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.MaxPrice)
+	}
+
+	if filter.SubcategoryID != "" {
+		filters = append(filters, "p.subcategory_id = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.SubcategoryID)
+	}
+
+	if filter.BrandID != "" {
+		filters = append(filters, "p.brand_id = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.BrandID)
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+
+	query += " GROUP BY p.id, d.id, s.id, b.id"
+
+	offset := (filter.Page - 1) * filter.PageSize
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d", filter.PageSize, offset)
+
+	var productsRecord []records.Products
+
+	err := p.conn.Select(&productsRecord, query, args...)
+	if err != nil {
+		return nil, 0, helpers.PostgresErrorTransform(err)
+	}
+
+	return records.ToArrayOfProductsDomain(productsRecord), len(productsRecord), nil
+}

@@ -5,6 +5,8 @@ import (
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/constants"
 	"ga_marketplace/pkg/helpers"
+	"ga_marketplace/third_party/one_c"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -12,12 +14,21 @@ import (
 type ordersUsecase struct {
 	ordersRepo       domains.OrdersRepository
 	productStockRepo domains.ProductStockRepository
+	usersRepo        domains.UserRepository
+	OnceCClient      one_c.Client
 }
 
-func NewOrdersUsecase(ordersRepo domains.OrdersRepository, productStockRepo domains.ProductStockRepository) domains.OrdersUsecase {
+func NewOrdersUsecase(
+	ordersRepo domains.OrdersRepository,
+	productStockRepo domains.ProductStockRepository,
+	usersRepo domains.UserRepository,
+	oneCClient one_c.Client,
+) domains.OrdersUsecase {
 	return &ordersUsecase{
 		ordersRepo:       ordersRepo,
 		productStockRepo: productStockRepo,
+		usersRepo:        usersRepo,
+		OnceCClient:      oneCClient,
 	}
 }
 
@@ -43,6 +54,20 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 	}
 
 	transactionId := helpers.GenerateUUID()
+
+	for {
+		transactionIdExists, err := o.productStockRepo.IsTransactionIdExist(transactionId)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+
+		if !transactionIdExists {
+			break
+		}
+
+		transactionId = helpers.GenerateUUID()
+	}
+
 	productStockDomain := domains.ProductStockDomain{
 		TransactionId: transactionId,
 		CustomerId:    orders.UserId,
@@ -64,6 +89,32 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 	err = o.productStockRepo.Save(productStockDomain)
 	if err != nil {
 		return http.StatusInternalServerError, err
+	}
+
+	user, err := o.usersRepo.FindById(orders.UserId)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	var productsItems []one_c.Products
+	for _, item := range productStockDomain.Items {
+		productsItems = append(productsItems, one_c.Products{
+			Quantity:  item.Quantity,
+			Amount:    item.Amount,
+			ProductId: item.ProductCode,
+		})
+	}
+	productSales := one_c.ProductStock{
+		CustomerId:      user.Phone,
+		TransactionId:   transactionId,
+		Active:          true,
+		TransactionDate: time.Now(),
+		Products:        productsItems,
+	}
+
+	err = o.OnceCClient.CreateProductStockRequest(productSales)
+	if err != nil {
+		slog.Error("OrdersUsecase.Save: failed to create product stock in 1C: ", err)
 	}
 
 	return http.StatusCreated, nil

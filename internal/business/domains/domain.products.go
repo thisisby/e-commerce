@@ -70,6 +70,7 @@ type ProductsRepository interface {
 	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, error)
 	UpdateFrom1c(code string, product *ProductDomain) error
 	FindByCode(code string) (*ProductDomain, error)
+	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
 }
 
 type ProductsUsecase interface {
@@ -83,4 +84,5 @@ type ProductsUsecase interface {
 	UpdateFrom1c(code string, product *ProductDomain) (int, error)
 	FindByCode(code string) (*ProductDomain, int, error)
 	FindByIdForUser(id int, userId int) (*ProductDomain, int, error)
+	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
 }

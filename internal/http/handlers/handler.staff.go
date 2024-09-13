@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/http/datatransfers/requests"
 	"ga_marketplace/pkg/helpers"
@@ -8,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type StaffHandler struct {
@@ -43,8 +46,6 @@ func (h *StaffHandler) Save(ctx echo.Context) error {
 		Avatar:           &avatarUrl,
 		ServiceId:        staffCreateRequest.ServiceId,
 		ServiceAddressId: staffCreateRequest.ServiceAddressId,
-		StartTime:        staffCreateRequest.StartTime,
-		EndTime:          staffCreateRequest.EndTime,
 	}
 
 	statusCode, err := h.staffUsecase.Save(staffDomain)
@@ -109,11 +110,17 @@ func (h *StaffHandler) Update(ctx echo.Context) error {
 	if avatar != nil {
 		staff.Avatar = &avatarUrl
 	}
-	if staffUpdateRequest.StartTime != nil {
-		staff.StartTime = *staffUpdateRequest.StartTime
+	if staffUpdateRequest.TimeSlot != nil {
+		var timeSlots []domains.TimeSlot
+
+		err := json.Unmarshal([]byte(*staffUpdateRequest.TimeSlot), &timeSlots)
+		if err != nil {
+			return NewErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Invalid time slot: %v", err))
+		}
+		staff.TimeSlot = timeSlots
 	}
-	if staffUpdateRequest.EndTime != nil {
-		staff.EndTime = *staffUpdateRequest.EndTime
+	if staffUpdateRequest.WorkingDays != nil {
+		staff.WorkingDays = *staffUpdateRequest.WorkingDays
 	}
 
 	statusCode, err = h.staffUsecase.Update(*staff)
@@ -167,4 +174,29 @@ func (h *StaffHandler) FindByServiceAddressId(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Staffs found", staff)
+}
+
+func (h *StaffHandler) FindTimeSlotByStaffId(ctx echo.Context) error {
+	staffIdParam := ctx.Param("staffId")
+	staffId, err := strconv.Atoi(staffIdParam)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid staff ID")
+	}
+
+	dateParam := ctx.QueryParam("date")
+	if dateParam == "" {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Date parameter is required")
+	}
+
+	date, err := time.Parse("2006-01-02", dateParam)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid date format")
+	}
+
+	timeSlots, statusCode, err := h.staffUsecase.FindAvailableTimeSlot(staffId, date)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Time slots found", timeSlots)
 }

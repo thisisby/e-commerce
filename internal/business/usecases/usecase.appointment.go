@@ -10,15 +10,18 @@ import (
 type appointmentUsecase struct {
 	appointmentRepository domains.AppointmentRepository
 	serviceItemUsecase    domains.ServiceItemUsecase
+	staffUsecase          domains.StaffUsecase
 }
 
 func NewAppointmentUsecase(
 	appointmentRepository domains.AppointmentRepository,
 	serviceItemUsecase domains.ServiceItemUsecase,
+	staffUsecase domains.StaffUsecase,
 ) domains.AppointmentUsecase {
 	return &appointmentUsecase{
 		appointmentRepository: appointmentRepository,
 		serviceItemUsecase:    serviceItemUsecase,
+		staffUsecase:          staffUsecase,
 	}
 }
 
@@ -56,7 +59,6 @@ func (a *appointmentUsecase) Save(domain domains.AppointmentDomain) (int, error)
 
 	domain.EndTime = domain.StartTime.Add(time.Minute * time.Duration(serviceItem.Duration))
 
-	// check if the new time is overlapping with other appointments
 	isOverlapping, err := a.appointmentRepository.IsOverlapping(0, domain.StaffId, domain.StartTime, domain.EndTime)
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -64,6 +66,22 @@ func (a *appointmentUsecase) Save(domain domains.AppointmentDomain) (int, error)
 
 	if isOverlapping {
 		return http.StatusBadRequest, errors.New("appointment time is overlapping with other appointments")
+	}
+
+	availableTimeSlots, statusCode, err := a.staffUsecase.FindAvailableTimeSlot(domain.StaffId, domain.StartTime)
+	if err != nil {
+		return statusCode, err
+	}
+
+	appointmentStart := domain.StartTime.Format("15:04")
+	appointmentEnd := domain.EndTime.Format("15:04")
+
+	for _, slot := range availableTimeSlots {
+		slotTime, _ := time.Parse("15:04", slot.Time)
+
+		if slotTime.Format("15:04") >= appointmentStart && slotTime.Format("15:04") < appointmentEnd && !slot.IsAvailable {
+			return http.StatusBadRequest, errors.New("requested time slot is unavailable")
+		}
 	}
 
 	err = a.appointmentRepository.Save(domain)
@@ -77,7 +95,6 @@ func (a *appointmentUsecase) Save(domain domains.AppointmentDomain) (int, error)
 func (a *appointmentUsecase) Update(domain domains.AppointmentDomain) (int, error) {
 	domain.EndTime = domain.StartTime.Add(time.Minute * time.Duration(domain.ServiceItemDomain.Duration))
 
-	// check if the new time is overlapping with other appointments
 	isOverlapping, err := a.appointmentRepository.IsOverlapping(domain.Id, domain.StaffId, domain.StartTime, domain.EndTime)
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -85,6 +102,22 @@ func (a *appointmentUsecase) Update(domain domains.AppointmentDomain) (int, erro
 
 	if isOverlapping {
 		return http.StatusBadRequest, errors.New("appointment time is overlapping with other appointments")
+	}
+
+	availableTimeSlots, statusCode, err := a.staffUsecase.FindAvailableTimeSlot(domain.StaffId, domain.StartTime)
+	if err != nil {
+		return statusCode, err
+	}
+
+	appointmentStart := domain.StartTime.Format("15:04")
+	appointmentEnd := domain.EndTime.Format("15:04")
+
+	for _, slot := range availableTimeSlots {
+		slotTime, _ := time.Parse("15:04", slot.Time)
+
+		if slotTime.Format("15:04") >= appointmentStart && slotTime.Format("15:04") < appointmentEnd && !slot.IsAvailable {
+			return http.StatusBadRequest, errors.New("requested time slot is unavailable")
+		}
 	}
 
 	err = a.appointmentRepository.Update(domain)

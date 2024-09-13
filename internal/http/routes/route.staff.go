@@ -27,7 +27,8 @@ func NewStaffRoute(
 	adminMiddleware middlewares.AuthMiddleware,
 ) *StaffRoute {
 	staffRepo := postgre.NewPostgreStaffRepository(db)
-	staffUsecase := usecases.NewStaffUsecase(staffRepo)
+	appointmentRepo := postgre.NewPostgreAppointmentsRepository(db)
+	staffUsecase := usecases.NewStaffUsecase(staffRepo, appointmentRepo)
 	staffHandler := handlers.NewStaffHandler(staffUsecase, s3Client)
 
 	return &StaffRoute{
@@ -48,6 +49,7 @@ func (r *StaffRoute) Register() {
 
 	staff.Use(r.authMiddleware.Handle)
 	staff.GET("", r.staffHandler.FindAll)
+	staff.GET("/:staffId/time-slots", r.staffHandler.FindTimeSlotByStaffId)
 
 	serviceAddress.Use(r.authMiddleware.Handle)
 	serviceAddress.GET("/:service_address_id/staff", r.staffHandler.FindByServiceAddressId)

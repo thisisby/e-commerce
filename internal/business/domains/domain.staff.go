@@ -10,8 +10,14 @@ type StaffDomain struct {
 	Avatar           *string
 	ServiceId        int
 	ServiceAddressId int
-	StartTime        time.Time
-	EndTime          time.Time
+	TimeSlot         []TimeSlot
+	WorkingDays      []string
+}
+
+type TimeSlot struct {
+	Id          int    `json:"id"`
+	Time        string `json:"time"`
+	IsAvailable bool   `json:"isAvailable"`
 }
 
 type StaffRepository interface {
@@ -32,4 +38,5 @@ type StaffUsecase interface {
 	Delete(id int) (int, error)
 	FindByServiceId(serviceId int) ([]StaffDomain, int, error)
 	FindByServiceAddressId(serviceAddressId int) ([]StaffDomain, int, error)
+	FindAvailableTimeSlot(staffId int, date time.Time) ([]TimeSlot, int, error)
 }

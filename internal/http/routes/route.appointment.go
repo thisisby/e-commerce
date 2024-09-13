@@ -27,7 +27,11 @@ func NewAppointmentRoute(
 	serviceItemUsecase := usecases.NewServiceItemUsecase(serviceItemRepo)
 
 	appointmentRepo := postgre.NewPostgreAppointmentsRepository(db)
-	appointmentUsecase := usecases.NewAppointmentUsecase(appointmentRepo, serviceItemUsecase)
+
+	staffRepo := postgre.NewPostgreStaffRepository(db)
+	staffUsecase := usecases.NewStaffUsecase(staffRepo, appointmentRepo)
+
+	appointmentUsecase := usecases.NewAppointmentUsecase(appointmentRepo, serviceItemUsecase, staffUsecase)
 
 	appointmentHandler := handlers.NewAppointmentHandler(appointmentUsecase)
 

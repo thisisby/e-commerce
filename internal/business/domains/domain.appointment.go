@@ -27,6 +27,7 @@ type AppointmentRepository interface {
 	FindById(id int) (AppointmentDomain, error)
 	IsOverlapping(appointmentId int, staffId int, startTime time.Time, endTime time.Time) (bool, error)
 	FindAllByStaffId(staffId int) ([]AppointmentDomain, error)
+	FindAllByStaffIdAndDate(staffId int, date time.Time) ([]AppointmentDomain, error)
 }
 
 type AppointmentUsecase interface {

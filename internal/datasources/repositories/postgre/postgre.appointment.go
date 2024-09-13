@@ -172,3 +172,26 @@ func (p *postgreAppointmentsRepository) FindAllByStaffId(staffId int) ([]domains
 
 	return records.ToArrayOfAppointmentDomain(appointmentRecord), nil
 }
+
+func (p *postgreAppointmentsRepository) FindAllByStaffIdAndDate(staffId int, date time.Time) ([]domains.AppointmentDomain, error) {
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endOfDay := time.Date(date.Year(), date.Month(), date.Day(), 23, 59, 59, 999999999, date.Location())
+
+	query := `
+		SELECT
+			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
+			s.id "staff.id", s.full_name "staff.full_name", s.occupation "staff.occupation", s.experience "staff.experience", s.avatar "staff.avatar", s.service_id "staff.service_id", s.service_address_id "staff.service_address_id"
+		FROM appointments a	
+		JOIN staff s ON a.staff_id = s.id
+		WHERE a.staff_id = $1
+		AND a.start_time >= $2 AND a.start_time <= $3
+	`
+
+	var appointmentRecord []records.Appointment
+	err := p.conn.Select(&appointmentRecord, query, staffId, startOfDay, endOfDay)
+	if err != nil {
+		return nil, helpers.PostgresErrorTransform(err)
+	}
+
+	return records.ToArrayOfAppointmentDomain(appointmentRecord), nil
+}

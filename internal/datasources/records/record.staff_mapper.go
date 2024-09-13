@@ -1,11 +1,23 @@
 package records
 
-import "ga_marketplace/internal/business/domains"
+import (
+	"encoding/json"
+	"ga_marketplace/internal/business/domains"
+	"log/slog"
+)
 
 func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
 	if rec == nil || rec.Id == 0 {
 		return nil
 	}
+
+	var timeSlot []domains.TimeSlot
+	err := json.Unmarshal([]byte(rec.TimeSlot), &timeSlot)
+	if err != nil {
+		slog.Error("error unmarshal time slot", err)
+		return nil
+	}
+
 	return &domains.StaffDomain{
 		Id:               rec.Id,
 		FullName:         rec.FullName,
@@ -14,12 +26,19 @@ func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
 		Avatar:           rec.Avatar,
 		ServiceId:        rec.ServiceId,
 		ServiceAddressId: rec.ServiceAddressId,
-		StartTime:        rec.StartTime,
-		EndTime:          rec.EndTime,
+		TimeSlot:         timeSlot,
+		WorkingDays:      rec.WorkingDays,
 	}
 }
 
 func FromStaffDomain(dom *domains.StaffDomain) *StaffRecord {
+
+	timeSlot, err := json.Marshal(dom.TimeSlot)
+	if err != nil {
+		slog.Error("error marshal time slot", err)
+		return nil
+	}
+
 	return &StaffRecord{
 		Id:               dom.Id,
 		FullName:         dom.FullName,
@@ -28,8 +47,8 @@ func FromStaffDomain(dom *domains.StaffDomain) *StaffRecord {
 		Avatar:           dom.Avatar,
 		ServiceId:        dom.ServiceId,
 		ServiceAddressId: dom.ServiceAddressId,
-		StartTime:        dom.StartTime,
-		EndTime:          dom.EndTime,
+		TimeSlot:         string(timeSlot),
+		WorkingDays:      dom.WorkingDays,
 	}
 }
 

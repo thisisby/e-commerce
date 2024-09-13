@@ -3,6 +3,7 @@ package one_c
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -107,7 +108,7 @@ func (c *Client) CreateProductStockRequest(productStock ProductStock) error {
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("Failed to send request: Product stock create", err)
 		slog.Error("Response Body: %s\n", string(bodyBytes))
-		return err
+		return fmt.Errorf("product stock create failed: status code %d, response body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	return nil

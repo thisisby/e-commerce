@@ -48,11 +48,6 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 		})
 	}
 
-	orderId, err := o.ordersRepo.Save(orders)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-
 	transactionId := helpers.GenerateUUID()
 
 	for {
@@ -66,6 +61,39 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 		}
 
 		transactionId = helpers.GenerateUUID()
+	}
+
+	user, err := o.usersRepo.FindById(orders.UserId)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	var productsItems []one_c.Products
+	for _, item := range orders.OrderDetails {
+		productsItems = append(productsItems, one_c.Products{
+			Quantity:  item.Quantity,
+			Amount:    item.SubTotal,
+			ProductId: item.ProductCCode,
+		})
+	}
+
+	productSales := one_c.ProductStock{
+		CustomerId:      user.Phone,
+		TransactionId:   transactionId,
+		Active:          true,
+		TransactionDate: time.Now(),
+		Products:        productsItems,
+	}
+
+	err = o.OnceCClient.CreateProductStockRequest(productSales)
+	if err != nil {
+		slog.Error("OrdersUsecase.Save: failed to create product stock in 1C: ", err)
+		return http.StatusInternalServerError, err
+	}
+
+	orderId, err := o.ordersRepo.Save(orders)
+	if err != nil {
+		return http.StatusInternalServerError, err
 	}
 
 	productStockDomain := domains.ProductStockDomain{
@@ -91,34 +119,7 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 		return http.StatusInternalServerError, err
 	}
 
-	user, err := o.usersRepo.FindById(orders.UserId)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
-
-	var productsItems []one_c.Products
-	for _, item := range productStockDomain.Items {
-		productsItems = append(productsItems, one_c.Products{
-			Quantity:  item.Quantity,
-			Amount:    item.Amount,
-			ProductId: item.ProductCode,
-		})
-	}
-	productSales := one_c.ProductStock{
-		CustomerId:      user.Phone,
-		TransactionId:   transactionId,
-		Active:          true,
-		TransactionDate: time.Now(),
-		Products:        productsItems,
-	}
-
-	err = o.OnceCClient.CreateProductStockRequest(productSales)
-	if err != nil {
-		slog.Error("OrdersUsecase.Save: failed to create product stock in 1C: ", err)
-	}
-
 	return http.StatusCreated, nil
-
 }
 
 func (o *ordersUsecase) FindByUserId(userId int, statusParam string) ([]domains.OrdersDomain, int, error) {

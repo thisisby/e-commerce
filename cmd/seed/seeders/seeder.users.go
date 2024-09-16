@@ -30,5 +30,15 @@ func init() {
 			CreatedAt:    helpers.GetCurrentTime(),
 			UpdatedAt:    helpers.GetCurrentTime(),
 		},
+		{
+			Id:           3,
+			Name:         "Покупатель",
+			Phone:        "1",
+			RoleId:       constants.MapperRoleToId[constants.Client],
+			RefreshToken: "nil",
+			DateOfBirth:  helpers.GetCurrentTime(),
+			CreatedAt:    helpers.GetCurrentTime(),
+			UpdatedAt:    helpers.GetCurrentTime(),
+		},
 	}
 }

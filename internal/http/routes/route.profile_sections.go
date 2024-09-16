@@ -38,7 +38,7 @@ func NewProfileSectionsRoute(
 
 func (r *ProfileSectionsRoute) Register() {
 	profileSections := r.router.Group("/profile-sections")
-	profileSections.Use(r.authMiddleware.Handle)
+
 	profileSections.GET("", r.profileSectionsHandler.FindAll)
 
 	admin := r.router.Group("/admin/profile-sections")

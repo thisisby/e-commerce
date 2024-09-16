@@ -7,6 +7,7 @@ type ProductStock struct {
 	CustomerId    int       `db:"customer_id"`
 	Date          time.Time `db:"date"`
 	Active        bool      `db:"active"`
+	OrderId       *int      `db:"order_id"`
 }
 
 type ProductStockItem struct {

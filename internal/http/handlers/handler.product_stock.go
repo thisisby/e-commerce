@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/http/datatransfers/requests"
 	"ga_marketplace/pkg/helpers"
@@ -27,8 +26,6 @@ func (p *ProductStockHandler) Save(ctx echo.Context) error {
 	}
 
 	productStockDomain := requests.ConvertToProductStockDomain(productStockCreateRequest)
-
-	fmt.Println("productStockDomain", productStockDomain)
 
 	statusCode, err := p.productStockUsecase.Save(productStockDomain)
 	if err != nil {

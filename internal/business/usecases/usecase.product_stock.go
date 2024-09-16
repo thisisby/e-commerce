@@ -1,7 +1,9 @@
 package usecases
 
 import (
+	"errors"
 	"ga_marketplace/internal/business/domains"
+	"ga_marketplace/internal/constants"
 	"net/http"
 )
 
@@ -54,6 +56,9 @@ func (p *productStockUsecase) FindStockItem(transactionId string, productId stri
 func (p *productStockUsecase) UpdateProductStockItem(item domains.ProductStockItemDomain, id string, id2 string) (int, error) {
 	err := p.productStockRepo.UpdateProductStockItem(item, id, id2)
 	if err != nil {
+		if errors.Is(err, constants.ErrForeignKeyViolation) {
+			return http.StatusNotFound, errors.New("product code not found")
+		}
 		return http.StatusInternalServerError, err
 	}
 

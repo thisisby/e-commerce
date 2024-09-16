@@ -41,7 +41,6 @@ func (r *CountriesRoute) Register() {
 	countries := r.router.Group("/countries")
 	admin := r.router.Group("/admin/countries")
 
-	countries.Use(r.authMiddleware.Handle)
 	countries.GET("", r.countryHandler.FindAll)
 	countries.GET("/:id", r.countryHandler.FindById)
 

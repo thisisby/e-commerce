@@ -41,7 +41,6 @@ func (r *ContactsRoute) Register() {
 	contacts := r.router.Group("/contacts")
 	admin := r.router.Group("/admin/contacts")
 
-	contacts.Use(r.authMiddleware.Handle)
 	contacts.GET("", r.contactHandler.FindAll)
 
 	admin.Use(r.adminMiddleware.Handle)

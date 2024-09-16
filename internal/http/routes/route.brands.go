@@ -41,7 +41,6 @@ func (r *BrandsRoute) Register() {
 	brands := r.router.Group("/brands")
 	admin := r.router.Group("/admin/brands")
 
-	brands.Use(r.authMiddleware.Handle)
 	brands.GET("", r.brandHandler.FindAll)
 
 	admin.Use(r.adminMiddleware.Handle)

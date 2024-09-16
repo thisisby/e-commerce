@@ -41,7 +41,6 @@ func (r *CategoriesRoute) Register() {
 	categories := r.router.Group("/categories")
 	admin := r.router.Group("/admin/categories")
 
-	categories.Use(r.authMiddleware.Handle)
 	categories.GET("", r.categoriesHandler.FindAll)
 
 	admin.Use(r.adminMiddleware.Handle)

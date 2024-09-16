@@ -41,7 +41,6 @@ func (r *CitiesRoute) Register() {
 	cities := r.router.Group("/cities")
 	admin := r.router.Group("/admin/cities")
 
-	cities.Use(r.authMiddleware.Handle)
 	cities.GET("", r.cityHandler.FindAll)
 	cities.GET("/:id", r.cityHandler.FindById)
 

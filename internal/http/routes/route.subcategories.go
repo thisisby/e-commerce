@@ -42,7 +42,6 @@ func (r *SubcategoriesRoute) Register() {
 	categories := r.router.Group("/categories")
 	admin := r.router.Group("/admin/subcategories")
 
-	subcategories.Use(r.authMiddleware.Handle)
 	subcategories.GET("", r.subcategoriesHandler.FindAll)
 
 	categories.Use(r.authMiddleware.Handle)

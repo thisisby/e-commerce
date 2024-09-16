@@ -9,7 +9,7 @@ type CreateProductStockRequest struct {
 	Date          time.Time `json:"date" validate:"required"`
 	TransactionId string    `json:"transaction_id_mp" validate:"required"`
 	CustomerId    int       `json:"customer_id" validate:"required"`
-	Active        bool      `json:"active" validate:"required"`
+	Active        bool      `json:"active"`
 	Items         []CreateProductStockItemRequest
 }
 

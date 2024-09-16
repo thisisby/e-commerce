@@ -4,7 +4,7 @@ import "time"
 
 type ProductStock struct {
 	TransactionId string    `db:"transaction_id"`
-	CustomerId    int       `db:"customer_id"`
+	CustomerId    string    `db:"customer_id"`
 	Date          time.Time `db:"date"`
 	Active        bool      `db:"active"`
 	OrderId       *int      `db:"order_id"`

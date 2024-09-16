@@ -98,7 +98,7 @@ func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.Ca
 
 	productStockDomain := domains.ProductStockDomain{
 		TransactionId: transactionId,
-		CustomerId:    orders.UserId,
+		CustomerId:    user.Phone,
 		Date:          time.Now(),
 		Active:        true,
 		OrderId:       orderId,

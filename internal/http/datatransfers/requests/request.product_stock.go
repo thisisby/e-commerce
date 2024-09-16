@@ -8,7 +8,7 @@ import (
 type CreateProductStockRequest struct {
 	Date          time.Time `json:"date" validate:"required"`
 	TransactionId string    `json:"transaction_id_mp" validate:"required"`
-	CustomerId    int       `json:"customer_id" validate:"required"`
+	CustomerId    string    `json:"customer_id" validate:"required"`
 	Active        bool      `json:"active"`
 	Items         []CreateProductStockItemRequest
 }
@@ -23,7 +23,7 @@ type CreateProductStockItemRequest struct {
 type UpdateProductStockRequest struct {
 	Date          *time.Time `json:"date"`
 	TransactionId *string    `json:"transaction_id_mp"`
-	CustomerId    *int       `json:"customer_id"`
+	CustomerId    *string    `json:"customer_id"`
 	Active        *bool      `json:"active"`
 }
 

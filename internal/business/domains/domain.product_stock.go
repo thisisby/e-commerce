@@ -4,7 +4,7 @@ import "time"
 
 type ProductStockDomain struct {
 	TransactionId string
-	CustomerId    int
+	CustomerId    string
 	Date          time.Time
 	Active        bool
 	Items         []ProductStockItemDomain

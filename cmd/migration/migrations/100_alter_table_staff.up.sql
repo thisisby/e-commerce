@@ -68,4 +68,4 @@ ALTER TABLE staff
 ]';
 
 ALTER TABLE staff
-    ADD COLUMN working_days TEXT[] NOT NULL DEFAULT '{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}';
+    ADD COLUMN IF NOT EXISTS working_days TEXT[] NOT NULL DEFAULT '{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}';

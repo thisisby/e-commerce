@@ -127,9 +127,9 @@ LEFT JOIN
     product_stock_item psi ON p.c_code = psi.product_code
 LEFT JOIN 
     product_stock ps ON psi.transaction_id = ps.transaction_id
-JOIN 
+LEFT JOIN 
     subcategories s ON p.subcategory_id = s.id
-JOIN 
+LEFT JOIN 
     brands b ON p.brand_id = b.id
 		`
 

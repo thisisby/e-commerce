@@ -6,7 +6,6 @@ import (
 	"ga_marketplace/internal/datasources/records"
 	"ga_marketplace/pkg/helpers"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/gommon/log"
 	"strconv"
 	"strings"
 )
@@ -43,7 +42,7 @@ func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, er
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.id = $1
@@ -163,12 +162,11 @@ JOIN
 		query += " WHERE " + strings.Join(filters, " AND ")
 	}
 
-	query += " GROUP BY p.id, s.id, b.id, d.id, c.product_id, w.id"
+	query += " GROUP BY p.id, s.id, b.id, d.id, c.id, w.id"
 
 	offset := (filter.Page - 1) * filter.PageSize
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d", filter.PageSize, offset)
 
-	log.Info("query: ", query)
 	var productsRecord []records.Products
 
 	err := p.conn.Select(&productsRecord, query, args...)

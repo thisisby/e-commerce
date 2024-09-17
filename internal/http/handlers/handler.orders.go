@@ -8,7 +8,6 @@ import (
 	"ga_marketplace/pkg/helpers"
 	"ga_marketplace/pkg/jwt"
 	"github.com/labstack/echo/v4"
-	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -39,7 +38,6 @@ func (o *OrdersHandler) Save(ctx echo.Context) error {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	slog.Info("Cart items: ", cartItems)
 	totalAmount, statusCode, err := o.cartItemsUsecase.FindTotalAmountByUserId(jwtClaims.UserId)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())

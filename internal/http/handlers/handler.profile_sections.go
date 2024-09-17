@@ -5,7 +5,6 @@ import (
 	"ga_marketplace/internal/http/datatransfers/requests"
 	"ga_marketplace/pkg/helpers"
 	"github.com/labstack/echo/v4"
-	"log/slog"
 	"net/http"
 	"strconv"
 )
@@ -73,8 +72,6 @@ func (p *ProfileSectionsHandler) UpdateById(ctx echo.Context) error {
 	if profileSectionUpdateRequest.ParentId != nil {
 		profile.ParentId = profileSectionUpdateRequest.ParentId
 	}
-
-	slog.Info("profile", profile)
 
 	statusCode, err = p.profileSectionsUsecase.UpdateById(profile)
 

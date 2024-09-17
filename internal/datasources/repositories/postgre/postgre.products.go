@@ -36,14 +36,14 @@ func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, er
 		    COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 		    CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price",
 		     COALESCE(SUM(CASE 
-                    WHEN psi.transaction_type = 1 THEN psi.quantity 
-                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
                  END), 0) AS "stock"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.id = $1
@@ -132,7 +132,6 @@ JOIN
     subcategories s ON p.subcategory_id = s.id
 JOIN 
     brands b ON p.brand_id = b.id
-
 		`
 
 	var filters []string
@@ -164,7 +163,7 @@ JOIN
 		query += " WHERE " + strings.Join(filters, " AND ")
 	}
 
-	query += " GROUP BY p.id, d.id, s.id, b.id, c.product_id, w.id"
+	query += " GROUP BY p.id, s.id, b.id, d.id, c.product_id, w.id"
 
 	offset := (filter.Page - 1) * filter.PageSize
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d", filter.PageSize, offset)
@@ -244,8 +243,8 @@ func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcateg
 		CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "is_in_wishlist",
 		CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price",
 		COALESCE(SUM(CASE 
-                    WHEN psi.transaction_type = 1 THEN psi.quantity 
-                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
                  END), 0) AS "stock"
 		FROM products p
@@ -254,7 +253,7 @@ func (p *postgreProductsRepository) FindAllForMeBySubcategoryId(id int, subcateg
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN subcategories s ON p.subcategory_id = s.id
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.subcategory_id = $2
 		GROUP BY p.id, d.id, s.id, b.id, c.product_id, w.id
@@ -286,8 +285,8 @@ func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) (
 		CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "is_in_wishlist",
 		CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price",
 		COALESCE(SUM(CASE 
-                    WHEN psi.transaction_type = 1 THEN psi.quantity 
-                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
                  END), 0) AS "stock"
 		FROM products p
@@ -295,7 +294,7 @@ func (p *postgreProductsRepository) FindAllForMeByBrandId(id int, brandId int) (
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = $1
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.brand_id = $2
@@ -397,14 +396,14 @@ func (p *postgreProductsRepository) FindByCode(code string) (*domains.ProductDom
 		    COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 		    CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price",
 		    COALESCE(SUM(CASE 
-                    WHEN psi.transaction_type = 1 THEN psi.quantity 
-                    WHEN psi.transaction_type = 2 THEN -psi.quantity 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
                  END), 0) AS "stock"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.c_code = $1
@@ -436,13 +435,18 @@ func (p *postgreProductsRepository) FindByIdForUser(id int, userId int) (*domain
 		    COALESCE(NULLIF(d.end_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.end_date",
 		    CASE WHEN d.discount IS NOT NULL THEN p.price - (p.price * d.discount / 100) ELSE p.price END AS "discounted_price",
 		    CASE WHEN c.product_id IS NOT NULL THEN TRUE ELSE FALSE END AS "is_in_cart",
-		    CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "is_in_wishlist"
+		    CASE WHEN w.product_id IS NOT NULL THEN w.id ELSE -1 END AS "is_in_wishlist",
+		    COALESCE(SUM(CASE 
+                    WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
+                    WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
+                    ELSE 0 
+                 END), 0) AS "stock"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN cart_items c ON p.id = c.product_id AND c.user_id = $2
 		LEFT JOIN wishes w ON p.id = w.product_id AND w.user_id = $2
 		LEFT JOIN product_stock_item psi ON p.c_code = psi.product_code
-		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id AND ps.active = TRUE
+		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
 		WHERE p.id = $1

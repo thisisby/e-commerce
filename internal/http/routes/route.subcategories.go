@@ -44,7 +44,6 @@ func (r *SubcategoriesRoute) Register() {
 
 	subcategories.GET("", r.subcategoriesHandler.FindAll)
 
-	categories.Use(r.authMiddleware.Handle)
 	categories.GET("/:category_id/subcategories", r.subcategoriesHandler.FindByCategoryId)
 
 	admin.Use(r.adminMiddleware.Handle)

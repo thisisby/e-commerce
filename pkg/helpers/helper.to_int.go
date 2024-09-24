@@ -12,3 +12,14 @@ func ToInt(value string, defaultValue int) int {
 
 	return defaultValue
 }
+
+func ToFloat64(value string, defaultValue float64) float64 {
+	if value == "" {
+		return defaultValue
+	}
+	if floatValue, err := strconv.ParseFloat(value, 64); err == nil {
+		return floatValue
+	}
+
+	return defaultValue
+}

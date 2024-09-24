@@ -173,3 +173,12 @@ func (p *productsUsecase) DeleteAttributesFromProduct(productId int, attributeId
 
 	return http.StatusOK, nil
 }
+
+func (p *productsUsecase) DeleteById(id int) (int, error) {
+	err := p.productsRepo.DeleteById(id)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}

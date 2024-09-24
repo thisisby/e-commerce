@@ -671,3 +671,17 @@ func (p *postgreProductsRepository) DeleteAttributesFromProduct(productId int, a
 
 	return nil
 }
+
+func (p *postgreProductsRepository) DeleteById(id int) error {
+	query := `
+		DELETE FROM products
+		WHERE id = $1
+		`
+
+	_, err := p.conn.Exec(query, id)
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}

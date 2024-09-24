@@ -82,6 +82,7 @@ type ProductsRepository interface {
 	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
 	AddAttributesToProduct(productId int, attributes []int) error
 	DeleteAttributesFromProduct(productId int, attributeIds []int) error
+	DeleteById(id int) error
 }
 
 type ProductsUsecase interface {
@@ -98,4 +99,5 @@ type ProductsUsecase interface {
 	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
 	AddAttributesToProduct(productId int, attributes []int) (int, error)
 	DeleteAttributesFromProduct(productId int, attributeIds []int) (int, error)
+	DeleteById(id int) (int, error)
 }

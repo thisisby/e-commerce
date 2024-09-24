@@ -341,3 +341,19 @@ func (p *ProductHandler) DeleteAttributeFromProduct(ctx echo.Context) error {
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Attributes deleted successfully", nil)
 }
+
+func (p *ProductHandler) DeleteById(ctx echo.Context) error {
+	productId := ctx.Param("id")
+
+	productIdInt, err := strconv.Atoi(productId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid product id")
+	}
+
+	statusCode, err := p.productUsecase.DeleteById(productIdInt)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Product deleted successfully", nil)
+}

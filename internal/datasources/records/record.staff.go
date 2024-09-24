@@ -10,6 +10,7 @@ type StaffRecord struct {
 	Avatar           *string        `db:"avatar"`
 	ServiceId        int            `db:"service_id"`
 	ServiceAddressId int            `db:"service_address_id"`
+	ServiceAddress   *string        `db:"service_address"`
 	TimeSlot         string         `db:"time_slot"`
 	WorkingDays      pq.StringArray `db:"working_days"`
 }

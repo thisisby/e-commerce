@@ -9,6 +9,7 @@ func (b *Brands) ToDomain() *domains.BrandsDomain {
 	return &domains.BrandsDomain{
 		Id:   b.Id,
 		Name: b.Name,
+		Info: b.Info,
 	}
 }
 
@@ -16,6 +17,7 @@ func FromBrandsDomain(domain domains.BrandsDomain) Brands {
 	return Brands{
 		Id:   domain.Id,
 		Name: domain.Name,
+		Info: domain.Info,
 	}
 }
 

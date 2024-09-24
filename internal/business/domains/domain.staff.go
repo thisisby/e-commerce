@@ -12,6 +12,7 @@ type StaffDomain struct {
 	ServiceAddressId int
 	TimeSlot         []TimeSlot
 	WorkingDays      []string
+	ServiceAddress   *string
 }
 
 type TimeSlot struct {

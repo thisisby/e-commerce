@@ -14,6 +14,7 @@ type StaffResponse struct {
 	ServiceAddressId int                `json:"service_address_id"`
 	TimeSlot         []domains.TimeSlot `json:"time_slot"`
 	WorkingDays      []string           `json:"working_days"`
+	ServiceAddress   *string            `json:"service_address"`
 }
 
 func FromStaffDomain(inDom domains.StaffDomain) *StaffResponse {
@@ -30,6 +31,7 @@ func FromStaffDomain(inDom domains.StaffDomain) *StaffResponse {
 		ServiceAddressId: inDom.ServiceAddressId,
 		TimeSlot:         inDom.TimeSlot,
 		WorkingDays:      inDom.WorkingDays,
+		ServiceAddress:   inDom.ServiceAddress,
 	}
 }
 

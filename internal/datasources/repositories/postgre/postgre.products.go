@@ -6,6 +6,8 @@ import (
 	"ga_marketplace/internal/datasources/records"
 	"ga_marketplace/pkg/helpers"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"log/slog"
 	"strconv"
 	"strings"
 )
@@ -25,7 +27,8 @@ func (p *postgreProductsRepository) FindById(id int) (*domains.ProductDomain, er
 		SELECT 
 		    p.id, p.name, p.description, p.ingredients, p.c_code, 
 		    p.ed_izm, p.article, p.price, p.subcategory_id, p.brand_id, 
-		    p.image, p.images, p.weight, p.created_at, p.updated_at,
+		    p.image, p.images, p.weight, p.country_of_production, p.sex,
+		    p.volume, p.created_at, p.updated_at,
 		    s.id "subcategory.id", s.name "subcategory.name", 
 		    s.category_id "subcategory.category_id",
 		    b.id "brand.id", b.name "brand.name",
@@ -157,6 +160,28 @@ LEFT JOIN
 		filters = append(filters, "p.brand_id = $"+strconv.Itoa(len(args)+1))
 		args = append(args, filter.BrandID)
 	}
+	if filter.CountryOfProduction != "" {
+		filters = append(filters, "p.country_of_production = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.CountryOfProduction)
+	}
+	if filter.Volume != 0 {
+		filters = append(filters, "p.volume = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.Volume)
+	}
+	if filter.Sex != "" {
+		filters = append(filters, "p.sex = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.Sex)
+	}
+
+	if len(filter.Attributes) > 1 {
+		filters = append(filters, "a.name = ANY($"+strconv.Itoa(len(args)+1)+")")
+		args = append(args, pq.Array(filter.Attributes))
+
+		query += `
+		JOIN product_attributes pa ON p.id = pa.product_id
+		JOIN attributes a ON pa.attribute_id = a.id
+		`
+	}
 
 	if len(filters) > 0 {
 		query += " WHERE " + strings.Join(filters, " AND ")
@@ -199,8 +224,11 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 		    image = $2,
 		    images = $3,
 		    subcategory_id = $4,
-		    brand_id = $5
-		WHERE id = $6
+		    brand_id = $5,
+			country_of_production = $6,
+			volume = $7,
+			sex = $8
+		WHERE id = $9
 	`
 
 	_, err = tx.Exec(updateQuery,
@@ -209,6 +237,9 @@ func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) erro
 		productRecord.Images,
 		productRecord.SubcategoryId,
 		productRecord.BrandId,
+		productRecord.CountryOfProduction,
+		productRecord.Volume,
+		productRecord.Sex,
 		productRecord.Id,
 	)
 	if err != nil {
@@ -423,10 +454,12 @@ func (p *postgreProductsRepository) FindByIdForUser(id int, userId int) (*domain
 		SELECT 
 		    p.id, p.name, p.description, p.ingredients, p.c_code, 
 		    p.ed_izm, p.article, p.price, p.subcategory_id, p.brand_id, 
-		    p.image, p.images, p.weight, p.created_at, p.updated_at,
+		    p.image, p.images, p.weight, p.country_of_production, p.sex,
+		    p.volume, p.created_at, p.updated_at,
 		    s.id "subcategory.id", s.name "subcategory.name", 
 		    s.category_id "subcategory.category_id",
-		    b.id "brand.id", b.name "brand.name",
+		    b.id "brand.id", b.name "brand.name", b.info "brand.info",
+		    ch.name "characteristic",
 		    COALESCE(d.id, -1) "discount.id", COALESCE(d.product_id, 0) "discount.product_id", 
 		    COALESCE(d.discount, 0) "discount.discount", 
 		    COALESCE(NULLIF(d.start_date, '0001-01-01'::timestamp), '1970-01-01'::timestamp) "discount.start_date", 
@@ -438,7 +471,8 @@ func (p *postgreProductsRepository) FindByIdForUser(id int, userId int) (*domain
                     WHEN psi.transaction_type = 1 AND ps.active = TRUE THEN psi.quantity 
                     WHEN psi.transaction_type = 2 AND ps.active = TRUE THEN -psi.quantity 
                     ELSE 0 
-                 END), 0) AS "stock"
+                 END), 0) AS "stock",
+			array_agg(COALESCE(a.name, '')) AS "attributes"
 		FROM products p
 		LEFT JOIN discounts d ON p.id = d.product_id AND d.start_date <= NOW() AND d.end_date >= NOW()
 		LEFT JOIN cart_items c ON p.id = c.product_id AND c.user_id = $2
@@ -447,7 +481,11 @@ func (p *postgreProductsRepository) FindByIdForUser(id int, userId int) (*domain
 		LEFT JOIN product_stock ps ON psi.transaction_id = ps.transaction_id
 		JOIN subcategories s ON p.subcategory_id = s.id
 		JOIN brands b ON p.brand_id = b.id
+		LEFT JOIN characteristics ch ON ch.subcategory_id = p.subcategory_id
+		LEFT JOIN product_attributes pa ON p.id = pa.product_id
+		LEFT JOIN attributes a ON pa.attribute_id = a.id
 		WHERE p.id = $1
+		GROUP BY p.id, s.id, b.id, d.id, c.id, w.id, ps.transaction_id, ch.name
 		`
 
 	var productRecord records.Products
@@ -523,6 +561,28 @@ func (p *postgreProductsRepository) FindAll(filter domains.ProductFilter) ([]dom
 		filters = append(filters, "p.brand_id = $"+strconv.Itoa(len(args)+1))
 		args = append(args, filter.BrandID)
 	}
+	if filter.CountryOfProduction != "" {
+		filters = append(filters, "p.country_of_production = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.CountryOfProduction)
+	}
+	if filter.Volume != 0 {
+		filters = append(filters, "p.volume = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.Volume)
+	}
+	if filter.Sex != "" {
+		filters = append(filters, "p.sex = $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.Sex)
+	}
+
+	if len(filter.Attributes) > 1 {
+		filters = append(filters, "a.name = ANY($"+strconv.Itoa(len(args)+1)+")")
+		args = append(args, pq.Array(filter.Attributes))
+
+		query += `
+		JOIN product_attributes pa ON p.id = pa.product_id
+		JOIN attributes a ON pa.attribute_id = a.id
+		`
+	}
 
 	if len(filters) > 0 {
 		query += " WHERE " + strings.Join(filters, " AND ")
@@ -540,5 +600,74 @@ func (p *postgreProductsRepository) FindAll(filter domains.ProductFilter) ([]dom
 		return nil, 0, helpers.PostgresErrorTransform(err)
 	}
 
+	slog.Info("query", query)
+
 	return records.ToArrayOfProductsDomain(productsRecord), len(productsRecord), nil
+}
+
+func (p *postgreProductsRepository) AddAttributesToProduct(productId int, attributes []int) error {
+	tx, err := p.conn.Begin()
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, attributeId := range attributes {
+		slog.Info("attributeId", attributeId)
+		query := `
+			INSERT INTO product_attributes (product_id, attribute_id)
+			VALUES ($1, $2)
+			`
+
+		_, err = tx.Exec(query, productId, attributeId)
+		if err != nil {
+			tx.Rollback()
+			return helpers.PostgresErrorTransform(err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
+}
+
+func (p *postgreProductsRepository) DeleteAttributesFromProduct(productId int, attributeIds []int) error {
+	tx, err := p.conn.Begin()
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, attributeId := range attributeIds {
+		query := `
+			DELETE FROM product_attributes
+			WHERE product_id = $1 AND attribute_id = $2
+			`
+
+		_, err = tx.Exec(query, productId, attributeId)
+		if err != nil {
+			tx.Rollback()
+			return helpers.PostgresErrorTransform(err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return helpers.PostgresErrorTransform(err)
+	}
+
+	return nil
 }

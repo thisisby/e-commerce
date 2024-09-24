@@ -3,6 +3,7 @@ package domains
 type BrandsDomain struct {
 	Id   int
 	Name string
+	Info string
 }
 
 type BrandsRepository interface {

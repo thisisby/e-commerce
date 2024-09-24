@@ -31,7 +31,7 @@ func (p *postgreBrandsRepository) FindAll() ([]domains.BrandsDomain, error) {
 }
 
 func (p *postgreBrandsRepository) Save(domain domains.BrandsDomain) error {
-	query := `INSERT INTO brands (name) VALUES (:name)`
+	query := `INSERT INTO brands (name, info) VALUES (:name, :info)`
 	brandsRecord := records.FromBrandsDomain(domain)
 
 	_, err := p.Conn.NamedQuery(query, brandsRecord)
@@ -43,7 +43,7 @@ func (p *postgreBrandsRepository) Save(domain domains.BrandsDomain) error {
 }
 
 func (p *postgreBrandsRepository) Update(domain domains.BrandsDomain) error {
-	query := `UPDATE brands SET name = :name WHERE id = :id`
+	query := `UPDATE brands SET name = :name, info = :info WHERE id = :id`
 	brandsRecord := records.FromBrandsDomain(domain)
 
 	_, err := p.Conn.NamedQuery(query, brandsRecord)

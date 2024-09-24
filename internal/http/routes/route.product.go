@@ -63,4 +63,5 @@ func (r *ProductRoute) Register() {
 	admin.POST("/from1c", r.productHandler.SaveFrom1c)
 	admin.PATCH("/from1c/:c_code", r.productHandler.UpdateFrom1c)
 	admin.PATCH("/:id", r.productHandler.UpdateById)
+	admin.POST("/:id/attributes", r.productHandler.DeleteAttributeFromProduct)
 }

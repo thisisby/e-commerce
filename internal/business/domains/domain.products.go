@@ -5,29 +5,34 @@ import (
 )
 
 type ProductDomain struct {
-	Id              int
-	Name            string
-	Description     string
-	Ingredients     string
-	Article         string
-	CCode           string
-	EdIzm           string
-	Price           float64
-	Weight          *float64
-	DiscountedPrice float64
-	TotalPrice      *float64
-	Discount        *DiscountsDomain
-	SubcategoryId   int
-	Subcategory     *SubcategoriesDomain
-	BrandId         int
-	Brand           *BrandsDomain
-	Image           string
-	Images          []string
-	IsInCart        bool
-	IsInWishlist    int
-	Stock           int
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	Id                  int
+	Name                string
+	Description         string
+	Ingredients         string
+	Article             string
+	CCode               string
+	EdIzm               string
+	Price               float64
+	Weight              *float64
+	DiscountedPrice     float64
+	TotalPrice          *float64
+	Discount            *DiscountsDomain
+	SubcategoryId       int
+	Subcategory         *SubcategoriesDomain
+	BrandId             int
+	Brand               *BrandsDomain
+	Image               string
+	Images              []string
+	IsInCart            bool
+	IsInWishlist        int
+	Stock               int
+	Attributes          []string
+	Characteristic      string
+	CountryOfProduction string
+	Volume              float64
+	Sex                 string
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 type ProductDomainV2 struct {
@@ -45,13 +50,17 @@ type ProductDomainV2 struct {
 }
 
 type ProductFilter struct {
-	Name          string
-	MinPrice      string
-	MaxPrice      string
-	SubcategoryID string
-	BrandID       string
-	Page          int
-	PageSize      int
+	Name                string
+	MinPrice            string
+	MaxPrice            string
+	SubcategoryID       string
+	BrandID             string
+	Attributes          []string
+	CountryOfProduction string
+	Volume              float64
+	Sex                 string
+	Page                int
+	PageSize            int
 }
 
 type ProductPagination struct {
@@ -71,6 +80,8 @@ type ProductsRepository interface {
 	UpdateFrom1c(code string, product *ProductDomain) error
 	FindByCode(code string) (*ProductDomain, error)
 	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
+	AddAttributesToProduct(productId int, attributes []int) error
+	DeleteAttributesFromProduct(productId int, attributeIds []int) error
 }
 
 type ProductsUsecase interface {
@@ -85,4 +96,6 @@ type ProductsUsecase interface {
 	FindByCode(code string) (*ProductDomain, int, error)
 	FindByIdForUser(id int, userId int) (*ProductDomain, int, error)
 	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
+	AddAttributesToProduct(productId int, attributes []int) (int, error)
+	DeleteAttributesFromProduct(productId int, attributeIds []int) (int, error)
 }

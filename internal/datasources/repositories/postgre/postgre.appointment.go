@@ -5,6 +5,7 @@ import (
 	"ga_marketplace/internal/datasources/records"
 	"ga_marketplace/pkg/helpers"
 	"github.com/jmoiron/sqlx"
+	"log/slog"
 	"time"
 )
 
@@ -23,6 +24,7 @@ func (p *postgreAppointmentsRepository) FindAll() ([]domains.AppointmentDomain, 
 		SELECT
 			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
 			s.id "staff.id", s.full_name "staff.full_name", s.occupation "staff.occupation", s.experience "staff.experience", s.avatar "staff.avatar", s.service_id "staff.service_id", s.service_address_id "staff.service_address_id",
+			s.time_slot "staff.time_slot", s.working_days "staff.working_days",
 			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id"
 		FROM appointments a	
 		JOIN staff s ON a.staff_id = s.id
@@ -43,11 +45,14 @@ func (p *postgreAppointmentsRepository) FindByUserId(userId int) ([]domains.Appo
 		SELECT
 			a.id, a.user_id, a.staff_id, a.start_time, a.end_time, a.service_item_id, a.comments, a.status, a.full_name, a.phone_number,
 			s.id "staff.id", s.full_name "staff.full_name", s.occupation "staff.occupation", s.experience "staff.experience", s.avatar "staff.avatar", s.service_id "staff.service_id", s.service_address_id "staff.service_address_id",
-			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id"
+			s.time_slot "staff.time_slot", s.working_days "staff.working_days",
+			si.id "service_item.id", si.title "service_item.title", si.price "service_item.price", si.duration "service_item.duration", si.description "service_item.description", si.subservice_id "service_item.subservice_id",
+			sa.address "staff.service_address"
 		FROM appointments a	
 		JOIN users u ON a.user_id = u.id
 		JOIN staff s ON a.staff_id = s.id
 		JOIN service_items si ON a.service_item_id = si.id
+		JOIN service_addresses sa ON s.service_address_id = sa.id
 		WHERE a.user_id = $1	
 	`
 
@@ -56,6 +61,8 @@ func (p *postgreAppointmentsRepository) FindByUserId(userId int) ([]domains.Appo
 	if err != nil {
 		return nil, helpers.PostgresErrorTransform(err)
 	}
+
+	slog.Info("appointmentRecord", appointmentRecord)
 
 	return records.ToArrayOfAppointmentDomain(appointmentRecord), nil
 }

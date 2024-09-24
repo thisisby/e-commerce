@@ -9,9 +9,17 @@ type ProductCreateRequest struct {
 }
 
 type ProductUpdateRequest struct {
-	Weight      *float64 `form:"weight"`
-	SubCategory *int     `form:"sub_category_id"`
-	BrandId     *int     `form:"brand_id"`
+	Weight              *float64 `form:"weight"`
+	SubCategory         *int     `form:"sub_category_id"`
+	BrandId             *int     `form:"brand_id"`
+	Volume              *float64 `form:"volume"`
+	CountryOfProduction *string  `form:"country_of_production"`
+	Sex                 *string  `form:"sex"`
+	AttributesIds       []int    `form:"attributes_ids"`
+}
+
+type ProductDeleteAttributeRequest struct {
+	AttributeIds []int `json:"attribute_ids"`
 }
 
 type ProductUpdateFrom1c struct {

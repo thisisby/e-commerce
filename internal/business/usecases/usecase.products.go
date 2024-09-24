@@ -155,3 +155,21 @@ func (p *productsUsecase) FindAll(filter domains.ProductFilter) ([]domains.Produ
 
 	return products, total, nil
 }
+
+func (p *productsUsecase) AddAttributesToProduct(productId int, attributes []int) (int, error) {
+	err := p.productsRepo.AddAttributesToProduct(productId, attributes)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}
+
+func (p *productsUsecase) DeleteAttributesFromProduct(productId int, attributeIds []int) (int, error) {
+	err := p.productsRepo.DeleteAttributesFromProduct(productId, attributeIds)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
+}

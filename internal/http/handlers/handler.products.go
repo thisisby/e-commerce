@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ga_marketplace/internal/business/domains"
 	"ga_marketplace/internal/constants"
 	"ga_marketplace/internal/http/datatransfers/requests"
@@ -10,9 +9,10 @@ import (
 	"ga_marketplace/pkg/jwt"
 	"ga_marketplace/third_party/aws"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
+	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type ProductHandler struct {
@@ -81,18 +81,19 @@ func (p *ProductHandler) FindAllForMe(ctx echo.Context) error {
 	jwtClaims := ctx.Get(constants.CtxAuthenticatedUserKey).(jwt.JWTCustomClaims)
 
 	filter := domains.ProductFilter{
-		Name:          ctx.QueryParam("name"),
-		MinPrice:      ctx.QueryParam("min_price"),
-		MaxPrice:      ctx.QueryParam("max_price"),
-		SubcategoryID: ctx.QueryParam("subcategory_id"),
-		BrandID:       ctx.QueryParam("brand_id"),
-		Page:          helpers.ToInt(ctx.QueryParam("page"), 1),
-		PageSize:      helpers.ToInt(ctx.QueryParam("page_size"), 10),
+		Name:                ctx.QueryParam("name"),
+		MinPrice:            ctx.QueryParam("min_price"),
+		MaxPrice:            ctx.QueryParam("max_price"),
+		SubcategoryID:       ctx.QueryParam("subcategory_id"),
+		BrandID:             ctx.QueryParam("brand_id"),
+		CountryOfProduction: ctx.QueryParam("country_of_production"),
+		Volume:              helpers.ToFloat64(ctx.QueryParam("volume"), 0),
+		Sex:                 ctx.QueryParam("sex"),
+		Page:                helpers.ToInt(ctx.QueryParam("page"), 1),
+		PageSize:            helpers.ToInt(ctx.QueryParam("page_size"), 10),
 	}
-
-	fmt.Printf("Working")
-
-	log.Info("filter", filter)
+	attributesParam := ctx.QueryParam("attributes")
+	filter.Attributes = strings.Split(attributesParam, ",")
 
 	products, statusCode, err := p.productUsecase.FindAllForMe(jwtClaims.UserId, filter)
 	if err != nil {
@@ -162,10 +163,27 @@ func (p *ProductHandler) UpdateById(ctx echo.Context) error {
 	if images != nil {
 		product.Images = imageUrls
 	}
+	if productUpdateRequest.Volume != nil {
+		product.Volume = *productUpdateRequest.Volume
+	}
+	if productUpdateRequest.CountryOfProduction != nil {
+		product.CountryOfProduction = *productUpdateRequest.CountryOfProduction
+	}
+	if productUpdateRequest.Sex != nil {
+		product.Sex = *productUpdateRequest.Sex
+	}
 
 	statusCode, err = p.productUsecase.UpdateById(*product)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	if len(productUpdateRequest.AttributesIds) > 0 {
+		slog.Info("AttributesIds", productUpdateRequest.AttributesIds)
+		statusCode, err = p.productUsecase.AddAttributesToProduct(productIdInt, productUpdateRequest.AttributesIds)
+		if err != nil {
+			return NewErrorResponse(ctx, statusCode, err.Error())
+		}
 	}
 
 	return NewSuccessResponse(ctx, statusCode, "Product updated successfully", nil)
@@ -280,14 +298,19 @@ func (p *ProductHandler) FindByIdForUser(ctx echo.Context) error {
 
 func (p *ProductHandler) FindAll(ctx echo.Context) error {
 	filter := domains.ProductFilter{
-		Name:          ctx.QueryParam("name"),
-		MinPrice:      ctx.QueryParam("min_price"),
-		MaxPrice:      ctx.QueryParam("max_price"),
-		SubcategoryID: ctx.QueryParam("subcategory_id"),
-		BrandID:       ctx.QueryParam("brand_id"),
-		Page:          helpers.ToInt(ctx.QueryParam("page"), 1),
-		PageSize:      helpers.ToInt(ctx.QueryParam("page_size"), 10),
+		Name:                ctx.QueryParam("name"),
+		MinPrice:            ctx.QueryParam("min_price"),
+		MaxPrice:            ctx.QueryParam("max_price"),
+		SubcategoryID:       ctx.QueryParam("subcategory_id"),
+		BrandID:             ctx.QueryParam("brand_id"),
+		CountryOfProduction: ctx.QueryParam("country_of_production"),
+		Volume:              helpers.ToFloat64(ctx.QueryParam("volume"), 0),
+		Sex:                 ctx.QueryParam("sex"),
+		Page:                helpers.ToInt(ctx.QueryParam("page"), 1),
+		PageSize:            helpers.ToInt(ctx.QueryParam("page_size"), 10),
 	}
+	attributesParam := ctx.QueryParam("attributes")
+	filter.Attributes = strings.Split(attributesParam, ",")
 
 	products, statusCode, err := p.productUsecase.FindAll(filter)
 	if err != nil {
@@ -295,4 +318,26 @@ func (p *ProductHandler) FindAll(ctx echo.Context) error {
 	}
 
 	return NewSuccessResponse(ctx, http.StatusOK, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
+}
+
+func (p *ProductHandler) DeleteAttributeFromProduct(ctx echo.Context) error {
+	var productDeleteAttributeRequest requests.ProductDeleteAttributeRequest
+
+	if err := helpers.BindAndValidate(ctx, &productDeleteAttributeRequest); err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	productId := ctx.Param("id")
+
+	productIdInt, err := strconv.Atoi(productId)
+	if err != nil {
+		return NewErrorResponse(ctx, http.StatusBadRequest, "Invalid product id")
+	}
+
+	statusCode, err := p.productUsecase.DeleteAttributesFromProduct(productIdInt, productDeleteAttributeRequest.AttributeIds)
+	if err != nil {
+		return NewErrorResponse(ctx, statusCode, err.Error())
+	}
+
+	return NewSuccessResponse(ctx, http.StatusOK, "Attributes deleted successfully", nil)
 }

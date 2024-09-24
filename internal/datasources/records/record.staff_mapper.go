@@ -8,6 +8,7 @@ import (
 
 func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
 	if rec == nil || rec.Id == 0 {
+		slog.Info("staff is nil")
 		return nil
 	}
 
@@ -17,6 +18,8 @@ func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
 		slog.Error("error unmarshal time slot", err)
 		return nil
 	}
+
+	slog.Info("Ok")
 
 	return &domains.StaffDomain{
 		Id:               rec.Id,
@@ -28,6 +31,7 @@ func (rec *StaffRecord) ToDomain() *domains.StaffDomain {
 		ServiceAddressId: rec.ServiceAddressId,
 		TimeSlot:         timeSlot,
 		WorkingDays:      rec.WorkingDays,
+		ServiceAddress:   rec.ServiceAddress,
 	}
 }
 

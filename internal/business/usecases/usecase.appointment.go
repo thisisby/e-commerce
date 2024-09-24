@@ -3,6 +3,7 @@ package usecases
 import (
 	"errors"
 	"ga_marketplace/internal/business/domains"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -47,6 +48,8 @@ func (a *appointmentUsecase) FindByUserId(userId int) ([]domains.AppointmentDoma
 	if len(appointments) == 0 {
 		return nil, http.StatusNotFound, nil
 	}
+
+	slog.Info("appointments usecase", appointments)
 
 	return appointments, http.StatusOK, nil
 }

@@ -78,7 +78,7 @@ func (p *postgreProductsRepository) Save(product *domains.ProductDomain) error {
 	return nil
 }
 
-func (p *postgreProductsRepository) FindAllForMe(id int, filter domains.ProductFilter) ([]domains.ProductDomain, error) {
+func (p *postgreProductsRepository) FindAllForMe(id int, filter domains.ProductFilter) ([]domains.ProductDomain, int, error) {
 	query := `
 		SELECT 
     		p.id, p.name, p.description, p.price, p.ingredients, p.c_code, 
@@ -183,6 +183,8 @@ LEFT JOIN
 		`
 	}
 
+	countQuery := "SELECT COUNT(DISTINCT p.id) FROM products p "
+
 	if len(filters) > 0 {
 		query += " WHERE " + strings.Join(filters, " AND ")
 	}
@@ -192,14 +194,22 @@ LEFT JOIN
 	offset := (filter.Page - 1) * filter.PageSize
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d", filter.PageSize, offset)
 
-	var productsRecord []records.Products
-
-	err := p.conn.Select(&productsRecord, query, args...)
+	var totalCount int
+	err := p.conn.Get(&totalCount, countQuery)
 	if err != nil {
-		return nil, helpers.PostgresErrorTransform(err)
+		return nil, 0, helpers.PostgresErrorTransform(err)
 	}
 
-	return records.ToArrayOfProductsDomain(productsRecord), nil
+	var productsRecord []records.Products
+
+	err = p.conn.Select(&productsRecord, query, args...)
+	if err != nil {
+		return nil, 0, helpers.PostgresErrorTransform(err)
+	}
+
+	totalPages := (totalCount + filter.PageSize - 1) / filter.PageSize
+
+	return records.ToArrayOfProductsDomain(productsRecord), totalPages, nil
 }
 
 func (p *postgreProductsRepository) UpdateById(inDom domains.ProductDomain) error {
@@ -584,6 +594,8 @@ func (p *postgreProductsRepository) FindAll(filter domains.ProductFilter) ([]dom
 		`
 	}
 
+	countQuery := "SELECT COUNT(DISTINCT p.id) FROM products p "
+
 	if len(filters) > 0 {
 		query += " WHERE " + strings.Join(filters, " AND ")
 	}
@@ -593,16 +605,22 @@ func (p *postgreProductsRepository) FindAll(filter domains.ProductFilter) ([]dom
 	offset := (filter.Page - 1) * filter.PageSize
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d", filter.PageSize, offset)
 
-	var productsRecord []records.Products
-
-	err := p.conn.Select(&productsRecord, query, args...)
+	var totalCount int
+	err := p.conn.Get(&totalCount, countQuery)
 	if err != nil {
 		return nil, 0, helpers.PostgresErrorTransform(err)
 	}
 
-	slog.Info("query", query)
+	var productsRecord []records.Products
 
-	return records.ToArrayOfProductsDomain(productsRecord), len(productsRecord), nil
+	err = p.conn.Select(&productsRecord, query, args...)
+	if err != nil {
+		return nil, 0, helpers.PostgresErrorTransform(err)
+	}
+
+	totalPages := (totalCount + filter.PageSize - 1) / filter.PageSize
+
+	return records.ToArrayOfProductsDomain(productsRecord), totalPages, nil
 }
 
 func (p *postgreProductsRepository) AddAttributesToProduct(productId int, attributes []int) error {

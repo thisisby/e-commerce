@@ -95,12 +95,17 @@ func (p *ProductHandler) FindAllForMe(ctx echo.Context) error {
 	attributesParam := ctx.QueryParam("attributes")
 	filter.Attributes = strings.Split(attributesParam, ",")
 
-	products, statusCode, err := p.productUsecase.FindAllForMe(jwtClaims.UserId, filter)
+	products, statusCode, count, err := p.productUsecase.FindAllForMe(jwtClaims.UserId, filter)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	return NewSuccessResponse(ctx, statusCode, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
+	return NewSuccessResponse(ctx, statusCode, "Products fetched successfully",
+		map[string]any{
+			"data":  responses.ToArrayOfProductResponse(products),
+			"count": count,
+		},
+	)
 }
 
 func (p *ProductHandler) UpdateById(ctx echo.Context) error {
@@ -312,12 +317,16 @@ func (p *ProductHandler) FindAll(ctx echo.Context) error {
 	attributesParam := ctx.QueryParam("attributes")
 	filter.Attributes = strings.Split(attributesParam, ",")
 
-	products, statusCode, err := p.productUsecase.FindAll(filter)
+	products, statusCode, totalPages, err := p.productUsecase.FindAll(filter)
 	if err != nil {
 		return NewErrorResponse(ctx, statusCode, err.Error())
 	}
 
-	return NewSuccessResponse(ctx, http.StatusOK, "Products fetched successfully", responses.ToArrayOfProductResponse(products))
+	return NewSuccessResponse(ctx, http.StatusOK, "Products fetched successfully",
+		map[string]any{
+			"data":  responses.ToArrayOfProductResponse(products),
+			"count": totalPages,
+		})
 }
 
 func (p *ProductHandler) DeleteAttributeFromProduct(ctx echo.Context) error {

@@ -73,7 +73,7 @@ type ProductsRepository interface {
 	FindByIdForUser(id int, userId int) (*ProductDomain, error)
 	Save(product *ProductDomain) error
 	SaveFrom1c(product *ProductDomainV2) error
-	FindAllForMe(id int, filter ProductFilter) ([]ProductDomain, error)
+	FindAllForMe(id int, filter ProductFilter) ([]ProductDomain, int, error)
 	UpdateById(inDom ProductDomain) error
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, error)
 	FindAllForMeByBrandId(id int, brandId int) ([]ProductDomain, error)
@@ -88,7 +88,7 @@ type ProductsRepository interface {
 type ProductsUsecase interface {
 	Save(product *ProductDomain) (int, error)
 	SaveFrom1c(product *ProductDomainV2) (int, error)
-	FindAllForMe(id int, filter ProductFilter) ([]ProductDomain, int, error)
+	FindAllForMe(id int, filter ProductFilter) ([]ProductDomain, int, int, error)
 	UpdateById(inDom ProductDomain) (int, error)
 	FindById(id int) (*ProductDomain, int, error)
 	FindAllForMeBySubcategoryId(id int, subcategoryId int) ([]ProductDomain, int, error)
@@ -96,7 +96,7 @@ type ProductsUsecase interface {
 	UpdateFrom1c(code string, product *ProductDomain) (int, error)
 	FindByCode(code string) (*ProductDomain, int, error)
 	FindByIdForUser(id int, userId int) (*ProductDomain, int, error)
-	FindAll(filter ProductFilter) ([]ProductDomain, int, error)
+	FindAll(filter ProductFilter) ([]ProductDomain, int, int, error)
 	AddAttributesToProduct(productId int, attributes []int) (int, error)
 	DeleteAttributesFromProduct(productId int, attributeIds []int) (int, error)
 	DeleteById(id int) (int, error)

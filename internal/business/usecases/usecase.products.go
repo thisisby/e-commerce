@@ -27,17 +27,17 @@ func (p *productsUsecase) Save(product *domains.ProductDomain) (int, error) {
 	return http.StatusCreated, nil
 }
 
-func (p *productsUsecase) FindAllForMe(id int, filter domains.ProductFilter) ([]domains.ProductDomain, int, error) {
-	products, err := p.productsRepo.FindAllForMe(id, filter)
+func (p *productsUsecase) FindAllForMe(id int, filter domains.ProductFilter) ([]domains.ProductDomain, int, int, error) {
+	products, count, err := p.productsRepo.FindAllForMe(id, filter)
 	if err != nil {
-		return nil, http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, 0, err
 	}
 
 	if len(products) == 0 {
-		return nil, http.StatusNotFound, errors.New("products not found")
+		return nil, http.StatusNotFound, 0, errors.New("products not found")
 	}
 
-	return products, http.StatusOK, nil
+	return products, http.StatusOK, count, nil
 }
 
 func (p *productsUsecase) UpdateById(inDom domains.ProductDomain) (int, error) {
@@ -143,17 +143,17 @@ func (p *productsUsecase) FindByIdForUser(id int, userId int) (*domains.ProductD
 	return product, http.StatusOK, nil
 }
 
-func (p *productsUsecase) FindAll(filter domains.ProductFilter) ([]domains.ProductDomain, int, error) {
-	products, total, err := p.productsRepo.FindAll(filter)
+func (p *productsUsecase) FindAll(filter domains.ProductFilter) ([]domains.ProductDomain, int, int, error) {
+	products, totalPages, err := p.productsRepo.FindAll(filter)
 	if err != nil {
-		return nil, http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, 0, err
 	}
 
 	if len(products) == 0 {
-		return nil, http.StatusNotFound, errors.New("products not found")
+		return nil, http.StatusNotFound, 0, errors.New("products not found")
 	}
 
-	return products, total, nil
+	return products, http.StatusOK, totalPages, nil
 }
 
 func (p *productsUsecase) AddAttributesToProduct(productId int, attributes []int) (int, error) {

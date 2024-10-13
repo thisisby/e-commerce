@@ -59,6 +59,8 @@ type ProductFilter struct {
 	CountryOfProduction string
 	Volume              float64
 	Sex                 string
+	DiscountStartTime   string
+	DiscountEndTime     string
 	Page                int
 	PageSize            int
 }

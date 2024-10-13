@@ -400,8 +400,9 @@ func (p *postgreProductsRepository) UpdateFrom1c(code string, product *domains.P
 		    article = $4,
 		    c_code = $5,
 		    ed_izm = $6,
+		    ingredients = $7,
 		    updated_at = NOW()
-		WHERE c_code = $7
+		WHERE c_code = $8
 		`
 
 	_, err := p.conn.Exec(query,
@@ -411,6 +412,7 @@ func (p *postgreProductsRepository) UpdateFrom1c(code string, product *domains.P
 		product.Article,
 		product.CCode,
 		product.EdIzm,
+		product.Ingredients,
 		code,
 	)
 	if err != nil {
@@ -582,6 +584,15 @@ func (p *postgreProductsRepository) FindAll(filter domains.ProductFilter) ([]dom
 	if filter.Sex != "" {
 		filters = append(filters, "p.sex = $"+strconv.Itoa(len(args)+1))
 		args = append(args, filter.Sex)
+	}
+	if filter.DiscountStartTime != "" {
+		filters = append(filters, "d.start_date >= $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.DiscountStartTime)
+	}
+
+	if filter.DiscountEndTime != "" {
+		filters = append(filters, "d.end_date <= $"+strconv.Itoa(len(args)+1))
+		args = append(args, filter.DiscountEndTime)
 	}
 
 	if len(filter.Attributes) > 1 {

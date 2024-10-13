@@ -275,6 +275,9 @@ func (p *ProductHandler) UpdateFrom1c(ctx echo.Context) error {
 	if productUpdateRequest.EdIzm != nil {
 		product.EdIzm = *productUpdateRequest.EdIzm
 	}
+	if productUpdateRequest.Ingredients != nil {
+		product.Ingredients = *productUpdateRequest.Ingredients
+	}
 
 	statusCode, err = p.productUsecase.UpdateFrom1c(cCode, product)
 	if err != nil {
@@ -311,6 +314,8 @@ func (p *ProductHandler) FindAll(ctx echo.Context) error {
 		CountryOfProduction: ctx.QueryParam("country_of_production"),
 		Volume:              helpers.ToFloat64(ctx.QueryParam("volume"), 0),
 		Sex:                 ctx.QueryParam("sex"),
+		DiscountStartTime:   ctx.QueryParam("discount_start_time"),
+		DiscountEndTime:     ctx.QueryParam("discount_end_time"),
 		Page:                helpers.ToInt(ctx.QueryParam("page"), 1),
 		PageSize:            helpers.ToInt(ctx.QueryParam("page_size"), 10),
 	}

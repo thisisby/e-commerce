@@ -29,4 +29,5 @@ type ProductUpdateFrom1c struct {
 	Article     *string  `json:"article"`
 	CCode       *string  `json:"c_code"`
 	EdIzm       *string  `json:"ed_izm"`
+	Ingredients *string  `json:"ingredients"`
 }

@@ -133,6 +133,8 @@ func main() {
 	routes.NewCharacteristicsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewAttributeRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewPersonalAddressesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewFilialAddressesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewFaqRouter(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 
 	slog.Info("success to listen and serve on :8080")
 

@@ -10,6 +10,7 @@ import (
 	"ga_marketplace/internal/utils"
 	"ga_marketplace/pkg/jwt"
 	"ga_marketplace/third_party/aws"
+	"ga_marketplace/third_party/cdek"
 	"ga_marketplace/third_party/mobizon"
 	"ga_marketplace/third_party/one_c"
 	"github.com/labstack/echo/v4"
@@ -105,6 +106,7 @@ func main() {
 	adminAuthMiddleware := middlewares.NewAuthMiddleware(jwtService, true)
 
 	oneCClient := one_c.NewClient(config.AppConfig.OneCBaseUrl, config.AppConfig.OneCUsername, config.AppConfig.OneCPassword)
+	cdekClient := cdek.NewClient(config.AppConfig.CdekBaseUrl, config.AppConfig.CdekGrantType, config.AppConfig.CdekClientId, config.AppConfig.CdekClientSecret)
 
 	fmt.Printf("initt: ", config.AppConfig.OneCBaseUrl)
 	v1 := e.Group("/api/v1")
@@ -135,6 +137,7 @@ func main() {
 	routes.NewPersonalAddressesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewFilialAddressesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewFaqRouter(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
+	routes.NewDeliveryCalculatorRoute(v1, clientAuthMiddleware, cdekClient).Register()
 
 	slog.Info("success to listen and serve on :8080")
 

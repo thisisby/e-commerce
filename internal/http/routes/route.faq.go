@@ -38,11 +38,10 @@ func NewFaqRouter(
 }
 
 func (r *FaqRouter) Register() {
-	personalAddresses := r.router.Group("/faq")
+	faq := r.router.Group("/faq")
 	admin := r.router.Group("/admin/faq")
 
-	personalAddresses.Use(r.authMiddleware.Handle)
-	personalAddresses.GET("", r.FaqHandler.FindAll)
+	faq.GET("", r.FaqHandler.FindAll)
 
 	admin.Use(r.adminMiddleware.Handle)
 	admin.POST("", r.FaqHandler.Save)

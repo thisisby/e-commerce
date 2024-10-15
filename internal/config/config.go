@@ -34,6 +34,11 @@ type Config struct {
 	OneCBaseUrl  string `mapstructure:"ONE_C_BASE_URL"`
 	OneCUsername string `mapstructure:"ONE_C_USERNAME"`
 	OneCPassword string `mapstructure:"ONE_C_PASSWORD"`
+
+	CdekBaseUrl      string `mapstructure:"CDEK_BASE_URL"`
+	CdekGrantType    string `mapstructure:"CDEK_GRANT_TYPE"`
+	CdekClientId     string `mapstructure:"CDEK_CLIENT_ID"`
+	CdekClientSecret string `mapstructure:"CDEK_CLIENT_SECRET"`
 }
 
 func InitializeAppConfig() error {

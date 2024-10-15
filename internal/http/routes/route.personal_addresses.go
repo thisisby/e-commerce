@@ -39,7 +39,6 @@ func NewPersonalAddressesRoute(
 
 func (r *PersonalAddresses) Register() {
 	personalAddresses := r.router.Group("/personal_addresses")
-	admin := r.router.Group("/admin/personal_addresses")
 
 	me := r.router.Group("/me/personal_addresses")
 
@@ -48,9 +47,7 @@ func (r *PersonalAddresses) Register() {
 
 	me.Use(r.authMiddleware.Handle)
 	me.GET("", r.PersonalAddressesHandler.FindByUserId)
-
-	admin.Use(r.adminMiddleware.Handle)
-	admin.POST("", r.PersonalAddressesHandler.Save)
-	admin.PUT("/:id", r.PersonalAddressesHandler.Update)
-	admin.DELETE("/:id", r.PersonalAddressesHandler.Delete)
+	me.POST("", r.PersonalAddressesHandler.Save)
+	me.PUT("/:id", r.PersonalAddressesHandler.Update)
+	me.DELETE("/:id", r.PersonalAddressesHandler.Delete)
 }

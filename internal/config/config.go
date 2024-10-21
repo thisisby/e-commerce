@@ -39,6 +39,10 @@ type Config struct {
 	CdekGrantType    string `mapstructure:"CDEK_GRANT_TYPE"`
 	CdekClientId     string `mapstructure:"CDEK_CLIENT_ID"`
 	CdekClientSecret string `mapstructure:"CDEK_CLIENT_SECRET"`
+
+	ForteBaseUrl  string `mapstructure:"FORTE_BASE_URL"`
+	ForteUsername string `mapstructure:"FORTE_USERNAME"`
+	FortePassword string `mapstructure:"FORTE_PASSWORD"`
 }
 
 func InitializeAppConfig() error {

@@ -5,6 +5,7 @@ import (
 	"ga_marketplace/internal/datasources/repositories/postgre"
 	"ga_marketplace/internal/http/handlers"
 	"ga_marketplace/internal/http/middlewares"
+	"ga_marketplace/third_party/forte"
 	"ga_marketplace/third_party/one_c"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
@@ -24,6 +25,7 @@ func NewOrdersRoute(
 	authMiddleware middlewares.AuthMiddleware,
 	adminMiddleware middlewares.AuthMiddleware,
 	oneCClient one_c.Client,
+	forteClient *forte.Client,
 
 ) *OrdersRoute {
 
@@ -34,7 +36,7 @@ func NewOrdersRoute(
 	cartItemsUsecase := usecases.NewCartsUsecase(cartRepo, userRepo, productRepo)
 	ordersRepo := postgre.NewPostgreOrdersRepository(db)
 	ordersUsecase := usecases.NewOrdersUsecase(ordersRepo, productStockRepo, userRepo, oneCClient)
-	orderHandler := handlers.NewOrdersHandler(ordersUsecase, cartItemsUsecase)
+	orderHandler := handlers.NewOrdersHandler(ordersUsecase, cartItemsUsecase, forteClient, &oneCClient)
 
 	return &OrdersRoute{
 		orderHandler:    orderHandler,

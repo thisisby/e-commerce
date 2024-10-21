@@ -113,3 +113,62 @@ func (c *Client) CreateProductStockRequest(productStock ProductStock) error {
 
 	return nil
 }
+
+func (c *Client) CheckProductStockRequest(productId string, quantity int) (bool, error) {
+	endpoint := fmt.Sprintf("%s/Royal_Skin_Prog/hs/api/v1/balance?product_id_1c=%s", c.BaseUrl, productId)
+	slog.Info("Checking product stock at: ", endpoint)
+
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		slog.Error("Failed to create request: Product stock check", err)
+		return false, err
+	}
+
+	req.SetBasicAuth(c.Username, c.Password)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		slog.Error("Failed to send request: Product stock check", err)
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		slog.Error("Failed to fetch product stock", fmt.Errorf("status: %d, body: %s", resp.StatusCode, string(bodyBytes)))
+		return false, fmt.Errorf("failed to fetch product stock: status code %d", resp.StatusCode)
+	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		slog.Error("Failed to read response body", err)
+		return false, err
+	}
+
+	var products []struct {
+		ProductID string `json:"product_id_1c"`
+		Quantity  int    `json:"quantity"`
+	}
+
+	if err := json.Unmarshal(bodyBytes, &products); err != nil {
+		slog.Error("Failed to parse response body", err)
+		return false, err
+	}
+
+	if len(products) == 0 {
+		slog.Error("No product found with the given product ID")
+		return false, fmt.Errorf("product with ID %s not found", productId)
+	}
+
+	availableQuantity := products[0].Quantity
+	slog.Info(fmt.Sprintf("Available quantity: %d, Requested quantity: %d", availableQuantity, quantity))
+
+	if availableQuantity < quantity {
+		slog.Error("Insufficient stock")
+		return false, fmt.Errorf("insufficient stock: available %d, required %d", availableQuantity, quantity)
+	}
+
+	slog.Info("Sufficient stock available")
+	return true, nil
+}

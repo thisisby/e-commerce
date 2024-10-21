@@ -3,13 +3,14 @@ package requests
 import "ga_marketplace/internal/business/domains"
 
 type CreateOrderRequest struct {
-	Street         string `json:"street" validate:"required"`
-	Region         string `json:"region" validate:"required"`
-	Apartment      string `json:"apartment" validate:"required"`
-	CityId         int    `json:"city_id" validate:"required"`
-	Email          string `json:"email" validate:"required,email"`
-	StreetNum      string `json:"street_num" validate:"required"`
-	DeliveryMethod string `json:"delivery_method" validate:"order_delivery_method"`
+	Street               string               `json:"street" validate:"required"`
+	Region               string               `json:"region" validate:"required"`
+	Apartment            string               `json:"apartment" validate:"required"`
+	CityId               int                  `json:"city_id" validate:"required"`
+	Email                string               `json:"email" validate:"required,email"`
+	StreetNum            string               `json:"street_num" validate:"required"`
+	DeliveryMethod       string               `json:"delivery_method" validate:"order_delivery_method"`
+	CreatePaymentRequest CreatePaymentRequest `json:"payment" validate:"required"`
 }
 
 func (r *CreateOrderRequest) ToDomain() domains.OrdersDomain {

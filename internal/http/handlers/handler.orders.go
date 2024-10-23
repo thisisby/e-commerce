@@ -69,7 +69,6 @@ func (o *OrdersHandler) Save(ctx echo.Context) error {
 		Currency:       "KZT",
 		Description:    orderCreateRequest.CreatePaymentRequest.Description,
 		Language:       "ru",
-		Test:           true,
 		BillingAddress: orderCreateRequest.CreatePaymentRequest.BillingAddress,
 		CreditCard:     orderCreateRequest.CreatePaymentRequest.CreditCard,
 		Customer:       orderCreateRequest.CreatePaymentRequest.Customer,

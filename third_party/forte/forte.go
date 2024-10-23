@@ -63,7 +63,7 @@ func (c *Client) CreatePayment(paymentInfo requests.CreatePaymentRequest) (any, 
 	fmt.Printf("Payment Response: %s\n", string(body))
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, http.StatusBadRequest, fmt.Errorf("received non-200 response: %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		return nil, http.StatusBadRequest, fmt.Errorf("received non-200 response: %d %s", resp.StatusCode, http.StatusText(resp.StatusCode), string(body))
 	}
 
 	var result map[string]any

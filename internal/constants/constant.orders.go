@@ -3,6 +3,7 @@ package constants
 const (
 	OrderPending   = "pending"
 	OrderShipping  = "shipping"
+	OrderCompleted = "completed"
 	OrderDelivered = "delivered"
 	OrderCancelled = "cancelled"
 )

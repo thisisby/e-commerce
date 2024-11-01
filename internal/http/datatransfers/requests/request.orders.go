@@ -10,6 +10,7 @@ type CreateOrderRequest struct {
 	Email                string               `json:"email" validate:"required,email"`
 	StreetNum            string               `json:"street_num" validate:"required"`
 	DeliveryMethod       string               `json:"delivery_method" validate:"order_delivery_method"`
+	ReceiptUrl           string               `json:"receipt_url"`
 	CreatePaymentRequest CreatePaymentRequest `json:"payment" validate:"required"`
 }
 
@@ -22,6 +23,7 @@ func (r *CreateOrderRequest) ToDomain() domains.OrdersDomain {
 		Email:          r.Email,
 		StreetNum:      r.StreetNum,
 		DeliveryMethod: r.DeliveryMethod,
+		ReceiptUrl:     r.ReceiptUrl,
 	}
 }
 

@@ -34,7 +34,7 @@ func NewOrdersUsecase(
 
 func (o *ordersUsecase) Save(orders domains.OrdersDomain, cartItems []domains.CartItemsDomain, totalAmount domains.CartItemTotalAmount) (int, error) {
 
-	orders.Status = constants.OrderPending
+	orders.Status = constants.OrderCompleted
 	orders.TotalPrice = totalAmount.TotalAmount + totalAmount.TotalDiscount
 	orders.DiscountedPrice = totalAmount.TotalAmount
 

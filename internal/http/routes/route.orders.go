@@ -2,6 +2,7 @@ package routes
 
 import (
 	"ga_marketplace/internal/business/usecases"
+	"ga_marketplace/internal/datasources/caches"
 	"ga_marketplace/internal/datasources/repositories/postgre"
 	"ga_marketplace/internal/http/handlers"
 	"ga_marketplace/internal/http/middlewares"
@@ -26,6 +27,7 @@ func NewOrdersRoute(
 	adminMiddleware middlewares.AuthMiddleware,
 	oneCClient one_c.Client,
 	forteClient *forte.Client,
+	redisCache caches.RedisCache,
 
 ) *OrdersRoute {
 
@@ -36,7 +38,7 @@ func NewOrdersRoute(
 	cartItemsUsecase := usecases.NewCartsUsecase(cartRepo, userRepo, productRepo)
 	ordersRepo := postgre.NewPostgreOrdersRepository(db)
 	ordersUsecase := usecases.NewOrdersUsecase(ordersRepo, productStockRepo, userRepo, oneCClient)
-	orderHandler := handlers.NewOrdersHandler(ordersUsecase, cartItemsUsecase, forteClient, &oneCClient)
+	orderHandler := handlers.NewOrdersHandler(ordersUsecase, cartItemsUsecase, forteClient, &oneCClient, redisCache)
 
 	return &OrdersRoute{
 		orderHandler:    orderHandler,

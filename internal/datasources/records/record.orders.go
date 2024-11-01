@@ -21,6 +21,7 @@ type Orders struct {
 	StreetNum       string         `db:"street_num"`
 	Email           string         `db:"email"`
 	DeliveryMethod  string         `db:"delivery_method"`
+	ReceiptUrl      string         `db:"receipt_url"`
 	CreatedAt       time.Time      `db:"created_at"`
 	UpdatedAt       time.Time      `db:"updated_at"`
 }
@@ -75,6 +76,7 @@ func (r *Orders) ToDomain() domains.OrdersDomain {
 		StreetNum:       r.StreetNum,
 		Email:           r.Email,
 		DeliveryMethod:  r.DeliveryMethod,
+		ReceiptUrl:      r.ReceiptUrl,
 	}
 	return domain
 }

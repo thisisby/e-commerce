@@ -18,6 +18,7 @@ type OrdersDomain struct {
 	StreetNum       string
 	Email           string
 	DeliveryMethod  string
+	ReceiptUrl      string
 }
 
 type OrderDetailsDomain struct {

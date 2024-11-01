@@ -71,5 +71,23 @@ func (c *Client) CreatePayment(paymentInfo requests.CreatePaymentRequest) (any, 
 		return nil, http.StatusBadRequest, fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	fmt.Println("ress: ", result)
+	transaction, ok := result["transaction"].(map[string]any)
+	if !ok {
+		return result, http.StatusBadRequest, fmt.Errorf("transaction object not found in the response")
+	}
+
+	// Check if the status is present in the response
+	if status, ok := transaction["status"].(string); ok {
+		if status == "incomplete" {
+			return result, http.StatusOK, nil
+		}
+		if status != "successful" {
+			return result, http.StatusBadRequest, fmt.Errorf("transaction failed with status: %s", status)
+		}
+	} else {
+		return result, http.StatusBadRequest, fmt.Errorf("transaction status not found in the response from forte")
+	}
+
 	return result, http.StatusOK, nil
 }

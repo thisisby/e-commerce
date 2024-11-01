@@ -31,12 +31,12 @@ func (p *postgreOrdersRepository) Save(orders domains.OrdersDomain) (int, error)
 	}()
 
 	query := `
-		INSERT INTO orders (user_id, total_price, discounted_price, city_id, status, street, region, apartment, street_num, email, delivery_method)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		INSERT INTO orders (user_id, total_price, discounted_price, city_id, status, street, region, apartment, street_num, email, delivery_method, receipt_url)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		RETURNING id
 	`
 	var orderId int
-	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.CityId, orders.Status, orders.Street, orders.Region, orders.Apartment, orders.StreetNum, orders.Email, orders.DeliveryMethod).Scan(&orderId)
+	err = tx.QueryRow(query, orders.UserId, orders.TotalPrice, orders.DiscountedPrice, orders.CityId, orders.Status, orders.Street, orders.Region, orders.Apartment, orders.StreetNum, orders.Email, orders.DeliveryMethod, orders.ReceiptUrl).Scan(&orderId)
 	if err != nil {
 		tx.Rollback()
 		return 0, helpers.PostgresErrorTransform(err)
@@ -81,7 +81,7 @@ func (p *postgreOrdersRepository) FindByUserId(userId int, statusParam string) (
 		SELECT 
 		    o.id, o.user_id, o.total_price, o.discounted_price,
 		    o.status, o.street, o.region, o.apartment, o.street_num,
-		    o.email, o.delivery_method, o.created_at, o.updated_at,
+		    o.email, o.delivery_method, o.created_at, o.updated_at, o.receipt_url,
 			u.id "user.id", u.name "user.name", u.phone "user.phone",
 			r.name "user.role.name", u.city_id "user.city_id", u.street "user.street",
 			u.region "user.region", u.apartment "user.apartment",
@@ -208,7 +208,7 @@ func (p *postgreOrdersRepository) FindAll(filter constants.OrderFilter) ([]domai
 	}()
 
 	query := `
-		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.email, o.street_num, o.delivery_method, o.created_at, o.updated_at,
+		SELECT o.id, o.user_id, o.total_price, o.discounted_price, o.status, o.street, o.region, o.apartment, o.email, o.street_num, o.delivery_method, o.created_at, o.updated_at, o.receipt_url,
 			u.id "user.id", u.name "user.name", u.phone "user.phone", r.name "user.role.name",
 			u.city_id "user.city_id", u.street "user.street", u.region "user.region", u.apartment "user.apartment",
 			u.email "user.email", u.street_num "user.street_num",

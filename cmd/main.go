@@ -121,7 +121,7 @@ func main() {
 	routes.NewProductRoute(conn, v1, s3Client, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewHealthCheckRoute(v1).Register()
 	routes.NewCountriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
-	routes.NewOrdersRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware, oneCClient, forteClient).Register()
+	routes.NewOrdersRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware, oneCClient, forteClient, redisCache).Register()
 	routes.NewCitiesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewContactsRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()
 	routes.NewCategoriesRoute(conn, v1, clientAuthMiddleware, adminAuthMiddleware).Register()

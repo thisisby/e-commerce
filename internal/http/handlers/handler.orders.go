@@ -104,7 +104,7 @@ func (o *OrdersHandler) Save(ctx echo.Context) error {
 		Browser: browser,
 	}
 	paymentRequest := requests.CreatePaymentRequest{
-		Amount:         totalAmount.TotalAmount,
+		Amount:         totalAmount.TotalAmount * 100,
 		Currency:       "KZT",
 		Description:    orderCreateRequest.CreatePaymentRequest.Description,
 		Language:       "ru",

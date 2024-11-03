@@ -30,7 +30,7 @@ type Customer struct {
 }
 
 func (c *Client) CreateCustomerRequest(customer Customer) error {
-	endpoint := c.BaseUrl + "/Royal_Skin_Prog/hs/api/v1/customer"
+	endpoint := c.BaseUrl + "/Royal_Skin/hs/api/v1/customer"
 
 	body, err := json.Marshal(customer)
 	if err != nil {
@@ -74,7 +74,7 @@ type Products struct {
 }
 
 func (c *Client) CreateProductStockRequest(productStock ProductStock) error {
-	endpoint := c.BaseUrl + "/Royal_Skin_Prog/hs/api/v1/sales"
+	endpoint := c.BaseUrl + "/Royal_Skin/hs/api/v1/sales"
 	slog.Info("url: ", c.BaseUrl)
 	slog.Info(endpoint)
 	body, err := json.Marshal(productStock)
@@ -115,7 +115,7 @@ func (c *Client) CreateProductStockRequest(productStock ProductStock) error {
 }
 
 func (c *Client) CheckProductStockRequest(productId string, quantity int) (bool, error) {
-	endpoint := fmt.Sprintf("%s/Royal_Skin_Prog/hs/api/v1/balance?product_id_1c=%s", c.BaseUrl, productId)
+	endpoint := fmt.Sprintf("%s/Royal_Skin/hs/api/v1/balance?product_id_1c=%s", c.BaseUrl, productId)
 	slog.Info("Checking product stock at: ", endpoint)
 
 	req, err := http.NewRequest("GET", endpoint, nil)

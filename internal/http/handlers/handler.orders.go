@@ -133,7 +133,6 @@ func (o *OrdersHandler) Save(ctx echo.Context) error {
 		return NewErrorResponse(ctx, http.StatusBadRequest, "Transaction data not found in payment response")
 	}
 
-	fmt.Println("Transaction11111: ", transaction)
 	transactionStatus := transaction["status"].(string)
 	transactionID := transaction["uid"].(string)
 	receiptUrl := transaction["receipt_url"].(string)

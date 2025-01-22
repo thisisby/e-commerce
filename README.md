@@ -1,11 +1,11 @@
 # go-cosmetics-ecommerce
 
 
-A modern and high-performance e-commerce platform for cosmetics, built in Go with the Gin framework and sqlx for PostgreSQL database integration. Designed with Clean Architecture principles for scalability and maintainability.
+A modern and high-performance e-commerce platform for cosmetics, built in Go with the Echo framework and sqlx for PostgreSQL database integration. Designed with Clean Architecture principles for scalability and maintainability.
 ### Features
 
 - Implements the Clean Architecture for a well-structured and extensible codebase.
-- Utilizes the Gin framework for fast and efficient HTTP handling.
+- Utilizes the Echo framework for fast and efficient HTTP handling.
 - Integrated with PostgreSQL via sqlx for flexible and robust database operations.
 - Comprehensive support for authentication using JWT and OTP for security and usability.
 
